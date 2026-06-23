@@ -6,6 +6,16 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <title>อัมโฮมคาร์ · รถมือสองคุณภาพ</title>
+<meta name="description" content="รถมือสองคัดคุณภาพ พร้อมส่งมอบ · ดูรถทั้งหมด สอบถามผ่าน LINE หรือโทรได้เลย">
+<meta property="og:type" content="website">
+<meta property="og:title" content="อัมโฮมคาร์ · รถมือสองคุณภาพ">
+<meta property="og:description" content="รถมือสองคัดคุณภาพ พร้อมส่งมอบ · ดูรถทั้งหมด สอบถาม LINE/โทรได้เลย">
+<meta property="og:image" content="https://raw.githubusercontent.com/umhomecar/logoimages/main/88.png">
+<meta property="og:locale" content="th_TH">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="อัมโฮมคาร์ · รถมือสองคุณภาพ">
+<meta name="twitter:description" content="รถมือสองคัดคุณภาพ พร้อมส่งมอบ · สอบถาม LINE/โทรได้เลย">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/umhomecar/logoimages/main/88.png">
 <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/umhomecar/logoimages/main/88.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -159,6 +169,23 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
 .setup h3{font-family:'Kanit';margin-bottom:10px}
 .setup code{background:var(--bg);padding:2px 7px;border-radius:6px;font-size:.85rem;color:var(--brand)}
 .setup ol{margin:12px 0 0 20px;line-height:1.9}
+.highlights{max-width:1180px;margin:16px auto 0;padding:0 18px;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none}
+.highlights::-webkit-scrollbar{display:none}
+.highlights span{white-space:nowrap;background:#fff;border:1px solid var(--line);border-radius:999px;padding:8px 15px;font-size:.86rem;font-weight:600;color:var(--ink);box-shadow:var(--shadow)}
+.shop{max-width:1180px;margin:12px auto 0;padding:0 18px}
+.shop-card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:20px 22px;box-shadow:var(--shadow)}
+.shop-card h3{font-family:'Kanit',sans-serif;font-weight:700;font-size:1.15rem;margin-bottom:13px;display:flex;align-items:center;gap:8px}
+.shop-row{display:flex;gap:10px;align-items:flex-start;color:#4a463f;font-size:.95rem;margin-bottom:9px}
+.shop-row .i{font-size:1.05rem;flex:none;line-height:1.5}
+.shop-cta{display:flex;gap:10px;flex-wrap:wrap;margin-top:15px}
+.shop-cta a{display:inline-flex;align-items:center;gap:7px;font-family:'Kanit',sans-serif;font-weight:600;font-size:.95rem;padding:12px 18px;border-radius:13px;text-decoration:none}
+.shop-map{background:var(--ink);color:#fff}
+.shop-line{background:var(--green);color:#fff}
+.shop-call{background:#fff;color:var(--ink);border:1.5px solid var(--line)}
+.sh-share{position:absolute;top:12px;left:12px;width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.92);font-size:1.05rem;display:grid;place-items:center;box-shadow:var(--shadow);z-index:2}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;font-family:'Kanit',sans-serif;font-weight:600;font-size:.92rem;padding:11px 20px;border-radius:999px;box-shadow:var(--shadow-lg);opacity:0;pointer-events:none;transition:all .25s;z-index:80}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+@media(max-width:680px){.toast{bottom:90px}}
 </style>
 </head>
 <body>
@@ -179,6 +206,8 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
     <p>เลือกชมรถทั้งหมดของเรา · สนใจคันไหนทักได้เลย</p>
     <div class="cnt" id="heroCount" hidden>🚗 มีรถ <b id="cntNum">0</b> คันให้เลือก</div>
   </section>
+
+  <div class="highlights" id="highlights"></div>
   <div class="tools" id="tools" hidden>
     <div class="tools-card">
       <div class="search">
@@ -187,6 +216,14 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
       </div>
       <div class="row">
         <div class="active-filter" id="activeFilter" hidden></div>
+        <select class="sort" id="priceRange">
+          <option value="all">ทุกราคา</option>
+          <option value="0-300000">ต่ำกว่า 3 แสน</option>
+          <option value="300000-500000">3 - 5 แสน</option>
+          <option value="500000-700000">5 - 7 แสน</option>
+          <option value="700000-1000000">7 แสน - 1 ล้าน</option>
+          <option value="1000000-">1 ล้านขึ้นไป</option>
+        </select>
         <select class="sort" id="sort">
           <option value="new">ใหม่ล่าสุด</option>
           <option value="plow">ราคาต่ำ → สูง</option>
@@ -207,7 +244,9 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
   <div class="drawer-hd"><span>🗂️ เลือกยี่ห้อ / รุ่น</span><button id="drawerX" aria-label="ปิดเมนู">✕</button></div>
   <div class="drawer-body" id="drawerBody"></div>
 </aside>
+<div class="toast" id="toast"></div>
 <div class="ov" id="ov"><div class="sheet" id="sheet"></div></div>
+<section class="shop" id="shop"></section>
 <footer class="foot" id="foot"></footer>
 <script>
 const CONFIG = {
@@ -218,6 +257,11 @@ const CONFIG = {
 
   LINE_URL: 'https://line.me/R/ti/p/@um44',
   PHONE: '099-396-9319',
+
+  ADDRESS: '423 มาบยางพรซอย ต.มาบยางพร อ.ปลวกแดง จ.ระยอง 21140',
+  MAP_URL: 'https://maps.app.goo.gl/7PVT2p6EZUqvGALPA',
+  HOURS: 'เปิดทุกวัน 08:00 - 18:00',
+  HIGHLIGHTS: ['✅ ตรวจสภาพทุกคัน', '💳 จัดไฟแนนซ์ได้', '🔄 รับเทิร์นรถเก่า', '📋 ฟรีโอน ฟรีค่าจัด'],
 };
 const $ = (s, r = document) => r.querySelector(s);
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -231,12 +275,35 @@ function lineCarUrl(c) {
   const msg = 'สนใจรถคันนี้ครับ/ค่ะ 🚗\n' + carName(c) + (c.year ? ' ปี ' + c.year : '') + (plate ? '\nทะเบียน ' + plate : '') + '\nราคา ' + (baht(c.price) || 'สอบถาม') + '\n(สอบถามจากหน้าเว็บโชว์รูม)';
   return 'https://line.me/R/oaMessage/' + id + '/?' + encodeURIComponent(msg);
 }
-let ALL = [], VIEW = [], brand = 'all', model = 'all', sort = 'new', query = '', page = 1, expanded = null;
+let ALL = [], VIEW = [], brand = 'all', model = 'all', sort = 'new', query = '', page = 1, expanded = null, priceRange = 'all';
 const PAGE_SIZE = 40;
 let cur = null, curIdx = 0;
 $('#hdLogo').src = CONFIG.LOGO_URL;
 $('#hdName').innerHTML = esc(CONFIG.SHOP_NAME) + '<small>รถมือสองคุณภาพ · ส่งมอบพร้อมใช้</small>';
 $('#foot').textContent = '© ' + new Date().getFullYear() + ' ' + CONFIG.SHOP_NAME + ' · รถทุกคันตรวจสภาพก่อนส่งมอบ';
+$('#highlights').innerHTML = (CONFIG.HIGHLIGHTS || []).map((t) => '<span>' + esc(t) + '</span>').join('');
+$('#shop').innerHTML = '<div class="shop-card"><h3>📍 ' + esc(CONFIG.SHOP_NAME) + '</h3>' +
+  (CONFIG.ADDRESS ? '<div class="shop-row"><span class="i">🏠</span><span>' + esc(CONFIG.ADDRESS) + '</span></div>' : '') +
+  (CONFIG.HOURS ? '<div class="shop-row"><span class="i">🕐</span><span>' + esc(CONFIG.HOURS) + '</span></div>' : '') +
+  '<div class="shop-cta">' +
+  (CONFIG.MAP_URL ? '<a class="shop-map" href="' + esc(CONFIG.MAP_URL) + '" target="_blank" rel="noopener">🗺️ นำทาง Google Maps</a>' : '') +
+  '<a class="shop-line" href="' + esc(CONFIG.LINE_URL) + '" target="_blank" rel="noopener">💬 แชท LINE</a>' +
+  '<a class="shop-call" href="tel:' + esc(CONFIG.PHONE.replace(/[^0-9+]/g, '')) + '">📞 โทร ' + esc(CONFIG.PHONE) + '</a>' +
+  '</div></div>';
+let toastT;
+function showToast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 2200); }
+function shareCar(c) {
+  const url = location.origin + location.pathname + '?car=' + encodeURIComponent(c.id);
+  if (navigator.share) { navigator.share({ title: carName(c), text: carName(c) + (c.price != null ? ' ราคา ' + baht(c.price) : ''), url }).catch(() => {}); }
+  else if (navigator.clipboard) { navigator.clipboard.writeText(url).then(() => showToast('คัดลอกลิงก์แล้ว ✓')).catch(() => showToast('ลิงก์: ' + url)); }
+  else showToast('ลิงก์: ' + url);
+}
+function openCarById(id) {
+  const c = ALL.find((x) => String(x.id) === String(id));
+  if (!c) return;
+  cur = c; curIdx = 0; renderSheet();
+  $('#ov').classList.add('show'); document.body.style.overflow = 'hidden';
+}
 document.querySelectorAll('[data-line]').forEach((b) => b.addEventListener('click', () => window.open(CONFIG.LINE_URL, '_blank')));
 document.querySelectorAll('[data-call]').forEach((b) => b.addEventListener('click', () => { location.href = 'tel:' + CONFIG.PHONE.replace(/[^0-9+]/g, ''); }));
 function skeletons() {
@@ -257,6 +324,8 @@ async function load() {
     $('#tools').hidden = false;
     $('#heroCount').hidden = false;
     $('#cntNum').textContent = ALL.length;
+    const carParam = new URLSearchParams(location.search).get('car');
+    if (carParam) openCarById(carParam);
   } catch (e) {
     console.error(e);
     $('#grid').innerHTML = '<div class="state" style="grid-column:1/-1"><div class="em">😕</div><h3>โหลดข้อมูลไม่สำเร็จ</h3><p>ลองรีเฟรชอีกครั้ง หรือทักร้านทาง LINE ได้เลย</p></div>';
@@ -317,6 +386,12 @@ function apply() {
   let r = ALL.slice();
   if (brand !== 'all') r = r.filter((c) => (c.brand || '').trim() === brand);
   if (model !== 'all') r = r.filter((c) => (c.model || '').trim() === model);
+  if (priceRange !== 'all') {
+    const parts = priceRange.split('-');
+    const min = Number(parts[0]) || 0;
+    const max = parts[1] ? Number(parts[1]) : Infinity;
+    r = r.filter((c) => c.price != null && c.price >= min && c.price <= max);
+  }
   if (query) {
     const q = query.toLowerCase();
     r = r.filter((c) => [c.brand, c.model, c.sub_model, c.year, c.price, c.engine, c.gear].filter(Boolean).join(' ').toLowerCase().includes(q));
@@ -395,6 +470,7 @@ function openDetail(i) {
 function closeDetail() {
   $('#ov').classList.remove('show');
   document.body.style.overflow = '';
+  if (location.search.indexOf('car=') !== -1) history.replaceState(null, '', location.pathname);
 }
 function gallery(d) {
   if (curIdx < 0) curIdx = 0;
@@ -411,6 +487,7 @@ function renderSheet() {
     '<div class="sh-hero">' +
     (imgs.length ? '<img id="shImg" src="' + esc(imgs[0]) + '" alt="' + esc(carName(c)) + '">' : '<div class="noimg" style="height:100%;display:grid;place-items:center;font-size:3rem;color:#fff">🚗</div>') +
     '<button class="sh-x" id="shX" aria-label="ปิด">✕</button>' +
+    '<button class="sh-share" id="shShare" aria-label="แชร์รถคันนี้">🔗</button>' +
     (imgs.length > 1 ? '<button class="sh-nav prev" id="shPrev" aria-label="รูปก่อนหน้า">‹</button><button class="sh-nav next" id="shNext" aria-label="รูปถัดไป">›</button><span class="sh-count" id="shCount">1/' + imgs.length + '</span>' : '') +
     '</div>' +
     (imgs.length > 1 ? '<div class="sh-thumbs">' + imgs.map((u, k) => '<img src="' + esc(u) + '" data-k="' + k + '" class="' + (k === 0 ? 'on' : '') + '" alt="">').join('') + '</div>' : '') +
@@ -420,6 +497,7 @@ function renderSheet() {
     '<div class="cta-row"><button class="cta cta-line" data-line><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 5.64 2 10.1c0 4 3.55 7.34 8.35 7.97.32.07.77.21.88.49.1.25.07.64.03.9l-.14.86c-.04.25-.2 1 .87.54s5.79-3.41 7.9-5.84C21.3 13.5 22 11.88 22 10.1 22 5.64 17.52 2 12 2z"/></svg>สอบถาม LINE</button>' +
     '<button class="cta cta-call" data-call><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.5 21 3 13.5 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.2.2 2.4.6 3.6.1.4 0 .8-.2 1l-2.3 2.2z"/></svg>โทรเลย</button></div></div>';
   $('#shX').addEventListener('click', closeDetail);
+  $('#shShare').addEventListener('click', () => shareCar(cur));
   const D = imgs.length;
   if (D > 1) {
     $('#shPrev').addEventListener('click', () => { curIdx = (curIdx - 1 + D) % D; gallery(D); });
@@ -446,6 +524,7 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && $('#draw
 let qt;
 $('#q').addEventListener('input', (e) => { clearTimeout(qt); const v = e.target.value; qt = setTimeout(() => { query = v.trim(); apply(); }, 200); });
 $('#sort').addEventListener('change', (e) => { sort = e.target.value; apply(); });
+$('#priceRange').addEventListener('change', (e) => { priceRange = e.target.value; apply(); });
 load();
 </script>
 </body>
