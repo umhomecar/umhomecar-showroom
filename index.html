@@ -227,7 +227,8 @@ function lineOaId() { return (CONFIG.LINE_URL.split('/').pop() || '').trim(); }
 function lineCarUrl(c) {
   const id = lineOaId();
   if (!c || !id || id[0] !== '@') return CONFIG.LINE_URL;
-  const msg = 'สนใจรถคันนี้ครับ/ค่ะ 🚗\n' + carName(c) + (c.year ? ' ปี ' + c.year : '') + '\nราคา ' + (baht(c.price) || 'สอบถาม') + '\n(สอบถามจากหน้าเว็บโชว์รูม)';
+  const plate = String(c.license_plate || '').trim();
+  const msg = 'สนใจรถคันนี้ครับ/ค่ะ 🚗\n' + carName(c) + (c.year ? ' ปี ' + c.year : '') + (plate ? '\nทะเบียน ' + plate : '') + '\nราคา ' + (baht(c.price) || 'สอบถาม') + '\n(สอบถามจากหน้าเว็บโชว์รูม)';
   return 'https://line.me/R/oaMessage/' + id + '/?' + encodeURIComponent(msg);
 }
 let ALL = [], VIEW = [], brand = 'all', model = 'all', sort = 'new', query = '', page = 1, expanded = null;
