@@ -60,6 +60,12 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
 .card:hover .card-img img{transform:scale(1.05)}
 .card-img .noimg{width:100%;height:100%;display:grid;place-items:center;font-size:2.4rem;opacity:.4}
 .card-img .pics{position:absolute;right:9px;bottom:9px;background:rgba(28,26,23,.72);color:#fff;font-size:.74rem;font-weight:600;padding:3px 9px;border-radius:999px;backdrop-filter:blur(4px)}
+.badges{position:absolute;left:9px;top:9px;display:flex;flex-direction:column;gap:5px;align-items:flex-start;z-index:1}
+.badges .hot{background:var(--brand);color:#fff;font-family:'Kanit',sans-serif;font-weight:700;font-size:.74rem;padding:4px 11px;border-radius:999px;box-shadow:var(--shadow)}
+.badges .sale{background:#fff;color:var(--brand);border:1.5px solid var(--brand);font-family:'Kanit',sans-serif;font-weight:600;font-size:.72rem;padding:3px 10px;border-radius:999px}
+.price .old{font-family:'Sarabun',sans-serif;font-size:.85rem;color:var(--muted);text-decoration:line-through;font-weight:400;margin-left:7px;display:inline}
+.sh-price .old{font-family:'Sarabun',sans-serif;font-size:1.1rem;color:var(--muted);text-decoration:line-through;font-weight:400;margin-left:9px}
+.sh-hot{display:inline-block;background:var(--brand);color:#fff;font-family:'Kanit',sans-serif;font-weight:700;font-size:.82rem;padding:4px 12px;border-radius:999px;margin-bottom:8px}
 .card-bd{padding:13px 15px 15px;display:flex;flex-direction:column;gap:7px;flex:1}
 .card-nm{font-family:'Kanit',sans-serif;font-weight:600;font-size:1.02rem;line-height:1.25}
 .card-meta{color:var(--muted);font-size:.84rem;display:flex;gap:8px;flex-wrap:wrap}
@@ -225,8 +231,21 @@ function apply() {
   }
   if (sort === 'plow') r.sort((a, b) => (a.price ?? 9e15) - (b.price ?? 9e15));
   else if (sort === 'phigh') r.sort((a, b) => (b.price ?? -1) - (a.price ?? -1));
+  else r.sort((a, b) => (b.is_hot ? 1 : 0) - (a.is_hot ? 1 : 0));
   VIEW = r;
   renderGrid();
+}
+function hasDiscount(c) { return c.original_price != null && c.price != null && Number(c.original_price) > Number(c.price); }
+function badgesHtml(c) {
+  let h = '';
+  if (c.is_hot) h += '<span class="hot">🔥 HOT</span>';
+  if (hasDiscount(c)) h += '<span class="sale">ลดราคา</span>';
+  return h ? '<div class="badges">' + h + '</div>' : '';
+}
+function priceHtml(c) {
+  const cur = baht(c.price) || 'สอบถามราคา';
+  if (hasDiscount(c)) return '<div class="price">' + cur + '<s class="old">' + baht(c.original_price) + '</s><small>ราคาพิเศษ</small></div>';
+  return '<div class="price">' + cur + (c.price != null ? '<small>ราคา</small>' : '') + '</div>';
 }
 function renderGrid() {
   if (!VIEW.length) {
@@ -238,12 +257,13 @@ function renderGrid() {
     const n = c.images ? c.images.length : 0;
     return '<button class="card" data-i="' + i + '"><div class="card-img">' +
       (cover ? '<img src="' + esc(cover) + '" alt="' + esc(carName(c)) + '" loading="lazy">' : '<div class="noimg">🚗</div>') +
+      badgesHtml(c) +
       (n > 1 ? '<span class="pics">📷 ' + n + '</span>' : '') +
       '</div><div class="card-bd"><div class="card-nm">' + esc(carName(c)) + '</div><div class="card-meta">' +
       (c.year ? '<span>📅 ' + esc(c.year) + '</span>' : '') +
       (c.mileage ? '<span>🛣️ ' + esc(c.mileage) + '</span>' : '') +
-      '</div><div class="card-ft"><div class="price">' + (baht(c.price) || 'สอบถามราคา') + (c.price != null ? '<small>ราคา</small>' : '') +
-      '</div><span class="card-go">ดูรายละเอียด →</span></div></div></button>';
+      '</div><div class="card-ft">' + priceHtml(c) +
+      '<span class="card-go">ดูรายละเอียด →</span></div></div></button>';
   }).join('');
   $('#grid').querySelectorAll('.card').forEach((el) => el.addEventListener('click', () => openDetail(Number(el.dataset.i))));
 }
@@ -269,7 +289,6 @@ function renderSheet() {
   const c = cur;
   const imgs = c.images && c.images.length ? c.images : (c.cover_image_url ? [c.cover_image_url] : []);
   const specs = [['ปีรถ', c.year], ['เลขไมล์', c.mileage], ['เครื่องยนต์', c.engine], ['เกียร์', c.gear]].filter((p) => p[1] != null && p[1] !== '');
-  const inst = [['4 ปี', c.installment_4_years], ['5 ปี', c.installment_5_years], ['6 ปี', c.installment_6_years], ['7 ปี', c.installment_7_years]].filter((p) => p[1] != null && p[1] !== '');
   $('#sheet').innerHTML =
     '<div class="sh-hero">' +
     (imgs.length ? '<img id="shImg" src="' + esc(imgs[0]) + '" alt="' + esc(carName(c)) + '">' : '<div class="noimg" style="height:100%;display:grid;place-items:center;font-size:3rem;color:#fff">🚗</div>') +
@@ -277,9 +296,8 @@ function renderSheet() {
     (imgs.length > 1 ? '<button class="sh-nav prev" id="shPrev" aria-label="รูปก่อนหน้า">‹</button><button class="sh-nav next" id="shNext" aria-label="รูปถัดไป">›</button><span class="sh-count" id="shCount">1/' + imgs.length + '</span>' : '') +
     '</div>' +
     (imgs.length > 1 ? '<div class="sh-thumbs">' + imgs.map((u, k) => '<img src="' + esc(u) + '" data-k="' + k + '" class="' + (k === 0 ? 'on' : '') + '" alt="">').join('') + '</div>' : '') +
-    '<div class="sh-bd"><div class="sh-nm">' + esc(carName(c)) + '</div><div class="sh-price">' + (baht(c.price) || 'สอบถามราคา') + '</div>' +
+    '<div class="sh-bd">' + (c.is_hot ? '<span class="sh-hot">🔥 HOT</span>' : '') + '<div class="sh-nm">' + esc(carName(c)) + '</div><div class="sh-price">' + (baht(c.price) || 'สอบถามราคา') + (hasDiscount(c) ? '<s class="old">' + baht(c.original_price) + '</s>' : '') + '</div>' +
     (specs.length ? '<div class="specs">' + specs.map((p) => '<div class="spec"><span>' + p[0] + '</span><b>' + esc(p[1]) + '</b></div>').join('') + '</div>' : '') +
-    (inst.length ? '<div class="inst"><div class="inst-h">💳 ตารางผ่อน (โดยประมาณ)</div><div class="inst-row">' + inst.map((p) => '<div class="it">' + p[0] + ' <b>' + Number(p[1]).toLocaleString('th-TH') + '</b>/ด.</div>').join('') + '</div></div>' : '') +
     (c.description ? '<div class="desc">' + esc(c.description) + '</div>' : '') +
     '<div class="cta-row"><button class="cta cta-line" data-line><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 5.64 2 10.1c0 4 3.55 7.34 8.35 7.97.32.07.77.21.88.49.1.25.07.64.03.9l-.14.86c-.04.25-.2 1 .87.54s5.79-3.41 7.9-5.84C21.3 13.5 22 11.88 22 10.1 22 5.64 17.52 2 12 2z"/></svg>สอบถาม LINE</button>' +
     '<button class="cta cta-call" data-call><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.5 21 3 13.5 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.2.2 2.4.6 3.6.1.4 0 .8-.2 1l-2.3 2.2z"/></svg>โทรเลย</button></div></div>';
