@@ -33,6 +33,32 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
 .hd-line{background:var(--green);color:#fff}
 .hd-call{background:var(--ink);color:#fff}
 .hd-btn svg{width:17px;height:17px}
+.hd-menu{font-size:1.45rem;line-height:1;padding:5px 11px;border-radius:11px;color:var(--ink);transition:background .14s}
+.hd-menu:hover{background:rgba(0,0,0,.05)}
+.active-filter{flex:1;min-width:0}
+.af-chip{display:inline-flex;align-items:center;gap:9px;background:var(--ink);color:#fff;font-family:'Kanit',sans-serif;font-weight:600;font-size:.86rem;padding:8px 15px;border-radius:999px;max-width:100%}
+.af-chip span{opacity:.75;font-size:1rem}
+.drawer-ov{position:fixed;inset:0;z-index:55;background:rgba(28,26,23,.5);backdrop-filter:blur(3px);opacity:0;pointer-events:none;transition:opacity .25s}
+.drawer-ov.show{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;left:0;bottom:0;z-index:56;width:300px;max-width:84vw;background:var(--bg);box-shadow:var(--shadow-lg);transform:translateX(-100%);transition:transform .28s cubic-bezier(.2,.8,.2,1);display:flex;flex-direction:column;overflow:hidden}
+.drawer.show{transform:translateX(0)}
+.drawer-hd{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--line);font-family:'Kanit',sans-serif;font-weight:600;font-size:1.05rem}
+.drawer-hd button{font-size:1.15rem;width:34px;height:34px;border-radius:50%;display:grid;place-items:center}
+.drawer-hd button:hover{background:rgba(0,0,0,.05)}
+.drawer-body{flex:1;overflow-y:auto;padding:6px 0 30px}
+.dr-all,.dr-brand,.dr-model{width:100%;text-align:left;display:flex;align-items:center;justify-content:space-between;gap:8px;font-family:'Sarabun',sans-serif;font-size:.98rem;color:var(--ink);padding:12px 18px;transition:background .12s}
+.dr-all{font-family:'Kanit',sans-serif;font-weight:600;border-bottom:1px solid var(--line)}
+.dr-brand{font-weight:600}
+.dr-all:hover,.dr-brand:hover,.dr-model:hover{background:rgba(0,0,0,.04)}
+.dr-all.on,.dr-brand.on{color:var(--brand)}
+.dr-meta{color:var(--muted);font-size:.85rem;font-weight:400;display:flex;align-items:center;gap:6px}
+.dr-meta .chev{font-style:normal;display:inline-block;transition:transform .2s}
+.dr-group.open .dr-meta .chev{transform:rotate(90deg)}
+.dr-models{display:none;background:#fff;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.dr-group.open .dr-models{display:block}
+.dr-model{padding-left:36px;font-size:.92rem}
+.dr-model>span{color:var(--muted);font-size:.82rem}
+.dr-model.on{color:var(--brand);font-weight:600;background:#fff7f4}
 @media(max-width:680px){.hd-actions{display:none}}
 .hero{max-width:1180px;margin:0 auto;padding:30px 18px 8px}
 .hero h1{font-family:'Kanit',sans-serif;font-weight:700;font-size:clamp(1.7rem,5vw,2.6rem);line-height:1.12;letter-spacing:.3px}
@@ -136,6 +162,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
 <body>
 <header class="hd">
   <div class="hd-in">
+    <button class="hd-menu" id="menuBtn" aria-label="เมนูยี่ห้อ/รุ่น">☰</button>
     <img class="hd-logo" id="hdLogo" alt="โลโก้ร้าน">
     <div class="hd-name" id="hdName">—</div>
     <div class="hd-actions">
@@ -157,14 +184,13 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
         <input id="q" type="search" placeholder="ค้นหา ยี่ห้อ / รุ่น / ปี / ราคา…" autocomplete="off">
       </div>
       <div class="row">
-        <div class="chips" id="brands"></div>
+        <div class="active-filter" id="activeFilter" hidden></div>
         <select class="sort" id="sort">
           <option value="new">ใหม่ล่าสุด</option>
           <option value="plow">ราคาต่ำ → สูง</option>
           <option value="phigh">ราคาสูง → ต่ำ</option>
         </select>
       </div>
-      <div class="chips chips-sub" id="models" hidden></div>
     </div>
   </div>
   <div class="grid" id="grid"></div>
@@ -174,6 +200,11 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
   <button class="cta cta-line" data-line><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 5.64 2 10.1c0 4 3.55 7.34 8.35 7.97.32.07.77.21.88.49.1.25.07.64.03.9l-.14.86c-.04.25-.2 1 .87.54s5.79-3.41 7.9-5.84C21.3 13.5 22 11.88 22 10.1 22 5.64 17.52 2 12 2z"/></svg>แชท LINE</button>
   <button class="cta cta-call" data-call><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.5 21 3 13.5 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.2.2 2.4.6 3.6.1.4 0 .8-.2 1l-2.3 2.2z"/></svg>โทรเลย</button>
 </div>
+<div class="drawer-ov" id="drawerOv"></div>
+<aside class="drawer" id="drawer" aria-label="เมนูยี่ห้อและรุ่น">
+  <div class="drawer-hd"><span>🗂️ เลือกยี่ห้อ / รุ่น</span><button id="drawerX" aria-label="ปิดเมนู">✕</button></div>
+  <div class="drawer-body" id="drawerBody"></div>
+</aside>
 <div class="ov" id="ov"><div class="sheet" id="sheet"></div></div>
 <footer class="foot" id="foot"></footer>
 <script>
@@ -182,6 +213,7 @@ const CONFIG = {
   LOGO_URL: 'https://raw.githubusercontent.com/umhomecar/logoimages/main/88.png',
   SUPABASE_URL: 'https://jvvjwblwdeggetnpfvgq.supabase.co',
   SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp2dmp3Ymx3ZGVnZ2V0bnBmdmdxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwNTgyNTUsImV4cCI6MjA5MzYzNDI1NX0.7fvwqyfCH_4m0WQyUeTwZypSxE17db9UBlxJ2H-ZdXo',
+
   LINE_URL: 'https://line.me/R/ti/p/@um44',
   PHONE: '099-396-9319',
 };
@@ -211,7 +243,6 @@ async function load() {
     const { data, error } = await db.from('public_cars').select('*').order('created_at', { ascending: false });
     if (error) throw error;
     ALL = (data || []).map((c) => ({ ...c, images: Array.isArray(c.images) ? c.images : [] }));
-    buildBrands();
     apply();
     $('#tools').hidden = false;
     $('#heroCount').hidden = false;
@@ -221,33 +252,45 @@ async function load() {
     $('#grid').innerHTML = '<div class="state" style="grid-column:1/-1"><div class="em">😕</div><h3>โหลดข้อมูลไม่สำเร็จ</h3><p>ลองรีเฟรชอีกครั้ง หรือทักร้านทาง LINE ได้เลย</p></div>';
   }
 }
-function buildBrands() {
-  const counts = {};
-  ALL.forEach((c) => { const b = (c.brand || '').trim(); if (b) counts[b] = (counts[b] || 0) + 1; });
-  const list = Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
-  $('#brands').innerHTML = '<button class="chip on" data-b="all">ทั้งหมด (' + ALL.length + ')</button>' + list.map((b) => '<button class="chip" data-b="' + esc(b) + '">' + esc(b) + ' (' + counts[b] + ')</button>').join('');
-  $('#brands').querySelectorAll('.chip').forEach((ch) => ch.addEventListener('click', () => {
-    brand = ch.dataset.b; model = 'all';
-    $('#brands').querySelectorAll('.chip').forEach((x) => x.classList.toggle('on', x === ch));
-    buildModels();
-    apply();
+function buildDrawer() {
+  const bc = {};
+  ALL.forEach((c) => { const b = (c.brand || '').trim(); if (b) bc[b] = (bc[b] || 0) + 1; });
+  const brands = Object.keys(bc).sort((a, b) => bc[b] - bc[a]);
+  let h = '<button class="dr-all' + (brand === 'all' ? ' on' : '') + '" data-b="all">🚗 รถทั้งหมด <span class="dr-meta">' + ALL.length + '</span></button>';
+  brands.forEach((b) => {
+    const mc = {};
+    ALL.filter((c) => (c.brand || '').trim() === b).forEach((c) => { const m = (c.model || '').trim(); if (m) mc[m] = (mc[m] || 0) + 1; });
+    const models = Object.keys(mc).sort((x, y) => mc[y] - mc[x]);
+    const multi = models.length > 1;
+    h += '<div class="dr-group' + (brand === b ? ' open' : '') + '">';
+    h += '<button class="dr-brand' + (brand === b && model === 'all' ? ' on' : '') + '" data-b="' + esc(b) + '"><span>' + esc(b) + '</span><span class="dr-meta">' + bc[b] + (multi ? ' <i class="chev">\u203a</i>' : '') + '</span></button>';
+    if (multi) {
+      h += '<div class="dr-models">';
+      models.forEach((m) => { h += '<button class="dr-model' + (brand === b && model === m ? ' on' : '') + '" data-b="' + esc(b) + '" data-m="' + esc(m) + '">' + esc(m) + ' <span>' + mc[m] + '</span></button>'; });
+      h += '</div>';
+    }
+    h += '</div>';
+  });
+  const body = $('#drawerBody');
+  body.innerHTML = h;
+  body.querySelector('.dr-all').addEventListener('click', () => { brand = 'all'; model = 'all'; apply(); closeDrawer(); });
+  body.querySelectorAll('.dr-brand').forEach((btn) => btn.addEventListener('click', () => {
+    const hasModels = !!btn.closest('.dr-group').querySelector('.dr-models');
+    brand = btn.dataset.b; model = 'all'; apply();
+    if (hasModels) buildDrawer(); else closeDrawer();
   }));
-  buildModels();
+  body.querySelectorAll('.dr-model').forEach((btn) => btn.addEventListener('click', () => {
+    brand = btn.dataset.b; model = btn.dataset.m; apply(); closeDrawer();
+  }));
 }
-function buildModels() {
-  const box = $('#models');
-  if (brand === 'all') { box.hidden = true; box.innerHTML = ''; return; }
-  const counts = {};
-  ALL.filter((c) => (c.brand || '').trim() === brand).forEach((c) => { const m = (c.model || '').trim(); if (m) counts[m] = (counts[m] || 0) + 1; });
-  const list = Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
-  if (list.length < 2) { box.hidden = true; box.innerHTML = ''; return; }
-  box.hidden = false;
-  box.innerHTML = '<button class="chip on" data-m="all">ทุกรุ่น</button>' + list.map((m) => '<button class="chip" data-m="' + esc(m) + '">' + esc(m) + ' (' + counts[m] + ')</button>').join('');
-  box.querySelectorAll('.chip').forEach((ch) => ch.addEventListener('click', () => {
-    model = ch.dataset.m;
-    box.querySelectorAll('.chip').forEach((x) => x.classList.toggle('on', x === ch));
-    apply();
-  }));
+function openDrawer() { buildDrawer(); $('#drawer').classList.add('show'); $('#drawerOv').classList.add('show'); document.body.style.overflow = 'hidden'; }
+function closeDrawer() { $('#drawer').classList.remove('show'); $('#drawerOv').classList.remove('show'); document.body.style.overflow = ''; }
+function updateActiveFilter() {
+  const el = $('#activeFilter');
+  if (brand === 'all') { el.hidden = true; el.innerHTML = ''; return; }
+  el.hidden = false;
+  el.innerHTML = '<button class="af-chip" id="afClear">' + esc(brand) + (model !== 'all' ? ' \u203a ' + esc(model) : '') + ' <span>\u2715</span></button>';
+  $('#afClear').addEventListener('click', () => { brand = 'all'; model = 'all'; apply(); });
 }
 function cleanDesc(text) {
   return String(text || '').split(/\r?\n/).filter((line) => {
@@ -270,6 +313,7 @@ function apply() {
   else r.sort((a, b) => (b.is_hot ? 1 : 0) - (a.is_hot ? 1 : 0));
   VIEW = r;
   page = 1;
+  updateActiveFilter();
   renderGrid();
 }
 function hasDiscount(c) { return c.original_price != null && c.price != null && Number(c.original_price) > Number(c.price); }
@@ -382,6 +426,10 @@ document.addEventListener('keydown', (e) => {
     if (e.key === 'ArrowRight') { curIdx = (curIdx + 1) % D; gallery(D); }
   }
 });
+$('#menuBtn').addEventListener('click', openDrawer);
+$('#drawerX').addEventListener('click', closeDrawer);
+$('#drawerOv').addEventListener('click', closeDrawer);
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && $('#drawer').classList.contains('show')) closeDrawer(); });
 let qt;
 $('#q').addEventListener('input', (e) => { clearTimeout(qt); const v = e.target.value; qt = setTimeout(() => { query = v.trim(); apply(); }, 200); });
 $('#sort').addEventListener('change', (e) => { sort = e.target.value; apply(); });
