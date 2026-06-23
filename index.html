@@ -2,7 +2,9 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <title>อัมโฮมคาร์ · รถมือสองคุณภาพ</title>
 <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/umhomecar/logoimages/main/88.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -22,7 +24,7 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--ink);line
 img{display:block;max-width:100%}
 button{font-family:inherit;cursor:pointer;border:none;background:none}
 :focus-visible{outline:3px solid var(--brand);outline-offset:2px;border-radius:6px}
-.hd{position:sticky;top:0;z-index:40;background:rgba(247,244,239,.88);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.hd{position:sticky;top:0;z-index:40;background:rgba(251,228,222,.92);backdrop-filter:blur(12px);border-bottom:1px solid #f3d3ca}
 .hd-in{max-width:1180px;margin:0 auto;padding:12px 18px;display:flex;align-items:center;gap:12px}
 .hd-logo{width:42px;height:42px;border-radius:11px;box-shadow:var(--shadow);background:#fff;padding:3px}
 .hd-name{font-family:'Kanit',sans-serif;font-weight:700;font-size:1.18rem;letter-spacing:.2px;line-height:1.1}
@@ -221,7 +223,14 @@ const $ = (s, r = document) => r.querySelector(s);
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const baht = (n) => (n == null || n === '') ? null : '฿' + Number(n).toLocaleString('th-TH');
 const carName = (c) => [c.brand, c.model, c.sub_model].filter(Boolean).join(' ') || 'รถยนต์';
-let ALL = [], VIEW = [], brand = 'all', model = 'all', sort = 'new', query = '', page = 1;
+function lineOaId() { return (CONFIG.LINE_URL.split('/').pop() || '').trim(); }
+function lineCarUrl(c) {
+  const id = lineOaId();
+  if (!c || !id || id[0] !== '@') return CONFIG.LINE_URL;
+  const msg = 'สนใจรถคันนี้ครับ/ค่ะ 🚗\n' + carName(c) + (c.year ? ' ปี ' + c.year : '') + '\nราคา ' + (baht(c.price) || 'สอบถาม') + '\n(สอบถามจากหน้าเว็บโชว์รูม)';
+  return 'https://line.me/R/oaMessage/' + id + '/?' + encodeURIComponent(msg);
+}
+let ALL = [], VIEW = [], brand = 'all', model = 'all', sort = 'new', query = '', page = 1, expanded = null;
 const PAGE_SIZE = 40;
 let cur = null, curIdx = 0;
 $('#hdLogo').src = CONFIG.LOGO_URL;
@@ -262,7 +271,7 @@ function buildDrawer() {
     ALL.filter((c) => (c.brand || '').trim() === b).forEach((c) => { const m = (c.model || '').trim(); if (m) mc[m] = (mc[m] || 0) + 1; });
     const models = Object.keys(mc).sort((x, y) => mc[y] - mc[x]);
     const multi = models.length > 1;
-    h += '<div class="dr-group' + (brand === b ? ' open' : '') + '">';
+    h += '<div class="dr-group' + (expanded === b ? ' open' : '') + '">';
     h += '<button class="dr-brand' + (brand === b && model === 'all' ? ' on' : '') + '" data-b="' + esc(b) + '"><span>' + esc(b) + '</span><span class="dr-meta">' + bc[b] + (multi ? ' <i class="chev">\u203a</i>' : '') + '</span></button>';
     if (multi) {
       h += '<div class="dr-models">';
@@ -273,17 +282,20 @@ function buildDrawer() {
   });
   const body = $('#drawerBody');
   body.innerHTML = h;
-  body.querySelector('.dr-all').addEventListener('click', () => { brand = 'all'; model = 'all'; apply(); closeDrawer(); });
+  body.querySelector('.dr-all').addEventListener('click', () => { brand = 'all'; model = 'all'; expanded = null; apply(); closeDrawer(); });
   body.querySelectorAll('.dr-brand').forEach((btn) => btn.addEventListener('click', () => {
+    const b = btn.dataset.b;
     const hasModels = !!btn.closest('.dr-group').querySelector('.dr-models');
-    brand = btn.dataset.b; model = 'all'; apply();
-    if (hasModels) buildDrawer(); else closeDrawer();
+    if (!hasModels) { brand = b; model = 'all'; expanded = null; apply(); closeDrawer(); return; }
+    if (expanded === b) { expanded = null; }
+    else { expanded = b; brand = b; model = 'all'; apply(); }
+    buildDrawer();
   }));
   body.querySelectorAll('.dr-model').forEach((btn) => btn.addEventListener('click', () => {
     brand = btn.dataset.b; model = btn.dataset.m; apply(); closeDrawer();
   }));
 }
-function openDrawer() { buildDrawer(); $('#drawer').classList.add('show'); $('#drawerOv').classList.add('show'); document.body.style.overflow = 'hidden'; }
+function openDrawer() { expanded = (brand !== 'all' ? brand : null); buildDrawer(); $('#drawer').classList.add('show'); $('#drawerOv').classList.add('show'); document.body.style.overflow = 'hidden'; }
 function closeDrawer() { $('#drawer').classList.remove('show'); $('#drawerOv').classList.remove('show'); document.body.style.overflow = ''; }
 function updateActiveFilter() {
   const el = $('#activeFilter');
@@ -413,7 +425,7 @@ function renderSheet() {
     $('#shNext').addEventListener('click', () => { curIdx = (curIdx + 1) % D; gallery(D); });
     $('#sheet').querySelectorAll('.sh-thumbs img').forEach((t) => t.addEventListener('click', () => { curIdx = Number(t.dataset.k); gallery(D); }));
   }
-  $('#sheet').querySelectorAll('[data-line]').forEach((b) => b.addEventListener('click', () => window.open(CONFIG.LINE_URL, '_blank')));
+  $('#sheet').querySelectorAll('[data-line]').forEach((b) => b.addEventListener('click', () => window.open(lineCarUrl(cur), '_blank')));
   $('#sheet').querySelectorAll('[data-call]').forEach((b) => b.addEventListener('click', () => { location.href = 'tel:' + CONFIG.PHONE.replace(/[^0-9+]/g, ''); }));
 }
 $('#ov').addEventListener('click', (e) => { if (e.target.id === 'ov') closeDetail(); });
