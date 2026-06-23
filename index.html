@@ -52,6 +52,13 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
 .chip{white-space:nowrap;padding:8px 15px;border-radius:999px;background:#fff;border:1.5px solid var(--line);font-weight:600;font-size:.88rem;color:var(--ink);transition:all .14s}
 .chip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
 .sort{padding:9px 14px;border:1.5px solid var(--line);border-radius:999px;background:#fff;font-family:inherit;font-weight:600;font-size:.86rem;color:var(--ink);cursor:pointer}
+.chips-sub{margin-top:9px}
+.chips-sub .chip{font-size:.84rem;padding:7px 13px}
+.chips-sub .chip.on{background:var(--brand);color:#fff;border-color:var(--brand)}
+.pager{max-width:1180px;margin:0 auto 90px;padding:4px 18px 0;display:flex;gap:6px;justify-content:center;align-items:center;flex-wrap:wrap}
+.pager button{min-width:40px;height:40px;padding:0 13px;border:1.5px solid var(--line);background:#fff;border-radius:12px;font-family:'Kanit',sans-serif;font-weight:600;font-size:.94rem;color:var(--ink);transition:all .14s}
+.pager button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.pager button:disabled{opacity:.38;cursor:default}
 .grid{max-width:1180px;margin:14px auto 90px;padding:0 18px;display:grid;grid-template-columns:repeat(auto-fill,minmax(248px,1fr));gap:18px}
 .card{background:var(--card);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);cursor:pointer;transition:transform .16s ease,box-shadow .16s ease;display:flex;flex-direction:column;text-align:left;width:100%}
 .card:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg)}
@@ -157,9 +164,11 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
           <option value="phigh">ราคาสูง → ต่ำ</option>
         </select>
       </div>
+      <div class="chips chips-sub" id="models" hidden></div>
     </div>
   </div>
   <div class="grid" id="grid"></div>
+  <div class="pager" id="pager"></div>
 </main>
 <div class="bar">
   <button class="cta cta-line" data-line><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 5.64 2 10.1c0 4 3.55 7.34 8.35 7.97.32.07.77.21.88.49.1.25.07.64.03.9l-.14.86c-.04.25-.2 1 .87.54s5.79-3.41 7.9-5.84C21.3 13.5 22 11.88 22 10.1 22 5.64 17.52 2 12 2z"/></svg>แชท LINE</button>
@@ -172,15 +181,16 @@ const CONFIG = {
   SHOP_NAME: 'อัมโฮมคาร์',
   LOGO_URL: 'https://raw.githubusercontent.com/umhomecar/logoimages/main/88.png',
   SUPABASE_URL: 'https://jvvjwblwdeggetnpfvgq.supabase.co',
-  SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp2dmp3Ymx3ZGVnZ2V0bnBmdmdxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwNTgyNTUsImV4cCI6MjA5MzYzNDI1NX0.7fvwqyfCH_4m0WQyUeTwZypSxE17db9UBlxJ2H-ZdXo',
-  LINE_URL: 'https://line.me/R/ti/p/@um44',
-  PHONE: '099-396-9319',
+  SUPABASE_ANON_KEY: 'ใส่_ANON_KEY_ที่นี่',
+  LINE_URL: 'https://line.me/R/ti/p/@ใส่ไอดีไลน์',
+  PHONE: '0812345678',
 };
 const $ = (s, r = document) => r.querySelector(s);
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const baht = (n) => (n == null || n === '') ? null : '฿' + Number(n).toLocaleString('th-TH');
 const carName = (c) => [c.brand, c.model, c.sub_model].filter(Boolean).join(' ') || 'รถยนต์';
-let ALL = [], VIEW = [], brand = 'all', sort = 'new', query = '';
+let ALL = [], VIEW = [], brand = 'all', model = 'all', sort = 'new', query = '', page = 1;
+const PAGE_SIZE = 40;
 let cur = null, curIdx = 0;
 $('#hdLogo').src = CONFIG.LOGO_URL;
 $('#hdName').innerHTML = esc(CONFIG.SHOP_NAME) + '<small>รถมือสองคุณภาพ · ส่งมอบพร้อมใช้</small>';
@@ -215,16 +225,42 @@ function buildBrands() {
   const counts = {};
   ALL.forEach((c) => { const b = (c.brand || '').trim(); if (b) counts[b] = (counts[b] || 0) + 1; });
   const list = Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
-  $('#brands').innerHTML = '<button class="chip on" data-b="all">ทั้งหมด</button>' + list.map((b) => '<button class="chip" data-b="' + esc(b) + '">' + esc(b) + '</button>').join('');
+  $('#brands').innerHTML = '<button class="chip on" data-b="all">ทั้งหมด (' + ALL.length + ')</button>' + list.map((b) => '<button class="chip" data-b="' + esc(b) + '">' + esc(b) + ' (' + counts[b] + ')</button>').join('');
   $('#brands').querySelectorAll('.chip').forEach((ch) => ch.addEventListener('click', () => {
-    brand = ch.dataset.b;
+    brand = ch.dataset.b; model = 'all';
     $('#brands').querySelectorAll('.chip').forEach((x) => x.classList.toggle('on', x === ch));
+    buildModels();
     apply();
   }));
+  buildModels();
+}
+function buildModels() {
+  const box = $('#models');
+  if (brand === 'all') { box.hidden = true; box.innerHTML = ''; return; }
+  const counts = {};
+  ALL.filter((c) => (c.brand || '').trim() === brand).forEach((c) => { const m = (c.model || '').trim(); if (m) counts[m] = (counts[m] || 0) + 1; });
+  const list = Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
+  if (list.length < 2) { box.hidden = true; box.innerHTML = ''; return; }
+  box.hidden = false;
+  box.innerHTML = '<button class="chip on" data-m="all">ทุกรุ่น</button>' + list.map((m) => '<button class="chip" data-m="' + esc(m) + '">' + esc(m) + ' (' + counts[m] + ')</button>').join('');
+  box.querySelectorAll('.chip').forEach((ch) => ch.addEventListener('click', () => {
+    model = ch.dataset.m;
+    box.querySelectorAll('.chip').forEach((x) => x.classList.toggle('on', x === ch));
+    apply();
+  }));
+}
+function cleanDesc(text) {
+  return String(text || '').split(/\r?\n/).filter((line) => {
+    const t = line.trim();
+    if (/ระยะ\s*(การ)?\s*ผ่อน/.test(t)) return false;
+    if (/^[^0-9A-Za-zก-๙]*\d+\s*ปี\s*[\d,]{3,}/.test(t)) return false;
+    return true;
+  }).join('\n').replace(/\n{3,}/g, '\n\n').trim();
 }
 function apply() {
   let r = ALL.slice();
   if (brand !== 'all') r = r.filter((c) => (c.brand || '').trim() === brand);
+  if (model !== 'all') r = r.filter((c) => (c.model || '').trim() === model);
   if (query) {
     const q = query.toLowerCase();
     r = r.filter((c) => [c.brand, c.model, c.sub_model, c.year, c.price, c.engine, c.gear].filter(Boolean).join(' ').toLowerCase().includes(q));
@@ -233,6 +269,7 @@ function apply() {
   else if (sort === 'phigh') r.sort((a, b) => (b.price ?? -1) - (a.price ?? -1));
   else r.sort((a, b) => (b.is_hot ? 1 : 0) - (a.is_hot ? 1 : 0));
   VIEW = r;
+  page = 1;
   renderGrid();
 }
 function hasDiscount(c) { return c.original_price != null && c.price != null && Number(c.original_price) > Number(c.price); }
@@ -250,9 +287,16 @@ function priceHtml(c) {
 function renderGrid() {
   if (!VIEW.length) {
     $('#grid').innerHTML = '<div class="state" style="grid-column:1/-1"><div class="em">🔍</div><h3>ไม่พบรถที่ค้นหา</h3><p>ลองเปลี่ยนคำค้นหา หรือเลือกยี่ห้ออื่นดูครับ</p></div>';
+    $('#pager').innerHTML = '';
     return;
   }
-  $('#grid').innerHTML = VIEW.map((c, i) => {
+  const pages = Math.ceil(VIEW.length / PAGE_SIZE);
+  if (page > pages) page = pages;
+  if (page < 1) page = 1;
+  const start = (page - 1) * PAGE_SIZE;
+  const slice = VIEW.slice(start, start + PAGE_SIZE);
+  $('#grid').innerHTML = slice.map((c, idx) => {
+    const i = start + idx;
     const cover = c.cover_image_url || (c.images && c.images[0]) || '';
     const n = c.images ? c.images.length : 0;
     return '<button class="card" data-i="' + i + '"><div class="card-img">' +
@@ -266,6 +310,23 @@ function renderGrid() {
       '<span class="card-go">ดูรายละเอียด →</span></div></div></button>';
   }).join('');
   $('#grid').querySelectorAll('.card').forEach((el) => el.addEventListener('click', () => openDetail(Number(el.dataset.i))));
+  renderPager(pages);
+}
+function renderPager(pages) {
+  const p = $('#pager');
+  if (pages <= 1) { p.innerHTML = ''; return; }
+  let h = '<button data-p="' + (page - 1) + '"' + (page === 1 ? ' disabled' : '') + '>‹</button>';
+  for (let i = 1; i <= pages; i++) h += '<button class="' + (i === page ? 'on' : '') + '" data-p="' + i + '">' + i + '</button>';
+  h += '<button data-p="' + (page + 1) + '"' + (page === pages ? ' disabled' : '') + '>›</button>';
+  p.innerHTML = h;
+  p.querySelectorAll('button[data-p]').forEach((b) => b.addEventListener('click', () => {
+    if (b.disabled) return;
+    const np = Number(b.dataset.p);
+    if (np < 1 || np > pages || np === page) return;
+    page = np;
+    renderGrid();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }));
 }
 function openDetail(i) {
   cur = VIEW[i]; curIdx = 0;
@@ -298,7 +359,7 @@ function renderSheet() {
     (imgs.length > 1 ? '<div class="sh-thumbs">' + imgs.map((u, k) => '<img src="' + esc(u) + '" data-k="' + k + '" class="' + (k === 0 ? 'on' : '') + '" alt="">').join('') + '</div>' : '') +
     '<div class="sh-bd">' + (c.is_hot ? '<span class="sh-hot">🔥 HOT</span>' : '') + '<div class="sh-nm">' + esc(carName(c)) + '</div><div class="sh-price">' + (baht(c.price) || 'สอบถามราคา') + (hasDiscount(c) ? '<s class="old">' + baht(c.original_price) + '</s>' : '') + '</div>' +
     (specs.length ? '<div class="specs">' + specs.map((p) => '<div class="spec"><span>' + p[0] + '</span><b>' + esc(p[1]) + '</b></div>').join('') + '</div>' : '') +
-    (c.description ? '<div class="desc">' + esc(c.description) + '</div>' : '') +
+    (cleanDesc(c.description) ? '<div class="desc">' + esc(cleanDesc(c.description)) + '</div>' : '') +
     '<div class="cta-row"><button class="cta cta-line" data-line><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 5.64 2 10.1c0 4 3.55 7.34 8.35 7.97.32.07.77.21.88.49.1.25.07.64.03.9l-.14.86c-.04.25-.2 1 .87.54s5.79-3.41 7.9-5.84C21.3 13.5 22 11.88 22 10.1 22 5.64 17.52 2 12 2z"/></svg>สอบถาม LINE</button>' +
     '<button class="cta cta-call" data-call><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.5 21 3 13.5 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.2.2 2.4.6 3.6.1.4 0 .8-.2 1l-2.3 2.2z"/></svg>โทรเลย</button></div></div>';
   $('#shX').addEventListener('click', closeDetail);
