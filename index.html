@@ -172,16 +172,15 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
 .highlights{max-width:1180px;margin:16px auto 0;padding:0 18px;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none}
 .highlights::-webkit-scrollbar{display:none}
 .highlights span{white-space:nowrap;background:#fff;border:1px solid var(--line);border-radius:999px;padding:8px 15px;font-size:.86rem;font-weight:600;color:var(--ink);box-shadow:var(--shadow)}
-.shop{max-width:1180px;margin:12px auto 0;padding:0 18px}
-.shop-card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:20px 22px;box-shadow:var(--shadow)}
-.shop-card h3{font-family:'Kanit',sans-serif;font-weight:700;font-size:1.15rem;margin-bottom:13px;display:flex;align-items:center;gap:8px}
-.shop-row{display:flex;gap:10px;align-items:flex-start;color:#4a463f;font-size:.95rem;margin-bottom:9px}
-.shop-row .i{font-size:1.05rem;flex:none;line-height:1.5}
-.shop-cta{display:flex;gap:10px;flex-wrap:wrap;margin-top:15px}
-.shop-cta a{display:inline-flex;align-items:center;gap:7px;font-family:'Kanit',sans-serif;font-weight:600;font-size:.95rem;padding:12px 18px;border-radius:13px;text-decoration:none}
-.shop-map{background:var(--ink);color:#fff}
-.shop-line{background:var(--green);color:#fff}
-.shop-call{background:#fff;color:var(--ink);border:1.5px solid var(--line)}
+.drawer-foot{flex:none;border-top:1px solid var(--line);background:#fff;padding:14px 18px 18px}
+.dr-shop-name{font-family:'Kanit',sans-serif;font-weight:700;font-size:1rem;margin-bottom:8px}
+.dr-shop-line{display:flex;gap:7px;color:#4a463f;font-size:.84rem;line-height:1.5;margin-bottom:6px}
+.dr-shop-line span{flex:none}
+.dr-shop-cta{display:flex;gap:7px;margin-top:11px}
+.dr-shop-cta a{flex:1;text-align:center;font-family:'Kanit',sans-serif;font-weight:600;font-size:.86rem;padding:10px 6px;border-radius:11px;text-decoration:none}
+.dr-shop-cta .map{background:var(--ink);color:#fff;flex:1.3}
+.dr-shop-cta .line{background:var(--green);color:#fff}
+.dr-shop-cta .call{background:var(--bg);color:var(--ink);border:1.5px solid var(--line)}
 .sh-share{position:absolute;top:12px;left:12px;width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.92);font-size:1.05rem;display:grid;place-items:center;box-shadow:var(--shadow);z-index:2}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;font-family:'Kanit',sans-serif;font-weight:600;font-size:.92rem;padding:11px 20px;border-radius:999px;box-shadow:var(--shadow-lg);opacity:0;pointer-events:none;transition:all .25s;z-index:80}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
@@ -243,10 +242,10 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
 <aside class="drawer" id="drawer" aria-label="เมนูยี่ห้อและรุ่น">
   <div class="drawer-hd"><span>🗂️ เลือกยี่ห้อ / รุ่น</span><button id="drawerX" aria-label="ปิดเมนู">✕</button></div>
   <div class="drawer-body" id="drawerBody"></div>
+  <div class="drawer-foot" id="drawerFoot"></div>
 </aside>
 <div class="toast" id="toast"></div>
 <div class="ov" id="ov"><div class="sheet" id="sheet"></div></div>
-<section class="shop" id="shop"></section>
 <footer class="foot" id="foot"></footer>
 <script>
 const CONFIG = {
@@ -260,7 +259,7 @@ const CONFIG = {
 
   ADDRESS: '423 มาบยางพรซอย ต.มาบยางพร อ.ปลวกแดง จ.ระยอง 21140',
   MAP_URL: 'https://maps.app.goo.gl/7PVT2p6EZUqvGALPA',
-  HOURS: 'เปิดทุกวัน 08:00 - 18:00',
+  HOURS: 'เปิดทุกวัน 08:00 - 19:00 น.',
   HIGHLIGHTS: ['✅ ตรวจสภาพทุกคัน', '💳 จัดไฟแนนซ์ได้', '🔄 รับเทิร์นรถเก่า', '📋 ฟรีโอน ฟรีค่าจัด'],
 };
 const $ = (s, r = document) => r.querySelector(s);
@@ -282,14 +281,14 @@ $('#hdLogo').src = CONFIG.LOGO_URL;
 $('#hdName').innerHTML = esc(CONFIG.SHOP_NAME) + '<small>รถมือสองคุณภาพ · ส่งมอบพร้อมใช้</small>';
 $('#foot').textContent = '© ' + new Date().getFullYear() + ' ' + CONFIG.SHOP_NAME + ' · รถทุกคันตรวจสภาพก่อนส่งมอบ';
 $('#highlights').innerHTML = (CONFIG.HIGHLIGHTS || []).map((t) => '<span>' + esc(t) + '</span>').join('');
-$('#shop').innerHTML = '<div class="shop-card"><h3>📍 ' + esc(CONFIG.SHOP_NAME) + '</h3>' +
-  (CONFIG.ADDRESS ? '<div class="shop-row"><span class="i">🏠</span><span>' + esc(CONFIG.ADDRESS) + '</span></div>' : '') +
-  (CONFIG.HOURS ? '<div class="shop-row"><span class="i">🕐</span><span>' + esc(CONFIG.HOURS) + '</span></div>' : '') +
-  '<div class="shop-cta">' +
-  (CONFIG.MAP_URL ? '<a class="shop-map" href="' + esc(CONFIG.MAP_URL) + '" target="_blank" rel="noopener">🗺️ นำทาง Google Maps</a>' : '') +
-  '<a class="shop-line" href="' + esc(CONFIG.LINE_URL) + '" target="_blank" rel="noopener">💬 แชท LINE</a>' +
-  '<a class="shop-call" href="tel:' + esc(CONFIG.PHONE.replace(/[^0-9+]/g, '')) + '">📞 โทร ' + esc(CONFIG.PHONE) + '</a>' +
-  '</div></div>';
+$('#drawerFoot').innerHTML = '<div class="dr-shop-name">📍 ' + esc(CONFIG.SHOP_NAME) + '</div>' +
+  (CONFIG.ADDRESS ? '<div class="dr-shop-line"><span>🏠</span>' + esc(CONFIG.ADDRESS) + '</div>' : '') +
+  (CONFIG.HOURS ? '<div class="dr-shop-line"><span>🕐</span>' + esc(CONFIG.HOURS) + '</div>' : '') +
+  '<div class="dr-shop-cta">' +
+  (CONFIG.MAP_URL ? '<a class="map" href="' + esc(CONFIG.MAP_URL) + '" target="_blank" rel="noopener">🗺️ นำทาง</a>' : '') +
+  '<a class="line" href="' + esc(CONFIG.LINE_URL) + '" target="_blank" rel="noopener">LINE</a>' +
+  '<a class="call" href="tel:' + esc(CONFIG.PHONE.replace(/[^0-9+]/g, '')) + '">โทร</a>' +
+  '</div>';
 let toastT;
 function showToast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 2200); }
 function shareCar(c) {
@@ -525,6 +524,10 @@ let qt;
 $('#q').addEventListener('input', (e) => { clearTimeout(qt); const v = e.target.value; qt = setTimeout(() => { query = v.trim(); apply(); }, 200); });
 $('#sort').addEventListener('change', (e) => { sort = e.target.value; apply(); });
 $('#priceRange').addEventListener('change', (e) => { priceRange = e.target.value; apply(); });
+// กันซูมบนมือถือ (iOS เพิกเฉย user-scalable=no จึงต้องกันด้วย JS)
+['gesturestart', 'gesturechange', 'gestureend'].forEach((ev) => document.addEventListener(ev, (e) => e.preventDefault()));
+let _lastTouchEnd = 0;
+document.addEventListener('touchend', (e) => { const n = Date.now(); if (n - _lastTouchEnd <= 350) e.preventDefault(); _lastTouchEnd = n; }, false);
 load();
 </script>
 </body>
