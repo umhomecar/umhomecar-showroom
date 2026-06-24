@@ -206,7 +206,6 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
     <div class="cnt" id="heroCount" hidden>🚗 มีรถ <b id="cntNum">0</b> คันให้เลือก</div>
   </section>
 
-  <div class="highlights" id="highlights"></div>
   <div class="tools" id="tools" hidden>
     <div class="tools-card">
       <div class="search">
@@ -280,7 +279,6 @@ let cur = null, curIdx = 0;
 $('#hdLogo').src = CONFIG.LOGO_URL;
 $('#hdName').innerHTML = esc(CONFIG.SHOP_NAME) + '<small>รถมือสองคุณภาพ · ส่งมอบพร้อมใช้</small>';
 $('#foot').textContent = '© ' + new Date().getFullYear() + ' ' + CONFIG.SHOP_NAME + ' · รถทุกคันตรวจสภาพก่อนส่งมอบ';
-$('#highlights').innerHTML = (CONFIG.HIGHLIGHTS || []).map((t) => '<span>' + esc(t) + '</span>').join('');
 $('#drawerFoot').innerHTML = '<div class="dr-shop-name">📍 ' + esc(CONFIG.SHOP_NAME) + '</div>' +
   (CONFIG.ADDRESS ? '<div class="dr-shop-line"><span>🏠</span>' + esc(CONFIG.ADDRESS) + '</div>' : '') +
   (CONFIG.HOURS ? '<div class="dr-shop-line"><span>🕐</span>' + esc(CONFIG.HOURS) + '</div>' : '') +
