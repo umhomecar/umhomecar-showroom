@@ -185,6 +185,25 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;font-family:'Kanit',sans-serif;font-weight:600;font-size:.92rem;padding:11px 20px;border-radius:999px;box-shadow:var(--shadow-lg);opacity:0;pointer-events:none;transition:all .25s;z-index:80}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 @media(max-width:680px){.toast{bottom:90px}}
+#statsBtn{position:fixed;left:16px;bottom:16px;width:46px;height:46px;border-radius:50%;background:var(--ink);color:#fff;font-size:1.2rem;display:none;place-items:center;box-shadow:var(--shadow-lg);z-index:70;border:none;cursor:pointer}
+.stats-sheet{max-width:560px}
+.stats-hd{display:flex;align-items:center;justify-content:space-between;padding:20px 22px 12px}
+.stats-hd h2{font-family:'Kanit',sans-serif;font-size:1.3rem;font-weight:700}
+.stats-hd small{font-weight:400;color:#8A8276;font-size:.8rem}
+.stats-live,.stats-total{margin:0 22px 10px;padding:13px 16px;border-radius:13px;font-weight:600;font-family:'Kanit',sans-serif}
+.stats-live{background:#e6f6ec;color:#137a3f}
+.stats-total{background:var(--bg);color:var(--ink)}
+.stats-sheet h3{font-family:'Kanit',sans-serif;font-weight:700;margin:16px 22px 8px}
+#statList{padding:0 14px 8px}
+.stat-row{display:flex;align-items:center;gap:11px;width:100%;background:none;border:none;border-bottom:1px solid var(--line);padding:9px 8px;cursor:pointer;text-align:left}
+.stat-rank{font-family:'Kanit',sans-serif;font-weight:700;color:#E8472B;width:22px;flex:none;text-align:center}
+.stat-row img{width:54px;height:40px;object-fit:cover;border-radius:8px;flex:none;background:var(--line)}
+.stat-name{flex:1;font-size:.92rem;color:var(--ink);font-weight:500;line-height:1.3}
+.stat-views{flex:none;font-weight:700;font-size:.9rem;color:#4a463f}
+.stats-foot{padding:14px 22px 22px;display:flex;flex-direction:column;gap:7px;align-items:flex-start}
+.stats-btn-off{background:#fde8e6;color:#b42318;border:none;font-family:'Kanit',sans-serif;font-weight:600;padding:10px 16px;border-radius:11px;cursor:pointer}
+.stats-note{font-size:.78rem;color:#8A8276;line-height:1.4}
+.stats-empty{padding:18px 22px;color:#8A8276}
 </style>
 </head>
 <body>
@@ -244,6 +263,8 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
   <div class="drawer-foot" id="drawerFoot"></div>
 </aside>
 <div class="toast" id="toast"></div>
+<button id="statsBtn" title="สถิติร้าน (เฉพาะเจ้าของ)" aria-label="สถิติร้าน">📊</button>
+<div class="ov" id="statsOv"><div class="sheet stats-sheet" id="statsSheet"></div></div>
 <div class="ov" id="ov"><div class="sheet" id="sheet"></div></div>
 <footer class="foot" id="foot"></footer>
 <script>
@@ -260,6 +281,9 @@ const CONFIG = {
   MAP_URL: 'https://maps.app.goo.gl/7PVT2p6EZUqvGALPA',
   HOURS: 'เปิดทุกวัน 08:00 - 19:00 น.',
   HIGHLIGHTS: ['✅ ตรวจสภาพทุกคัน', '💳 จัดไฟแนนซ์ได้', '🔄 รับเทิร์นรถเก่า', '📋 ฟรีโอน ฟรีค่าจัด'],
+
+  // 🔑 ลิงก์ลับเปิดหน้าสถิติ + ตั้งเครื่องนี้เป็น "เจ้าของ" (ไม่ถูกนับ): เว็บคุณ.com/?stats=um2024
+  OWNER_KEY: 'um2024',
 };
 const $ = (s, r = document) => r.querySelector(s);
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -276,6 +300,18 @@ function lineCarUrl(c) {
 let ALL = [], VIEW = [], brand = 'all', model = 'all', sort = 'new', query = '', page = 1, expanded = null, priceRange = 'all';
 const PAGE_SIZE = 40;
 let cur = null, curIdx = 0;
+let db = null, presenceChannel = null, liveCount = 0;
+const viewedThisSession = new Set();
+const _params = new URLSearchParams(location.search);
+const _openStatsOnLoad = _params.get('stats') === CONFIG.OWNER_KEY || _params.get('owner') === CONFIG.OWNER_KEY;
+function isOwner() { try { return localStorage.getItem('umhome_owner') === '1'; } catch (e) { return false; } }
+function setOwner(on) { try { on ? localStorage.setItem('umhome_owner', '1') : localStorage.removeItem('umhome_owner'); } catch (e) {} }
+if (_openStatsOnLoad) setOwner(true);
+async function countView(c) {
+  if (!db || !c || isOwner() || viewedThisSession.has(c.id)) return;
+  viewedThisSession.add(c.id);
+  try { await db.rpc('bump_car_view', { p_car_id: String(c.id) }); } catch (e) {}
+}
 $('#hdLogo').src = CONFIG.LOGO_URL;
 $('#hdName').innerHTML = esc(CONFIG.SHOP_NAME) + '<small>รถมือสองคุณภาพ · ส่งมอบพร้อมใช้</small>';
 $('#foot').textContent = '© ' + new Date().getFullYear() + ' ' + CONFIG.SHOP_NAME + ' · รถทุกคันตรวจสภาพก่อนส่งมอบ';
@@ -300,6 +336,7 @@ function openCarById(id) {
   if (!c) return;
   cur = c; curIdx = 0; renderSheet();
   $('#ov').classList.add('show'); document.body.style.overflow = 'hidden';
+  countView(c);
 }
 document.querySelectorAll('[data-line]').forEach((b) => b.addEventListener('click', () => window.open(CONFIG.LINE_URL, '_blank')));
 document.querySelectorAll('[data-call]').forEach((b) => b.addEventListener('click', () => { location.href = 'tel:' + CONFIG.PHONE.replace(/[^0-9+]/g, ''); }));
@@ -313,7 +350,7 @@ async function load() {
   }
   skeletons();
   try {
-    const db = supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
+    db = supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
     const { data, error } = await db.from('public_cars').select('*').order('created_at', { ascending: false });
     if (error) throw error;
     ALL = (data || []).map((c) => ({ ...c, images: Array.isArray(c.images) ? c.images : [] }));
@@ -323,6 +360,14 @@ async function load() {
     $('#cntNum').textContent = ALL.length;
     const carParam = new URLSearchParams(location.search).get('car');
     if (carParam) openCarById(carParam);
+    startPresence();
+    updateStatsBtn();
+    if (_params.has('stats') || _params.has('owner')) {
+      _params.delete('stats'); _params.delete('owner');
+      const qs = _params.toString();
+      history.replaceState(null, '', location.pathname + (qs ? '?' + qs : ''));
+    }
+    if (_openStatsOnLoad) openStats();
   } catch (e) {
     console.error(e);
     $('#grid').innerHTML = '<div class="state" style="grid-column:1/-1"><div class="em">😕</div><h3>โหลดข้อมูลไม่สำเร็จ</h3><p>ลองรีเฟรชอีกครั้ง หรือทักร้านทาง LINE ได้เลย</p></div>';
@@ -463,11 +508,66 @@ function openDetail(i) {
   renderSheet();
   $('#ov').classList.add('show');
   document.body.style.overflow = 'hidden';
+  countView(cur);
 }
 function closeDetail() {
   $('#ov').classList.remove('show');
   document.body.style.overflow = '';
   if (location.search.indexOf('car=') !== -1) history.replaceState(null, '', location.pathname);
+}
+// ── คนดูสด (Supabase Realtime Presence) — นับเฉพาะลูกค้า (ไม่นับเจ้าของ) ──
+function startPresence() {
+  if (!db || presenceChannel) return;
+  const key = (self.crypto && crypto.randomUUID) ? crypto.randomUUID() : 'u' + Math.random().toString(36).slice(2);
+  presenceChannel = db.channel('showroom-live', { config: { presence: { key } } });
+  presenceChannel.on('presence', { event: 'sync' }, () => {
+    const st = presenceChannel.presenceState();
+    let n = 0;
+    Object.values(st).forEach((arr) => arr.forEach((p) => { if (!p.owner) n++; }));
+    liveCount = n; updateLiveUI();
+  });
+  presenceChannel.subscribe(async (status) => {
+    if (status === 'SUBSCRIBED') { try { await presenceChannel.track({ owner: isOwner(), at: Date.now() }); } catch (e) {} }
+  });
+}
+function retrackPresence() { if (presenceChannel) { try { presenceChannel.track({ owner: isOwner(), at: Date.now() }); } catch (e) {} } }
+function updateLiveUI() { const el = $('#statLive'); if (el) el.textContent = liveCount; }
+function updateStatsBtn() { const b = $('#statsBtn'); if (b) b.style.display = isOwner() ? 'grid' : 'none'; }
+// ── หน้าสถิติ (เฉพาะเจ้าของ) ──
+function openStats() {
+  $('#statsSheet').innerHTML =
+    '<div class="stats-hd"><h2>📊 สถิติร้าน <small>(เฉพาะเจ้าของ)</small></h2><button class="sh-x" id="statsX" aria-label="ปิด">✕</button></div>' +
+    '<div class="stats-live">🟢 ลูกค้ากำลังดูตอนนี้ <b id="statLive">' + liveCount + '</b> คน</div>' +
+    '<div class="stats-total">📈 ยอดดูรวมทั้งเว็บ <b id="statTotal">…</b> ครั้ง</div>' +
+    '<h3>👁 รถยอดนิยม</h3><div id="statList">กำลังโหลด…</div>' +
+    '<div class="stats-foot"><button id="ownerOff" class="stats-btn-off">ออกจากโหมดเจ้าของ</button>' +
+    '<span class="stats-note">เครื่องนี้ถูกตั้งเป็น “เจ้าของ” — การกดดูของคุณจะไม่ถูกนับในสถิติ</span></div>';
+  $('#statsX').addEventListener('click', closeStats);
+  $('#ownerOff').addEventListener('click', () => { setOwner(false); retrackPresence(); updateStatsBtn(); showToast('ออกจากโหมดเจ้าของแล้ว'); closeStats(); });
+  $('#statsOv').classList.add('show'); document.body.style.overflow = 'hidden';
+  loadStats();
+}
+function closeStats() { $('#statsOv').classList.remove('show'); document.body.style.overflow = ''; }
+async function loadStats() {
+  try {
+    const { data, error } = await db.from('car_view_ranking').select('*').limit(100);
+    if (error) throw error;
+    const rows = data || [];
+    const total = rows.reduce((s, r) => s + (Number(r.views) || 0), 0);
+    const tEl = $('#statTotal'); if (tEl) tEl.textContent = total.toLocaleString('th-TH');
+    const listEl = $('#statList'); if (!listEl) return;
+    if (!rows.length) { listEl.innerHTML = '<div class="stats-empty">ยังไม่มีข้อมูลการดู — รอลูกค้าเข้ามาชมก่อนนะครับ</div>'; return; }
+    listEl.innerHTML = rows.slice(0, 20).map((r, i) =>
+      '<button class="stat-row" data-car="' + esc(r.car_id) + '">' +
+      '<span class="stat-rank">' + (i + 1) + '</span>' +
+      '<img src="' + esc(r.cover_image_url || '') + '" alt="" onerror="this.style.visibility=\'hidden\'">' +
+      '<span class="stat-name">' + esc([r.brand, r.model, r.sub_model].filter(Boolean).join(' ')) + (r.year ? ' ' + esc(r.year) : '') + '</span>' +
+      '<span class="stat-views">👁 ' + Number(r.views).toLocaleString('th-TH') + '</span></button>'
+    ).join('');
+    listEl.querySelectorAll('.stat-row').forEach((b) => b.addEventListener('click', () => { closeStats(); openCarById(b.dataset.car); }));
+  } catch (e) {
+    const listEl = $('#statList'); if (listEl) listEl.innerHTML = '<div class="stats-empty">โหลดสถิติไม่สำเร็จ — รัน showroom_stats.sql ใน Supabase แล้วหรือยังครับ?</div>';
+  }
 }
 function gallery(d) {
   if (curIdx < 0) curIdx = 0;
@@ -505,6 +605,8 @@ function renderSheet() {
   $('#sheet').querySelectorAll('[data-call]').forEach((b) => b.addEventListener('click', () => { location.href = 'tel:' + CONFIG.PHONE.replace(/[^0-9+]/g, ''); }));
 }
 $('#ov').addEventListener('click', (e) => { if (e.target.id === 'ov') closeDetail(); });
+$('#statsOv').addEventListener('click', (e) => { if (e.target.id === 'statsOv') closeStats(); });
+$('#statsBtn').addEventListener('click', openStats);
 document.addEventListener('keydown', (e) => {
   if (!$('#ov').classList.contains('show')) return;
   if (e.key === 'Escape') closeDetail();
