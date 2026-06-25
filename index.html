@@ -284,7 +284,34 @@ const CONFIG = {
 
   // 🔑 ลิงก์ลับเปิดหน้าสถิติ + ตั้งเครื่องนี้เป็น "เจ้าของ" (ไม่ถูกนับ): เว็บคุณ.com/?stats=um2024
   OWNER_KEY: 'um2024',
+
+  // 🏢 สาขาเพิ่มเติม — สต๊อกรถเหมือนกันทุกสาขา ต่างแค่ข้อมูลติดต่อ
+  //    ค่าด้านบน = สาขาหลัก (มาบยางพร) ใช้เมื่อเปิดเว็บปกติ ไม่มี ?b=
+  //    สาขาใหม่ = เพิ่ม 1 บล็อกในนี้ แล้วให้สาขานั้นใช้ลิงก์  เว็บคุณ.com/?b=ชื่อคีย์
+  BRANCHES: {
+    // ── ตัวอย่างสาขาที่ 2 — เปิดด้วย  เว็บคุณ.com/?b=branch2  (แก้ทุกค่าให้เป็นของสาขาจริง) ──
+    branch2: {
+      SHOP_NAME: 'อัมโฮมคาร์ (สาขาหลัก)',
+      LINE_URL: 'https://line.me/R/ti/p/@umbk',   // LINE OA ของสาขานี้ (deep-link ทักรุ่นรถ ดึงให้อัตโนมัติ)
+      PHONE: '065-514-0450',
+      ADDRESS: ' อัมโฮมคาร์ เลขที่ 69 ถนนเพิ่มสิน คลองถนน เขตสายไหม กทม 10220',
+      MAP_URL: 'https://goo.gl/maps/gw6EJAzWFE72',
+      HOURS: 'เปิดทุกวัน 08:00 - 19:00 น.',
+      LOGO_URL: 'https://raw.githubusercontent.com/umhomecar/logoimages/main/n.jpg',   // ใส่ได้ถ้าอยากใช้โลโก้คนละอัน (ไม่ใส่ = ใช้อันเดียวกับสาขาหลัก)
+    },
+    // เพิ่มอีกได้:  branch3: { SHOP_NAME:'...', LINE_URL:'...', PHONE:'...', ADDRESS:'...', MAP_URL:'...', HOURS:'...' },
+  },
 };
+
+// ── สลับข้อมูลติดต่อตามสาขา (อ่านจากลิงก์ ?b=คีย์) ──────────────────────────────
+(function applyBranchFromUrl() {
+  const key = new URLSearchParams(location.search).get('b');
+  const b = key && CONFIG.BRANCHES && CONFIG.BRANCHES[key];
+  if (!b) return;
+  ['SHOP_NAME', 'LINE_URL', 'PHONE', 'ADDRESS', 'MAP_URL', 'HOURS', 'LOGO_URL'].forEach((k) => {
+    if (b[k] != null && b[k] !== '') CONFIG[k] = b[k];
+  });
+})();
 const $ = (s, r = document) => r.querySelector(s);
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const baht = (n) => (n == null || n === '') ? null : '฿' + Number(n).toLocaleString('th-TH');
@@ -303,6 +330,8 @@ let cur = null, curIdx = 0;
 let db = null, presenceChannel = null, liveCount = 0;
 const viewedThisSession = new Set();
 const _params = new URLSearchParams(location.search);
+const _branchKey = _params.get('b') || '';
+const _branchQS = _branchKey ? '?b=' + encodeURIComponent(_branchKey) : '';
 const _openStatsOnLoad = _params.get('stats') === CONFIG.OWNER_KEY || _params.get('owner') === CONFIG.OWNER_KEY;
 function isOwner() { try { return localStorage.getItem('umhome_owner') === '1'; } catch (e) { return false; } }
 function setOwner(on) { try { on ? localStorage.setItem('umhome_owner', '1') : localStorage.removeItem('umhome_owner'); } catch (e) {} }
@@ -326,7 +355,7 @@ $('#drawerFoot').innerHTML = '<div class="dr-shop-name">📍 ' + esc(CONFIG.SHOP
 let toastT;
 function showToast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 2200); }
 function shareCar(c) {
-  const url = location.origin + location.pathname + '?car=' + encodeURIComponent(c.id);
+  const url = location.origin + location.pathname + '?car=' + encodeURIComponent(c.id) + (_branchKey ? '&b=' + encodeURIComponent(_branchKey) : '');
   if (navigator.share) { navigator.share({ title: carName(c), text: carName(c) + (c.price != null ? ' ราคา ' + baht(c.price) : ''), url }).catch(() => {}); }
   else if (navigator.clipboard) { navigator.clipboard.writeText(url).then(() => showToast('คัดลอกลิงก์แล้ว ✓')).catch(() => showToast('ลิงก์: ' + url)); }
   else showToast('ลิงก์: ' + url);
@@ -513,7 +542,7 @@ function openDetail(i) {
 function closeDetail() {
   $('#ov').classList.remove('show');
   document.body.style.overflow = '';
-  if (location.search.indexOf('car=') !== -1) history.replaceState(null, '', location.pathname);
+  if (location.search.indexOf('car=') !== -1) history.replaceState(null, '', location.pathname + _branchQS);
 }
 // ── คนดูสด (Supabase Realtime Presence) — นับเฉพาะลูกค้า (ไม่นับเจ้าของ) ──
 function startPresence() {
