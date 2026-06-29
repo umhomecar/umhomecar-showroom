@@ -10,12 +10,14 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="อัมโฮมคาร์ · รถมือสองคุณภาพ">
 <meta property="og:description" content="รถมือสองคัดคุณภาพ พร้อมส่งมอบ · ดูรถทั้งหมด สอบถาม LINE/โทรได้เลย">
-<meta property="og:image" content="https://raw.githubusercontent.com/umhomecar/logoimages/main/88.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/umhomecar/logoimages/main/og-cover.png">
+<meta property="og:image:width" content="1250">
+<meta property="og:image:height" content="1250">
 <meta property="og:locale" content="th_TH">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="อัมโฮมคาร์ · รถมือสองคุณภาพ">
 <meta name="twitter:description" content="รถมือสองคัดคุณภาพ พร้อมส่งมอบ · สอบถาม LINE/โทรได้เลย">
-<meta name="twitter:image" content="https://raw.githubusercontent.com/umhomecar/logoimages/main/88.png">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/umhomecar/logoimages/main/og-cover.png">
 <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/umhomecar/logoimages/main/88.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -159,6 +161,8 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
 .cta:active{transform:scale(.97)}
 .cta-line{background:var(--green);color:#fff}
 .cta-call{background:var(--ink);color:#fff}
+.cta-tiktok{width:100%;margin-bottom:10px;background:#000;color:#fff;text-decoration:none}
+.tik-pip{position:absolute;top:8px;right:8px;background:#000;color:#fff;font-size:.85rem;width:27px;height:27px;border-radius:50%;display:grid;place-items:center;box-shadow:var(--shadow);z-index:2}
 .cta svg{width:20px;height:20px}
 .bar{position:fixed;left:0;right:0;bottom:0;z-index:50;display:none;gap:10px;padding:10px 14px calc(10px + env(safe-area-inset-bottom));background:rgba(247,244,239,.95);backdrop-filter:blur(12px);border-top:1px solid var(--line)}
 .bar .cta{font-size:1rem;padding:13px}
@@ -291,13 +295,13 @@ const CONFIG = {
   BRANCHES: {
     // ── ตัวอย่างสาขาที่ 2 — เปิดด้วย  เว็บคุณ.com/?b=branch2  (แก้ทุกค่าให้เป็นของสาขาจริง) ──
     branch2: {
-      SHOP_NAME: 'อัมโฮมคาร์ (สาขาหลัก)',
-      LINE_URL: 'https://line.me/R/ti/p/@umbk',   // LINE OA ของสาขานี้ (deep-link ทักรุ่นรถ ดึงให้อัตโนมัติ)
-      PHONE: '065-514-0450',
-      ADDRESS: ' อัมโฮมคาร์ เลขที่ 69 ถนนเพิ่มสิน คลองถนน เขตสายไหม กทม 10220',
-      MAP_URL: 'https://goo.gl/maps/gw6EJAzWFE72',
+      SHOP_NAME: 'อัมโฮมคาร์ (สาขา ____)',
+      LINE_URL: 'https://line.me/R/ti/p/@xxxxx',   // LINE OA ของสาขานี้ (deep-link ทักรุ่นรถ ดึงให้อัตโนมัติ)
+      PHONE: '0xx-xxx-xxxx',
+      ADDRESS: 'ที่อยู่สาขานี้ ...',
+      MAP_URL: 'https://maps.app.goo.gl/xxxxx',
       HOURS: 'เปิดทุกวัน 08:00 - 19:00 น.',
-      LOGO_URL: 'https://raw.githubusercontent.com/umhomecar/logoimages/main/n.jpg',   // ใส่ได้ถ้าอยากใช้โลโก้คนละอัน (ไม่ใส่ = ใช้อันเดียวกับสาขาหลัก)
+      // LOGO_URL: '...',   // ใส่ได้ถ้าอยากใช้โลโก้คนละอัน (ไม่ใส่ = ใช้อันเดียวกับสาขาหลัก)
     },
     // เพิ่มอีกได้:  branch3: { SHOP_NAME:'...', LINE_URL:'...', PHONE:'...', ADDRESS:'...', MAP_URL:'...', HOURS:'...' },
   },
@@ -505,6 +509,7 @@ function renderGrid() {
     return '<button class="card" data-i="' + i + '"><div class="card-img">' +
       (cover ? '<img src="' + esc(cover) + '" alt="' + esc(carName(c)) + '" loading="lazy">' : '<div class="noimg">🚗</div>') +
       badgesHtml(c) +
+      ((c.tiktok_url && /^https?:\/\//i.test(c.tiktok_url)) ? '<span class="tik-pip" title="มีวิดีโอ TikTok">🎵</span>' : '') +
       (n > 1 ? '<span class="pics">📷 ' + n + '</span>' : '') +
       '</div><div class="card-bd"><div class="card-nm">' + esc(carName(c)) + '</div><div class="card-meta">' +
       (c.year ? '<span>📅 ' + esc(c.year) + '</span>' : '') +
@@ -620,6 +625,7 @@ function renderSheet() {
     '<div class="sh-bd">' + (c.is_hot ? '<span class="sh-hot">🔥 HOT</span>' : '') + '<div class="sh-nm">' + esc(carName(c)) + '</div><div class="sh-price">' + (baht(c.price) || 'สอบถามราคา') + (hasDiscount(c) ? '<s class="old">' + baht(c.original_price) + '</s>' : '') + '</div>' +
     (specs.length ? '<div class="specs">' + specs.map((p) => '<div class="spec"><span>' + p[0] + '</span><b>' + esc(p[1]) + '</b></div>').join('') + '</div>' : '') +
     (cleanDesc(c.description) ? '<div class="desc">' + esc(cleanDesc(c.description)) + '</div>' : '') +
+    ((c.tiktok_url && /^https?:\/\//i.test(c.tiktok_url)) ? '<a class="cta cta-tiktok" href="' + esc(c.tiktok_url) + '" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 3c.32 2.1 1.62 3.55 3.5 3.8v2.35c-1.16.05-2.32-.2-3.36-.78l-.02 5.6c0 2.96-2.2 5.23-5.06 5.23-2.85 0-5.06-2.27-5.06-5.18 0-2.93 2.27-5.2 5.13-5.2.27 0 .54.02.8.06v2.53a2.6 2.6 0 0 0-.86-.15c-1.46 0-2.6 1.18-2.6 2.7 0 1.5 1.14 2.66 2.6 2.66 1.46 0 2.62-1.13 2.62-2.6V3h2.37z"/></svg>🎵 ดูวิดีโอรถคันนี้ใน TikTok</a>' : '') +
     '<div class="cta-row"><button class="cta cta-line" data-line><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 5.64 2 10.1c0 4 3.55 7.34 8.35 7.97.32.07.77.21.88.49.1.25.07.64.03.9l-.14.86c-.04.25-.2 1 .87.54s5.79-3.41 7.9-5.84C21.3 13.5 22 11.88 22 10.1 22 5.64 17.52 2 12 2z"/></svg>สอบถาม LINE</button>' +
     '<button class="cta cta-call" data-call><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.5 21 3 13.5 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.2.2 2.4.6 3.6.1.4 0 .8-.2 1l-2.3 2.2z"/></svg>โทรเลย</button></div></div>';
   $('#shX').addEventListener('click', closeDetail);
