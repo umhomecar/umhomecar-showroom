@@ -11,8 +11,8 @@
 <meta property="og:title" content="อัมโฮมคาร์ · รถมือสองคุณภาพ">
 <meta property="og:description" content="รถมือสองคัดคุณภาพ พร้อมส่งมอบ · ดูรถทั้งหมด สอบถาม LINE/โทรได้เลย">
 <meta property="og:image" content="https://raw.githubusercontent.com/umhomecar/logoimages/main/og-cover.png">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
+<meta property="og:image:width" content="1250">
+<meta property="og:image:height" content="1250">
 <meta property="og:locale" content="th_TH">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="อัมโฮมคาร์ · รถมือสองคุณภาพ">
@@ -246,6 +246,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
           <option value="1000000-">1 ล้านขึ้นไป</option>
         </select>
         <select class="sort" id="sort">
+          <option value="random">🎲 สุ่ม (แนะนำ)</option>
           <option value="new">ใหม่ล่าสุด</option>
           <option value="plow">ราคาต่ำ → สูง</option>
           <option value="phigh">ราคาสูง → ต่ำ</option>
@@ -328,7 +329,7 @@ function lineCarUrl(c) {
   const msg = 'สนใจรถคันนี้ครับ/ค่ะ 🚗\n' + carName(c) + (c.year ? ' ปี ' + c.year : '') + (plate ? '\nทะเบียน ' + plate : '') + '\nราคา ' + (baht(c.price) || 'สอบถาม') + '\n(สอบถามจากหน้าเว็บโชว์รูม)';
   return 'https://line.me/R/oaMessage/' + id + '/?' + encodeURIComponent(msg);
 }
-let ALL = [], VIEW = [], brand = 'all', model = 'all', sort = 'new', query = '', page = 1, expanded = null, priceRange = 'all';
+let ALL = [], VIEW = [], brand = 'all', model = 'all', sort = 'random', query = '', page = 1, expanded = null, priceRange = 'all';
 const PAGE_SIZE = 40;
 let cur = null, curIdx = 0;
 let db = null, presenceChannel = null, liveCount = 0;
@@ -386,7 +387,7 @@ async function load() {
     db = supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
     const { data, error } = await db.from('public_cars').select('*').order('created_at', { ascending: false });
     if (error) throw error;
-    ALL = (data || []).map((c) => ({ ...c, images: Array.isArray(c.images) ? c.images : [] }));
+    ALL = (data || []).map((c) => ({ ...c, images: Array.isArray(c.images) ? c.images : [], _rnd: Math.random() }));
     apply();
     $('#tools').hidden = false;
     $('#heroCount').hidden = false;
@@ -473,7 +474,8 @@ function apply() {
   }
   if (sort === 'plow') r.sort((a, b) => (a.price ?? 9e15) - (b.price ?? 9e15));
   else if (sort === 'phigh') r.sort((a, b) => (b.price ?? -1) - (a.price ?? -1));
-  else r.sort((a, b) => (b.is_hot ? 1 : 0) - (a.is_hot ? 1 : 0));
+  else if (sort === 'new') r.sort((a, b) => (b.is_hot ? 1 : 0) - (a.is_hot ? 1 : 0));
+  else r.sort((a, b) => ((b.is_hot ? 1 : 0) - (a.is_hot ? 1 : 0)) || ((a._rnd ?? 0) - (b._rnd ?? 0)));
   VIEW = r;
   page = 1;
   updateActiveFilter();
