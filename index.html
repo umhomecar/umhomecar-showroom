@@ -134,6 +134,15 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
 .price{font-family:'Kanit',sans-serif;font-weight:700;font-size:1.32rem;color:var(--brand);line-height:1}
 .price small{font-family:'Sarabun';font-weight:400;font-size:.7rem;color:var(--muted);display:block}
 .card-go{font-size:.82rem;font-weight:600;color:var(--ink);background:var(--bg);padding:8px 13px;border-radius:10px;white-space:nowrap}
+.card-pricerow{margin-top:auto;padding-top:6px}
+.card-inst{font-size:.8rem;color:var(--muted);font-family:'Sarabun',sans-serif;margin-top:3px}
+.card-inst b{color:var(--ink);font-weight:700}
+.card-btn{display:flex;align-items:center;justify-content:center;gap:5px;font-family:'Kanit',sans-serif;font-weight:600;font-size:.86rem;padding:9px;border-radius:10px;cursor:pointer;text-decoration:none;border:none}
+.card-detail{width:100%;margin-top:2px;background:var(--bg);color:var(--ink);border:1.5px solid var(--line)}
+.card-contact{display:flex;gap:8px}
+.card-contact .card-btn{flex:1}
+.card-line{background:var(--green);color:#fff}
+.card-call{background:var(--ink);color:#fff}
 .card-cmp{width:100%;margin-top:10px;background:var(--bg);border:1.5px solid var(--line);color:var(--ink);font-family:'Kanit',sans-serif;font-weight:600;font-size:.84rem;padding:9px;border-radius:11px;cursor:pointer}
 .card-cmp.on{background:#fde9e4;border-color:var(--brand);color:var(--brand)}
 .state{max-width:1180px;margin:60px auto;padding:0 18px;text-align:center;color:var(--muted)}
@@ -636,12 +645,18 @@ function renderGrid() {
       '</div><div class="card-bd"><div class="card-nm">' + esc(carName(c)) + '</div><div class="card-meta">' +
       (c.year ? '<span>📅 ' + esc(c.year) + '</span>' : '') +
       (c.mileage ? '<span>🛣️ ' + esc(c.mileage) + '</span>' : '') +
-      '</div><div class="card-ft">' + priceHtml(c) +
-      '<span class="card-go">ดูรายละเอียด →</span></div>' +
+      '</div>' +
+      '<div class="card-pricerow">' + priceHtml(c) + (c.price ? '<div class="card-inst">ผ่อนเริ่มต้น <b>' + baht(calcMonthly(c.price, 0, 48)) + '</b> /เดือน</div>' : '') + '</div>' +
+      '<button class="card-btn card-detail">ดูรายละเอียด →</button>' +
+      '<div class="card-contact">' +
+      '<a class="card-btn card-line" href="' + esc(lineCarUrl(c)) + '" target="_blank" rel="noopener" data-stop>💬 LINE</a>' +
+      '<a class="card-btn card-call" href="tel:' + String(CONFIG.PHONE || '').replace(/[^0-9+]/g, '') + '" data-stop>📞 โทร</a>' +
+      '</div>' +
       '<button class="card-cmp' + (inCompare(c.id) ? ' on' : '') + '" data-cmp="' + esc(c.id) + '">' + (inCompare(c.id) ? '✓ อยู่ในรายการเปรียบเทียบ' : '⚖️ + เปรียบเทียบ') + '</button>' +
       '</div></div>';
   }).join('');
   $('#grid').querySelectorAll('.card').forEach((el) => el.addEventListener('click', () => openDetail(Number(el.dataset.i))));
+  $('#grid').querySelectorAll('[data-stop]').forEach((el) => el.addEventListener('click', (e) => e.stopPropagation()));
   $('#grid').querySelectorAll('[data-cmp]').forEach((b) => b.addEventListener('click', (e) => {
     e.stopPropagation();
     toggleCompare(b.dataset.cmp);
