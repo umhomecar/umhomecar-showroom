@@ -175,6 +175,16 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
 .fin-result b{font-family:'Kanit',sans-serif;font-size:1.8rem;font-weight:800;display:block;line-height:1.25}
 .fin-result small{font-size:.75rem;opacity:.92}
 .fin-note{font-size:.72rem;color:#8A8276;margin-top:9px;line-height:1.45}
+.sim{margin-bottom:16px}
+.sim-hd{font-family:'Kanit',sans-serif;font-weight:700;font-size:1.02rem;margin-bottom:10px}
+.sim-row{display:flex;gap:11px;overflow-x:auto;scrollbar-width:none;padding-bottom:4px;margin:0 -2px}
+.sim-row::-webkit-scrollbar{display:none}
+.sim-card{flex:0 0 142px;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;text-align:left;cursor:pointer;padding:0}
+.sim-card img,.sim-noimg{width:100%;height:94px;object-fit:cover;display:block;background:var(--bg)}
+.sim-noimg{display:grid;place-items:center;font-size:1.6rem}
+.sim-nm{font-family:'Kanit',sans-serif;font-weight:600;font-size:.82rem;color:var(--ink);padding:8px 9px 2px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sim-meta{font-size:.72rem;color:#8A8276;padding:0 9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sim-price{font-family:'Kanit',sans-serif;font-weight:700;color:var(--brand);font-size:.9rem;padding:3px 9px 9px}
 .cta-row{display:flex;gap:10px}
 .cta{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:8px;font-family:'Kanit';font-weight:600;font-size:1.05rem;padding:15px;border-radius:14px;transition:transform .12s}
 .cta:active{transform:scale(.97)}
@@ -396,6 +406,7 @@ function openCarById(id) {
   const c = ALL.find((x) => String(x.id) === String(id));
   if (!c) return;
   cur = c; curIdx = 0; renderSheet();
+  const sh = $('#sheet'); if (sh) sh.scrollTop = 0;
   $('#ov').classList.add('show'); document.body.style.overflow = 'hidden';
   countView(c);
 }
@@ -678,6 +689,36 @@ function wireFinance() {
   }));
   $('#sheet').querySelectorAll('.fin-term').forEach((b) => b.addEventListener('click', () => { calcTerm = Number(b.dataset.term); updateFinance(); }));
 }
+// รถใกล้เคียง: รุ่นเดียวกัน > ยี่ห้อเดียวกัน > ราคาใกล้กัน (±35%)
+function similarCars(c, limit) {
+  const price = Number(c.price) || 0;
+  const norm = (s) => String(s || '').trim().toLowerCase();
+  const list = ALL.filter((x) => String(x.id) !== String(c.id)).map((x) => {
+    let score = 0;
+    const sameModel = x.model && c.model && norm(x.model) === norm(c.model);
+    const sameBrand = x.brand && c.brand && norm(x.brand) === norm(c.brand);
+    if (sameModel) score += 1000;
+    if (sameBrand) score += 200;
+    let pdiff = 1;
+    if (price && x.price) { pdiff = Math.abs(Number(x.price) - price) / price; score += Math.max(0, 100 - pdiff * 200); }
+    return { x, score, sameBrand, pdiff };
+  }).filter((o) => o.sameBrand || o.pdiff <= 0.35);
+  list.sort((a, b) => b.score - a.score);
+  return list.slice(0, limit || 8).map((o) => o.x);
+}
+function similarHtml(c) {
+  const sim = similarCars(c, 8);
+  if (!sim.length) return '';
+  return '<div class="sim"><div class="sim-hd">🚗 รถใกล้เคียง</div><div class="sim-row">' +
+    sim.map((x) => {
+      const cover = (x.images && x.images[0]) || x.cover_image_url || '';
+      return '<button class="sim-card" data-sim="' + esc(x.id) + '">' +
+        (cover ? '<img src="' + esc(cover) + '" alt="" loading="lazy">' : '<div class="sim-noimg">🚗</div>') +
+        '<div class="sim-nm">' + esc(carName(x)) + '</div>' +
+        '<div class="sim-meta">' + (x.year ? esc(x.year) : '') + (x.mileage ? ' · ' + esc(x.mileage) : '') + '</div>' +
+        '<div class="sim-price">' + (baht(x.price) || 'สอบถาม') + '</div></button>';
+    }).join('') + '</div></div>';
+}
 function renderSheet() {
   const c = cur;
   calcDown = 0; calcTerm = (CONFIG.FINANCE && CONFIG.FINANCE.defaultTerm) || 48;
@@ -696,11 +737,13 @@ function renderSheet() {
     (cleanDesc(c.description) ? '<div class="desc">' + esc(cleanDesc(c.description)) + '</div>' : '') +
     financeHtml(c) +
     ((c.tiktok_url && /^https?:\/\//i.test(c.tiktok_url)) ? '<a class="cta cta-tiktok" href="' + esc(c.tiktok_url) + '" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 3c.32 2.1 1.62 3.55 3.5 3.8v2.35c-1.16.05-2.32-.2-3.36-.78l-.02 5.6c0 2.96-2.2 5.23-5.06 5.23-2.85 0-5.06-2.27-5.06-5.18 0-2.93 2.27-5.2 5.13-5.2.27 0 .54.02.8.06v2.53a2.6 2.6 0 0 0-.86-.15c-1.46 0-2.6 1.18-2.6 2.7 0 1.5 1.14 2.66 2.6 2.66 1.46 0 2.62-1.13 2.62-2.6V3h2.37z"/></svg>🎵 ดูวิดีโอรถคันนี้ใน TikTok</a>' : '') +
+    similarHtml(c) +
     '<div class="cta-row"><button class="cta cta-line" data-line><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 5.64 2 10.1c0 4 3.55 7.34 8.35 7.97.32.07.77.21.88.49.1.25.07.64.03.9l-.14.86c-.04.25-.2 1 .87.54s5.79-3.41 7.9-5.84C21.3 13.5 22 11.88 22 10.1 22 5.64 17.52 2 12 2z"/></svg>สอบถาม LINE</button>' +
     '<button class="cta cta-call" data-call><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.5 21 3 13.5 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.2.2 2.4.6 3.6.1.4 0 .8-.2 1l-2.3 2.2z"/></svg>โทรเลย</button></div></div>';
   $('#shX').addEventListener('click', closeDetail);
   $('#shShare').addEventListener('click', () => shareCar(cur));
   wireFinance();
+  $('#sheet').querySelectorAll('[data-sim]').forEach((b) => b.addEventListener('click', () => openCarById(b.dataset.sim)));
   const D = imgs.length;
   if (D > 1) {
     $('#shPrev').addEventListener('click', () => { curIdx = (curIdx - 1 + D) % D; gallery(D); });
