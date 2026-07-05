@@ -113,6 +113,10 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
 .pager button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
 .pager button:disabled{opacity:.38;cursor:default}
 .grid{max-width:1180px;margin:14px auto 90px;padding:0 18px;display:grid;grid-template-columns:repeat(auto-fill,minmax(248px,1fr));gap:18px}
+.sec-head{max-width:1180px;margin:26px auto 0;padding:0 18px;font-family:'Kanit',sans-serif;font-weight:700;font-size:1.3rem;color:var(--ink)}
+.sec-head-all{margin-top:30px}
+.featured{margin-bottom:6px}
+.featured .grid{margin:12px auto 0}
 .card{background:var(--card);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);cursor:pointer;transition:transform .16s ease,box-shadow .16s ease;display:flex;flex-direction:column;text-align:left;width:100%}
 .card:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg)}
 .card-img{position:relative;aspect-ratio:4/3;background:#efe9e0;overflow:hidden}
@@ -331,6 +335,8 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
       </div>
     </div>
   </div>
+  <section class="featured" id="featured" hidden></section>
+  <h2 class="sec-head sec-head-all" id="allHead" hidden>รถทั้งหมด</h2>
   <div class="grid" id="grid"></div>
   <div class="pager" id="pager"></div>
 </main>
@@ -609,6 +615,7 @@ function apply() {
   page = 1;
   updateActiveFilter();
   renderGrid();
+  renderFeatured();
 }
 function hasDiscount(c) { return c.original_price != null && c.price != null && Number(c.original_price) > Number(c.price); }
 function badgesHtml(c) {
@@ -622,6 +629,50 @@ function priceHtml(c) {
   if (hasDiscount(c)) return '<div class="price">' + cur + '<s class="old">' + baht(c.original_price) + '</s><small>ราคาพิเศษ</small></div>';
   return '<div class="price">' + cur + (c.price != null ? '<small>ราคา</small>' : '') + '</div>';
 }
+function cardHtml(c) {
+  const cover = c.cover_image_url || (c.images && c.images[0]) || '';
+  const n = c.images ? c.images.length : 0;
+  return '<div class="card" data-id="' + esc(c.id) + '"><div class="card-img">' +
+    (cover ? '<img src="' + esc(cover) + '" alt="' + esc(carName(c)) + '" loading="lazy">' : '<div class="noimg">🚗</div>') +
+    badgesHtml(c) +
+    ((c.tiktok_url && /^https?:\/\//i.test(c.tiktok_url)) ? '<span class="tik-pip" title="มีวิดีโอ TikTok">🎵</span>' : '') +
+    (n > 1 ? '<span class="pics">📷 ' + n + '</span>' : '') +
+    '</div><div class="card-bd"><div class="card-nm">' + esc(carName(c)) + '</div><div class="card-meta">' +
+    (c.year ? '<span>📅 ' + esc(c.year) + '</span>' : '') +
+    (c.mileage ? '<span>🛣️ ' + esc(c.mileage) + '</span>' : '') +
+    '</div>' +
+    '<div class="card-pricerow">' + priceHtml(c) + (c.price ? '<div class="card-inst">ผ่อนเริ่มต้น <b>' + baht(calcMonthly(c.price, 0, 48)) + '</b> /เดือน</div>' : '') + '</div>' +
+    '<button class="card-btn card-detail">ดูรายละเอียด →</button>' +
+    '<div class="card-contact">' +
+    '<a class="card-btn card-line" href="' + esc(lineCarUrl(c)) + '" target="_blank" rel="noopener" data-stop>💬 LINE</a>' +
+    '<a class="card-btn card-call" href="tel:' + String(CONFIG.PHONE || '').replace(/[^0-9+]/g, '') + '" data-stop>📞 โทร</a>' +
+    '</div>' +
+    '<button class="card-cmp' + (inCompare(c.id) ? ' on' : '') + '" data-cmp="' + esc(c.id) + '">' + (inCompare(c.id) ? '✓ อยู่ในรายการเปรียบเทียบ' : '⚖️ + เปรียบเทียบ') + '</button>' +
+    '</div></div>';
+}
+function wireCards(root) {
+  if (!root) return;
+  root.querySelectorAll('.card').forEach((el) => el.addEventListener('click', () => openCarById(el.dataset.id)));
+  root.querySelectorAll('[data-stop]').forEach((el) => el.addEventListener('click', (e) => e.stopPropagation()));
+  root.querySelectorAll('[data-cmp]').forEach((b) => b.addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleCompare(b.dataset.cmp);
+    const on = inCompare(b.dataset.cmp);
+    b.classList.toggle('on', on);
+    b.textContent = on ? '✓ อยู่ในรายการเปรียบเทียบ' : '⚖️ + เปรียบเทียบ';
+  }));
+}
+function renderFeatured() {
+  const sec = $('#featured'), ah = $('#allHead');
+  const noFilter = brand === 'all' && model === 'all' && priceRange === 'all' && !query && !onlyHot;
+  const hot = ALL.filter((c) => c.is_hot);
+  if (!sec) return;
+  if (!noFilter || hot.length < 2) { sec.hidden = true; sec.innerHTML = ''; if (ah) ah.hidden = true; return; }
+  sec.hidden = false;
+  sec.innerHTML = '<h2 class="sec-head">⭐ รถแนะนำประจำสัปดาห์</h2><div class="grid">' + hot.slice(0, 6).map((c) => cardHtml(c)).join('') + '</div>';
+  wireCards(sec);
+  if (ah) { ah.hidden = false; ah.textContent = 'รถทั้งหมด'; }
+}
 function renderGrid() {
   if (!VIEW.length) {
     $('#grid').innerHTML = '<div class="state" style="grid-column:1/-1"><div class="em">🔍</div><h3>ไม่พบรถที่ค้นหา</h3><p>ลองเปลี่ยนคำค้นหา หรือเลือกยี่ห้ออื่นดูครับ</p></div>';
@@ -633,37 +684,8 @@ function renderGrid() {
   if (page < 1) page = 1;
   const start = (page - 1) * PAGE_SIZE;
   const slice = VIEW.slice(start, start + PAGE_SIZE);
-  $('#grid').innerHTML = slice.map((c, idx) => {
-    const i = start + idx;
-    const cover = c.cover_image_url || (c.images && c.images[0]) || '';
-    const n = c.images ? c.images.length : 0;
-    return '<div class="card" data-i="' + i + '"><div class="card-img">' +
-      (cover ? '<img src="' + esc(cover) + '" alt="' + esc(carName(c)) + '" loading="lazy">' : '<div class="noimg">🚗</div>') +
-      badgesHtml(c) +
-      ((c.tiktok_url && /^https?:\/\//i.test(c.tiktok_url)) ? '<span class="tik-pip" title="มีวิดีโอ TikTok">🎵</span>' : '') +
-      (n > 1 ? '<span class="pics">📷 ' + n + '</span>' : '') +
-      '</div><div class="card-bd"><div class="card-nm">' + esc(carName(c)) + '</div><div class="card-meta">' +
-      (c.year ? '<span>📅 ' + esc(c.year) + '</span>' : '') +
-      (c.mileage ? '<span>🛣️ ' + esc(c.mileage) + '</span>' : '') +
-      '</div>' +
-      '<div class="card-pricerow">' + priceHtml(c) + (c.price ? '<div class="card-inst">ผ่อนเริ่มต้น <b>' + baht(calcMonthly(c.price, 0, 48)) + '</b> /เดือน</div>' : '') + '</div>' +
-      '<button class="card-btn card-detail">ดูรายละเอียด →</button>' +
-      '<div class="card-contact">' +
-      '<a class="card-btn card-line" href="' + esc(lineCarUrl(c)) + '" target="_blank" rel="noopener" data-stop>💬 LINE</a>' +
-      '<a class="card-btn card-call" href="tel:' + String(CONFIG.PHONE || '').replace(/[^0-9+]/g, '') + '" data-stop>📞 โทร</a>' +
-      '</div>' +
-      '<button class="card-cmp' + (inCompare(c.id) ? ' on' : '') + '" data-cmp="' + esc(c.id) + '">' + (inCompare(c.id) ? '✓ อยู่ในรายการเปรียบเทียบ' : '⚖️ + เปรียบเทียบ') + '</button>' +
-      '</div></div>';
-  }).join('');
-  $('#grid').querySelectorAll('.card').forEach((el) => el.addEventListener('click', () => openDetail(Number(el.dataset.i))));
-  $('#grid').querySelectorAll('[data-stop]').forEach((el) => el.addEventListener('click', (e) => e.stopPropagation()));
-  $('#grid').querySelectorAll('[data-cmp]').forEach((b) => b.addEventListener('click', (e) => {
-    e.stopPropagation();
-    toggleCompare(b.dataset.cmp);
-    const on = inCompare(b.dataset.cmp);
-    b.classList.toggle('on', on);
-    b.textContent = on ? '✓ อยู่ในรายการเปรียบเทียบ' : '⚖️ + เปรียบเทียบ';
-  }));
+  $('#grid').innerHTML = slice.map((c) => cardHtml(c)).join('');
+  wireCards($('#grid'));
   renderPager(pages);
 }
 function renderPager(pages) {
