@@ -215,11 +215,11 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
 .sim-price{font-family:'Kanit',sans-serif;font-weight:700;color:var(--brand);font-size:.9rem;padding:3px 9px 9px}
 .cmp-add{width:100%;margin-bottom:16px;background:#fff;color:var(--ink);border:1.5px solid var(--line)}
 .cmp-add.on{background:#fde9e4;color:var(--brand);border-color:var(--brand)}
-.cmp-bar{position:fixed;left:50%;bottom:20px;transform:translateX(-50%) translateY(24px);opacity:0;visibility:hidden;pointer-events:none;z-index:54;display:flex;gap:8px;align-items:center;background:var(--ink);color:#fff;padding:8px 8px 8px 18px;border-radius:999px;box-shadow:var(--shadow-lg);transition:opacity .25s,transform .25s,visibility .25s}
+.cmp-bar{position:fixed;left:50%;bottom:20px;transform:translateX(-50%) translateY(24px);opacity:0;visibility:hidden;pointer-events:none;z-index:54;display:flex;gap:8px;align-items:center;white-space:nowrap;max-width:calc(100vw - 28px);background:var(--ink);color:#fff;padding:8px 8px 8px 18px;border-radius:999px;box-shadow:var(--shadow-lg);transition:opacity .25s,transform .25s,visibility .25s}
 .cmp-bar.show{opacity:1;visibility:visible;pointer-events:auto;transform:translateX(-50%) translateY(0)}
-.cmp-bar-open{background:none;border:none;color:#fff;font-family:'Kanit',sans-serif;font-weight:700;font-size:.95rem;cursor:pointer}
-.cmp-bar-clear{background:rgba(255,255,255,.18);border:none;color:#fff;font-family:'Kanit',sans-serif;font-weight:600;font-size:.82rem;padding:8px 14px;border-radius:999px;cursor:pointer}
-@media(max-width:680px){.cmp-bar{bottom:calc(86px + env(safe-area-inset-bottom))}}
+.cmp-bar-open{background:none;border:none;color:#fff;font-family:'Kanit',sans-serif;font-weight:700;font-size:.95rem;cursor:pointer;white-space:nowrap;flex-shrink:1;overflow:hidden;text-overflow:ellipsis}
+.cmp-bar-clear{background:rgba(255,255,255,.18);border:none;color:#fff;font-family:'Kanit',sans-serif;font-weight:600;font-size:.82rem;padding:8px 14px;border-radius:999px;cursor:pointer;flex-shrink:0}
+@media(max-width:680px){.cmp-bar{bottom:calc(94px + env(safe-area-inset-bottom))}}
 .cmp-sheet{max-width:820px}
 #cmpOv{z-index:62}
 .cmp-hd{display:flex;align-items:center;justify-content:space-between;padding:18px 20px 12px}
@@ -669,7 +669,8 @@ function renderFeatured() {
   if (!sec) return;
   if (!noFilter || hot.length < 2) { sec.hidden = true; sec.innerHTML = ''; if (ah) ah.hidden = true; return; }
   sec.hidden = false;
-  sec.innerHTML = '<h2 class="sec-head">⭐ รถแนะนำประจำสัปดาห์</h2><div class="grid">' + hot.slice(0, 6).map((c) => cardHtml(c)).join('') + '</div>';
+  const feat = hot.slice().sort((a, b) => (a._rnd ?? 0) - (b._rnd ?? 0)).slice(0, 6);
+  sec.innerHTML = '<h2 class="sec-head">⭐ รถแนะนำประจำสัปดาห์</h2><div class="grid">' + feat.map((c) => cardHtml(c)).join('') + '</div>';
   wireCards(sec);
   if (ah) { ah.hidden = false; ah.textContent = 'รถทั้งหมด'; }
 }
@@ -860,7 +861,11 @@ function renderCompareBar() {
   $('#cmpCount').textContent = compareIds.length;
   bar.classList.toggle('show', compareIds.length >= 1);
 }
-function clearCompare() { compareIds = []; renderCompareBar(); }
+function clearCompare() { compareIds = []; renderCompareBar(); renderGrid(); renderFeatured(); syncDetailCmpBtn(); }
+function syncDetailCmpBtn() {
+  const b = $('#cmpAdd');
+  if (b && cur) { const on = inCompare(cur.id); b.classList.toggle('on', on); b.textContent = on ? '✓ อยู่ในรายการเปรียบเทียบ' : '⚖️ เพิ่มไปเปรียบเทียบ'; }
+}
 function compareBtnHtml(c) {
   const on = inCompare(c.id);
   return '<button class="cta cmp-add' + (on ? ' on' : '') + '" id="cmpAdd">' + (on ? '✓ อยู่ในรายการเปรียบเทียบ' : '⚖️ เพิ่มไปเปรียบเทียบ') + '</button>';
