@@ -76,10 +76,18 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
 .dr-models{display:none;background:#fff;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
 .dr-group.open .dr-models{display:block}
 .dr-model{padding-left:36px;font-size:.92rem}
+.dr-pop{padding-left:18px;font-weight:600;border-bottom:1px solid var(--line)}
 .dr-model>span{color:var(--muted);font-size:.82rem}
 .dr-model.on{color:var(--brand);font-weight:600;background:#fff7f4}
 @media(max-width:680px){.hd-actions{display:none}}
-.hero{max-width:1180px;margin:0 auto;padding:30px 18px 8px}
+.hero{max-width:1180px;margin:0 auto;padding:18px 18px 8px}
+.hero-cover{width:100%;aspect-ratio:16/6;background-size:cover;background-position:center;border-radius:16px;box-shadow:var(--shadow);margin-bottom:16px}
+@media(max-width:680px){.hero-cover{aspect-ratio:5/3}}
+.hero-stats{color:var(--muted);margin-top:8px;font-size:.95rem;line-height:1.5}
+.hero-cta{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:16px}
+.hero-btn{background:linear-gradient(100deg,var(--brand),var(--brand-2));color:#fff;border:none;font-family:'Kanit',sans-serif;font-weight:700;font-size:1rem;padding:12px 26px;border-radius:999px;cursor:pointer;box-shadow:var(--shadow)}
+.hero-btn:active{transform:scale(.97)}
+.hero-trust{color:var(--muted);font-size:.9rem;display:inline-flex;align-items:center;gap:5px}
 .hero h1{font-family:'Kanit',sans-serif;font-weight:700;font-size:clamp(1.7rem,5vw,2.6rem);line-height:1.12;letter-spacing:.3px}
 .hero h1 .accent{background:linear-gradient(100deg,var(--brand),var(--brand-2));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
 .hero p{color:var(--muted);margin-top:8px;font-size:1.02rem}
@@ -284,9 +292,13 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
 </header>
 <main id="app">
   <section class="hero">
-    <h1>รถมือสองคุณภาพ<br><span class="accent">คัดมาให้แล้ว</span> พร้อมส่งมอบ</h1>
-    <p>เลือกชมรถทั้งหมดของเรา · สนใจคันไหนทักได้เลย</p>
-    <div class="cnt" id="heroCount" hidden>🚗 มีรถ <b id="cntNum">0</b> คันให้เลือก</div>
+    <div class="hero-cover" id="heroCover" hidden></div>
+    <h1 id="heroHead">รถมือสองคุณภาพ</h1>
+    <p class="hero-stats" id="heroStats"></p>
+    <div class="hero-cta">
+      <button class="hero-btn" id="heroAll">ดูรถทั้งหมด →</button>
+      <span class="hero-trust" id="heroTrust" hidden></span>
+    </div>
   </section>
 
   <div class="tools" id="tools" hidden>
@@ -354,6 +366,15 @@ const CONFIG = {
 
   // 🎬 ช่อง TikTok ของร้าน (โชว์ในเมนู ☰)
   TIKTOK_CHANNEL: 'https://www.tiktok.com/@umhomecar',
+
+  // 🖼️ แบนเนอร์หน้าปก + ข้อความ Hero ({count} = จำนวนรถอัตโนมัติ)
+  HERO: {
+    cover: 'https://raw.githubusercontent.com/umhomecar/logoimages/main/og-cover.png',
+    headline: 'รถมือสองคุณภาพ ออกรถง่าย',
+    highlight: 'จองเพียง 99 บาท',
+    stats: 'ตรวจเช็ก {count} รายการ · ดอกเบี้ยเริ่มต้น 2.79% · ผ่อนสูงสุด 84 งวด',
+    trust: 'รับประกันคุณภาพทุกคัน',
+  },
 
   // 💳 เครื่องคำนวณค่างวด — แก้ดอกเบี้ย/ตัวเลือกได้ (rates = %ต่อปี ต่อจำนวนงวด)
   FINANCE: {
@@ -464,8 +485,11 @@ async function load() {
     ALL = (data || []).map((c) => ({ ...c, images: Array.isArray(c.images) ? c.images : [], _rnd: Math.random() }));
     apply();
     $('#tools').hidden = false;
-    $('#heroCount').hidden = false;
-    $('#cntNum').textContent = ALL.length;
+    const H = CONFIG.HERO || {};
+    if (H.cover) { const hc = $('#heroCover'); hc.style.backgroundImage = 'url("' + H.cover + '")'; hc.hidden = false; }
+    $('#heroHead').innerHTML = esc(H.headline || 'รถมือสองคุณภาพ') + (H.highlight ? ' <span class="accent">' + esc(H.highlight) + '</span>' : '');
+    $('#heroStats').textContent = String(H.stats || '').replace('{count}', ALL.length.toLocaleString('th-TH'));
+    if (H.trust) { const ht = $('#heroTrust'); ht.innerHTML = '🛡️ ' + esc(H.trust); ht.hidden = false; }
     const carParam = new URLSearchParams(location.search).get('car');
     if (carParam) openCarById(carParam);
     startPresence();
@@ -485,6 +509,10 @@ function buildDrawer() {
   const bc = {};
   ALL.forEach((c) => { const b = (c.brand || '').trim(); if (b) bc[b] = (bc[b] || 0) + 1; });
   const brands = Object.keys(bc).sort((a, b) => bc[b] - bc[a]);
+  const mCount = {};
+  ALL.forEach((c) => { const b = (c.brand || '').trim(), m = (c.model || '').trim(); if (!m) return; const k = b + '||' + m; (mCount[k] = mCount[k] || { brand: b, model: m, n: 0 }).n++; });
+  const popModels = Object.values(mCount).sort((a, b) => b.n - a.n).slice(0, 8);
+  const popHtml = popModels.map((p) => '<button class="dr-model dr-pop' + (brand === p.brand && model === p.model ? ' on' : '') + '" data-b="' + esc(p.brand) + '" data-m="' + esc(p.model) + '">🚗 ' + esc(p.model) + ' <span class="dr-meta">' + p.n + '</span></button>').join('');
   let h = '<div class="dr-cats">' +
     '<button class="dr-cat" data-cat="home">🏠 หน้าแรก</button>' +
     '<button class="dr-cat" data-cat="new">✨ รถเข้าใหม่</button>' +
@@ -492,7 +520,8 @@ function buildDrawer() {
     '<button class="dr-cat" data-cat="budget">💰 งบไม่เกิน 5 แสน</button>' +
     '</div>' +
     (CONFIG.TIKTOK_CHANNEL ? '<a class="dr-tiktok" href="' + esc(CONFIG.TIKTOK_CHANNEL) + '" target="_blank" rel="noopener">🎬 TikTok รีวิวรถ</a>' : '') +
-    '<div class="dr-section">ยี่ห้อ / รุ่นยอดนิยม</div>' +
+    '<div class="dr-section">รุ่นยอดนิยม</div>' + popHtml +
+    '<div class="dr-section">ทุกยี่ห้อ</div>' +
     '<button class="dr-all' + (brand === 'all' ? ' on' : '') + '" data-b="all">🚗 รถทั้งหมด <span class="dr-meta">' + ALL.length + '</span></button>';
   brands.forEach((b) => {
     const mc = {};
@@ -877,6 +906,7 @@ function renderSheet() {
 $('#ov').addEventListener('click', (e) => { if (e.target.id === 'ov') closeDetail(); });
 $('#statsOv').addEventListener('click', (e) => { if (e.target.id === 'statsOv') closeStats(); });
 $('#statsBtn').addEventListener('click', openStats);
+$('#heroAll').addEventListener('click', () => { const t = document.getElementById('tools') || document.getElementById('grid'); if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
 $('#cmpOpen').addEventListener('click', openCompare);
 $('#cmpClear').addEventListener('click', clearCompare);
 $('#cmpOv').addEventListener('click', (e) => { if (e.target.id === 'cmpOv') closeCompare(); });
