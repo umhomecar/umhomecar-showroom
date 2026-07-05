@@ -193,6 +193,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
 .cmp-bar-clear{background:rgba(255,255,255,.18);border:none;color:#fff;font-family:'Kanit',sans-serif;font-weight:600;font-size:.82rem;padding:8px 14px;border-radius:999px;cursor:pointer}
 @media(max-width:680px){.cmp-bar{bottom:calc(78px + env(safe-area-inset-bottom))}}
 .cmp-sheet{max-width:820px}
+#cmpOv{z-index:62}
 .cmp-hd{display:flex;align-items:center;justify-content:space-between;padding:18px 20px 12px}
 .cmp-hd h2{font-family:'Kanit',sans-serif;font-size:1.25rem;font-weight:700}
 .cmp-hd small{font-weight:400;color:#8A8276;font-size:.8rem}
@@ -787,7 +788,7 @@ function openCompare() {
   $('#cmpSheet').querySelectorAll('[data-open]').forEach((b) => b.addEventListener('click', () => { closeCompare(); openCarById(b.dataset.open); }));
   $('#cmpOv').classList.add('show'); document.body.style.overflow = 'hidden';
 }
-function closeCompare() { $('#cmpOv').classList.remove('show'); document.body.style.overflow = ''; }
+function closeCompare() { $('#cmpOv').classList.remove('show'); if (!$('#ov').classList.contains('show')) document.body.style.overflow = ''; }
 function renderSheet() {
   const c = cur;
   calcDown = 0; calcTerm = (CONFIG.FINANCE && CONFIG.FINANCE.defaultTerm) || 48;
@@ -815,10 +816,13 @@ function renderSheet() {
   wireFinance();
   const cmpAdd = $('#cmpAdd');
   if (cmpAdd) cmpAdd.addEventListener('click', () => {
+    const wasIn = inCompare(cur.id);
     toggleCompare(cur.id);
     const on = inCompare(cur.id);
     cmpAdd.classList.toggle('on', on);
     cmpAdd.textContent = on ? '✓ อยู่ในรายการเปรียบเทียบ' : '⚖️ เพิ่มไปเปรียบเทียบ';
+    // เพิ่งเพิ่มคัน แล้วมีครบ 2 คันขึ้นไป → เด้งหน้าเปรียบเทียบเลย (ไม่ต้องปิดหน้ารถ)
+    if (!wasIn && on && compareIds.length >= 2) openCompare();
   });
   $('#sheet').querySelectorAll('[data-sim]').forEach((b) => b.addEventListener('click', () => openCarById(b.dataset.sim)));
   const D = imgs.length;
