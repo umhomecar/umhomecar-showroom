@@ -155,7 +155,26 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
 .inst-row{display:flex;gap:8px;flex-wrap:wrap}
 .inst-row .it{background:var(--bg);border-radius:10px;padding:8px 12px;font-size:.86rem;font-weight:600}
 .inst-row .it b{color:var(--brand);font-family:'Kanit'}
-.desc{white-space:pre-wrap;background:#fff;border:1px solid var(--line);border-radius:13px;padding:14px 16px;font-size:.92rem;color:#4a463f;margin-bottom:16px;max-height:230px;overflow-y:auto}
+.desc{white-space:pre-wrap;background:#fff;border:1px solid var(--line);border-radius:13px;padding:14px 16px;font-size:.92rem;color:#4a463f;margin-bottom:16px}
+.finance{background:#fff;border:1px solid var(--line);border-radius:15px;padding:16px 16px 14px;margin-bottom:16px}
+.fin-hd{font-family:'Kanit',sans-serif;font-weight:700;font-size:1.02rem}
+.fin-hd small{display:block;font-weight:400;color:#8A8276;font-size:.75rem;margin-top:3px}
+.fin-label{display:block;font-size:.82rem;color:#6b6459;font-weight:600;margin:11px 0 5px}
+.fin-input{width:100%;border:1.5px solid var(--line);border-radius:11px;padding:11px 13px;font-size:1.05rem;font-family:'Sarabun',sans-serif;background:var(--bg);box-sizing:border-box}
+.fin-pcts{display:flex;gap:7px;margin-top:8px}
+.fin-pct{flex:1;border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:9px 4px;font-family:'Kanit',sans-serif;font-weight:600;font-size:.85rem;cursor:pointer;color:var(--ink)}
+.fin-pct:active{background:var(--bg)}
+.fin-terms{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px}
+.fin-term{border:1.5px solid var(--line);background:#fff;border-radius:11px;padding:9px 6px;cursor:pointer;text-align:center;font-family:'Kanit',sans-serif;color:var(--ink)}
+.fin-term b{display:block;font-size:.9rem;font-weight:700}
+.fin-term span{font-size:.73rem;color:#8A8276}
+.fin-term.on{border-color:var(--brand);background:#fde9e4}
+.fin-term.on span{color:var(--brand)}
+.fin-result{margin-top:14px;background:var(--brand);color:#fff;border-radius:13px;padding:14px;text-align:center}
+.fin-result>span{font-size:.82rem;opacity:.92;display:block}
+.fin-result b{font-family:'Kanit',sans-serif;font-size:1.8rem;font-weight:800;display:block;line-height:1.25}
+.fin-result small{font-size:.75rem;opacity:.92}
+.fin-note{font-size:.72rem;color:#8A8276;margin-top:9px;line-height:1.45}
 .cta-row{display:flex;gap:10px}
 .cta{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:8px;font-family:'Kanit';font-weight:600;font-size:1.05rem;padding:15px;border-radius:14px;transition:transform .12s}
 .cta:active{transform:scale(.97)}
@@ -289,6 +308,14 @@ const CONFIG = {
 
   // 🔑 ลิงก์ลับเปิดหน้าสถิติ + ตั้งเครื่องนี้เป็น "เจ้าของ" (ไม่ถูกนับ): เว็บคุณ.com/?stats=um2024
   OWNER_KEY: 'um2024',
+
+  // 💳 เครื่องคำนวณค่างวด — แก้ดอกเบี้ย/ตัวเลือกได้ (rates = %ต่อปี ต่อจำนวนงวด)
+  FINANCE: {
+    rates: { 48: 2.79, 60: 3.29, 72: 3.99, 84: 4.99 },
+    vat: 7,
+    downPercents: [10, 15, 20, 25],
+    defaultTerm: 48,
+  },
 
   // 🏢 สาขาเพิ่มเติม — สต๊อกรถเหมือนกันทุกสาขา ต่างแค่ข้อมูลติดต่อ
   //    ค่าด้านบน = สาขาหลัก (มาบยางพร) ใช้เมื่อเปิดเว็บปกติ ไม่มี ?b=
@@ -612,8 +639,48 @@ function gallery(d) {
   if ($('#shCount')) $('#shCount').textContent = (curIdx + 1) + '/' + d;
   document.querySelectorAll('.sh-thumbs img').forEach((t, k) => t.classList.toggle('on', k === curIdx));
 }
+let calcDown = 0, calcTerm = 48;
+function calcMonthly(price, down, term) {
+  const financed = Math.max(0, (Number(price) || 0) - (Number(down) || 0));
+  const rate = (CONFIG.FINANCE.rates[term] || 0) / 100;
+  const interest = financed * rate * (term / 12);
+  const interestVat = interest * (1 + (CONFIG.FINANCE.vat || 0) / 100);
+  return Math.round((financed + interestVat) / term);
+}
+function financeHtml(c) {
+  if (!c.price) return '';
+  const F = CONFIG.FINANCE;
+  const terms = Object.keys(F.rates).map(Number).sort((a, b) => a - b);
+  const monthly = calcMonthly(c.price, calcDown, calcTerm);
+  return '<div class="finance">' +
+    '<div class="fin-hd">💳 เครื่องคำนวณค่างวด <small>ดอกเบี้ยตามจำนวนงวด · รวม VAT ' + F.vat + '% (ประมาณการ)</small></div>' +
+    '<label class="fin-label">เงินดาวน์ (บาท)</label>' +
+    '<input id="finDown" class="fin-input" inputmode="numeric" value="" placeholder="0">' +
+    '<div class="fin-pcts">' + (F.downPercents || []).map((p) => '<button class="fin-pct" data-pct="' + p + '">' + p + '%</button>').join('') + '</div>' +
+    '<label class="fin-label">จำนวนงวด</label>' +
+    '<div class="fin-terms">' + terms.map((t) => '<button class="fin-term' + (t === calcTerm ? ' on' : '') + '" data-term="' + t + '"><b>' + t + ' งวด</b><span>' + F.rates[t] + '%</span></button>').join('') + '</div>' +
+    '<div class="fin-result"><span>ค่างวดประมาณการ</span><b id="finMonthly">' + baht(monthly) + '</b><small id="finTermLbl">/ เดือน · ผ่อน ' + calcTerm + ' งวด</small></div>' +
+    '<div class="fin-note">* เป็นเพียงประมาณการเบื้องต้น ยอดผ่อนจริงขึ้นกับผลอนุมัติของสถาบันการเงิน</div>' +
+    '</div>';
+}
+function updateFinance() {
+  const el = $('#finMonthly'); if (el) el.textContent = baht(calcMonthly(cur.price, calcDown, calcTerm));
+  const lbl = $('#finTermLbl'); if (lbl) lbl.textContent = '/ เดือน · ผ่อน ' + calcTerm + ' งวด';
+  $('#sheet').querySelectorAll('.fin-term').forEach((b) => b.classList.toggle('on', Number(b.dataset.term) === calcTerm));
+}
+function wireFinance() {
+  const dn = $('#finDown');
+  if (!dn) return;
+  dn.addEventListener('input', (e) => { calcDown = Number(String(e.target.value).replace(/[^0-9]/g, '')) || 0; updateFinance(); });
+  $('#sheet').querySelectorAll('.fin-pct').forEach((b) => b.addEventListener('click', () => {
+    calcDown = Math.round((cur.price || 0) * Number(b.dataset.pct) / 100);
+    dn.value = calcDown.toLocaleString('th-TH'); updateFinance();
+  }));
+  $('#sheet').querySelectorAll('.fin-term').forEach((b) => b.addEventListener('click', () => { calcTerm = Number(b.dataset.term); updateFinance(); }));
+}
 function renderSheet() {
   const c = cur;
+  calcDown = 0; calcTerm = (CONFIG.FINANCE && CONFIG.FINANCE.defaultTerm) || 48;
   const imgs = c.images && c.images.length ? c.images : (c.cover_image_url ? [c.cover_image_url] : []);
   const specs = [['ปีรถ', c.year], ['เลขไมล์', c.mileage], ['เครื่องยนต์', c.engine], ['เกียร์', c.gear]].filter((p) => p[1] != null && p[1] !== '');
   $('#sheet').innerHTML =
@@ -627,11 +694,13 @@ function renderSheet() {
     '<div class="sh-bd">' + (c.is_hot ? '<span class="sh-hot">🔥 HOT</span>' : '') + '<div class="sh-nm">' + esc(carName(c)) + '</div><div class="sh-price">' + (baht(c.price) || 'สอบถามราคา') + (hasDiscount(c) ? '<s class="old">' + baht(c.original_price) + '</s>' : '') + '</div>' +
     (specs.length ? '<div class="specs">' + specs.map((p) => '<div class="spec"><span>' + p[0] + '</span><b>' + esc(p[1]) + '</b></div>').join('') + '</div>' : '') +
     (cleanDesc(c.description) ? '<div class="desc">' + esc(cleanDesc(c.description)) + '</div>' : '') +
+    financeHtml(c) +
     ((c.tiktok_url && /^https?:\/\//i.test(c.tiktok_url)) ? '<a class="cta cta-tiktok" href="' + esc(c.tiktok_url) + '" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 3c.32 2.1 1.62 3.55 3.5 3.8v2.35c-1.16.05-2.32-.2-3.36-.78l-.02 5.6c0 2.96-2.2 5.23-5.06 5.23-2.85 0-5.06-2.27-5.06-5.18 0-2.93 2.27-5.2 5.13-5.2.27 0 .54.02.8.06v2.53a2.6 2.6 0 0 0-.86-.15c-1.46 0-2.6 1.18-2.6 2.7 0 1.5 1.14 2.66 2.6 2.66 1.46 0 2.62-1.13 2.62-2.6V3h2.37z"/></svg>🎵 ดูวิดีโอรถคันนี้ใน TikTok</a>' : '') +
     '<div class="cta-row"><button class="cta cta-line" data-line><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 5.64 2 10.1c0 4 3.55 7.34 8.35 7.97.32.07.77.21.88.49.1.25.07.64.03.9l-.14.86c-.04.25-.2 1 .87.54s5.79-3.41 7.9-5.84C21.3 13.5 22 11.88 22 10.1 22 5.64 17.52 2 12 2z"/></svg>สอบถาม LINE</button>' +
     '<button class="cta cta-call" data-call><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.5 21 3 13.5 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.2.2 2.4.6 3.6.1.4 0 .8-.2 1l-2.3 2.2z"/></svg>โทรเลย</button></div></div>';
   $('#shX').addEventListener('click', closeDetail);
   $('#shShare').addEventListener('click', () => shareCar(cur));
+  wireFinance();
   const D = imgs.length;
   if (D > 1) {
     $('#shPrev').addEventListener('click', () => { curIdx = (curIdx - 1 + D) % D; gallery(D); });
