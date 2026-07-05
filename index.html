@@ -295,10 +295,6 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
     <div class="hero-cover" id="heroCover" hidden></div>
     <h1 id="heroHead">รถมือสองคุณภาพ</h1>
     <p class="hero-stats" id="heroStats"></p>
-    <div class="hero-cta">
-      <button class="hero-btn" id="heroAll">ดูรถทั้งหมด →</button>
-      <span class="hero-trust" id="heroTrust" hidden></span>
-    </div>
   </section>
 
   <div class="tools" id="tools" hidden>
@@ -369,11 +365,11 @@ const CONFIG = {
 
   // 🖼️ แบนเนอร์หน้าปก + ข้อความ Hero ({count} = จำนวนรถอัตโนมัติ)
   HERO: {
-    cover: 'https://raw.githubusercontent.com/umhomecar/logoimages/main/450.png',
+    cover: '',
     headline: 'รถมือสองคุณภาพ ออกรถง่าย',
     highlight: 'จองเพียง 99 บาท',
-    stats: 'ตรวจเช็ก {count} รายการ · ดอกเบี้ยเริ่มต้น 2.79% · ผ่อนสูงสุด 84 งวด',
-    trust: 'รับประกันคุณภาพทุกคัน',
+    stats: 'ตรวจเช็ก {count} รายการ · ดอกเบี้ยเริ่มต้น 2.79% · ผ่อนสูงสุด 84 งวด · 🛡️ รับประกันคุณภาพทุกคัน',
+    trust: '',
   },
 
   // 💳 เครื่องคำนวณค่างวด — แก้ดอกเบี้ย/ตัวเลือกได้ (rates = %ต่อปี ต่อจำนวนงวด)
@@ -906,7 +902,6 @@ function renderSheet() {
 $('#ov').addEventListener('click', (e) => { if (e.target.id === 'ov') closeDetail(); });
 $('#statsOv').addEventListener('click', (e) => { if (e.target.id === 'statsOv') closeStats(); });
 $('#statsBtn').addEventListener('click', openStats);
-$('#heroAll').addEventListener('click', () => { const t = document.getElementById('tools') || document.getElementById('grid'); if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
 $('#cmpOpen').addEventListener('click', openCompare);
 $('#cmpClear').addEventListener('click', clearCompare);
 $('#cmpOv').addEventListener('click', (e) => { if (e.target.id === 'cmpOv') closeCompare(); });
