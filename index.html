@@ -62,6 +62,11 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
 .drawer-body{flex:1;overflow-y:auto;padding:6px 0 30px}
 .dr-all,.dr-brand,.dr-model{width:100%;text-align:left;display:flex;align-items:center;justify-content:space-between;gap:8px;font-family:'Sarabun',sans-serif;font-size:.98rem;color:var(--ink);padding:12px 18px;transition:background .12s}
 .dr-all{font-family:'Kanit',sans-serif;font-weight:600;border-bottom:1px solid var(--line)}
+.dr-cats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.dr-cat{background:var(--bg);border:1px solid var(--line);border-radius:11px;padding:11px 6px;font-family:'Kanit',sans-serif;font-weight:600;font-size:.84rem;color:var(--ink);cursor:pointer;text-align:center}
+.dr-cat:active{background:#efeae2}
+.dr-tiktok{display:flex;align-items:center;justify-content:center;gap:6px;background:#000;color:#fff;border-radius:11px;padding:11px;font-family:'Kanit',sans-serif;font-weight:600;font-size:.88rem;text-decoration:none;margin-bottom:15px}
+.dr-section{font-family:'Kanit',sans-serif;font-weight:700;font-size:.78rem;color:#8A8276;letter-spacing:.02em;margin:4px 0 9px;padding-left:2px}
 .dr-brand{font-weight:600}
 .dr-all:hover,.dr-brand:hover,.dr-model:hover{background:rgba(0,0,0,.04)}
 .dr-all.on,.dr-brand.on{color:var(--brand)}
@@ -121,6 +126,8 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
 .price{font-family:'Kanit',sans-serif;font-weight:700;font-size:1.32rem;color:var(--brand);line-height:1}
 .price small{font-family:'Sarabun';font-weight:400;font-size:.7rem;color:var(--muted);display:block}
 .card-go{font-size:.82rem;font-weight:600;color:var(--ink);background:var(--bg);padding:8px 13px;border-radius:10px;white-space:nowrap}
+.card-cmp{width:100%;margin-top:10px;background:var(--bg);border:1.5px solid var(--line);color:var(--ink);font-family:'Kanit',sans-serif;font-weight:600;font-size:.84rem;padding:9px;border-radius:11px;cursor:pointer}
+.card-cmp.on{background:#fde9e4;border-color:var(--brand);color:var(--brand)}
 .state{max-width:1180px;margin:60px auto;padding:0 18px;text-align:center;color:var(--muted)}
 .state .em{font-size:3rem;margin-bottom:10px}
 .state h3{font-family:'Kanit';color:var(--ink);margin-bottom:6px}
@@ -345,6 +352,9 @@ const CONFIG = {
   // 🔑 ลิงก์ลับเปิดหน้าสถิติ + ตั้งเครื่องนี้เป็น "เจ้าของ" (ไม่ถูกนับ): เว็บคุณ.com/?stats=um2024
   OWNER_KEY: 'um2024',
 
+  // 🎬 ช่อง TikTok ของร้าน (โชว์ในเมนู ☰)
+  TIKTOK_CHANNEL: 'https://www.tiktok.com/@umhomecar',
+
   // 💳 เครื่องคำนวณค่างวด — แก้ดอกเบี้ย/ตัวเลือกได้ (rates = %ต่อปี ต่อจำนวนงวด)
   FINANCE: {
     rates: { 48: 2.79, 60: 3.29, 72: 3.99, 84: 4.99 },
@@ -392,7 +402,7 @@ function lineCarUrl(c) {
   const msg = 'สนใจรถคันนี้ครับ/ค่ะ 🚗\n' + carName(c) + (c.year ? ' ปี ' + c.year : '') + (plate ? '\nทะเบียน ' + plate : '') + '\nราคา ' + (baht(c.price) || 'สอบถาม') + '\n(สอบถามจากหน้าเว็บโชว์รูม)';
   return 'https://line.me/R/oaMessage/' + id + '/?' + encodeURIComponent(msg);
 }
-let ALL = [], VIEW = [], brand = 'all', model = 'all', sort = 'random', query = '', page = 1, expanded = null, priceRange = 'all';
+let ALL = [], VIEW = [], brand = 'all', model = 'all', sort = 'random', query = '', page = 1, expanded = null, priceRange = 'all', onlyHot = false;
 const PAGE_SIZE = 40;
 let cur = null, curIdx = 0;
 let db = null, presenceChannel = null, liveCount = 0;
@@ -475,7 +485,15 @@ function buildDrawer() {
   const bc = {};
   ALL.forEach((c) => { const b = (c.brand || '').trim(); if (b) bc[b] = (bc[b] || 0) + 1; });
   const brands = Object.keys(bc).sort((a, b) => bc[b] - bc[a]);
-  let h = '<button class="dr-all' + (brand === 'all' ? ' on' : '') + '" data-b="all">🚗 รถทั้งหมด <span class="dr-meta">' + ALL.length + '</span></button>';
+  let h = '<div class="dr-cats">' +
+    '<button class="dr-cat" data-cat="home">🏠 หน้าแรก</button>' +
+    '<button class="dr-cat" data-cat="new">✨ รถเข้าใหม่</button>' +
+    '<button class="dr-cat" data-cat="hot">⭐ รถแนะนำ</button>' +
+    '<button class="dr-cat" data-cat="budget">💰 งบไม่เกิน 5 แสน</button>' +
+    '</div>' +
+    (CONFIG.TIKTOK_CHANNEL ? '<a class="dr-tiktok" href="' + esc(CONFIG.TIKTOK_CHANNEL) + '" target="_blank" rel="noopener">🎬 TikTok รีวิวรถ</a>' : '') +
+    '<div class="dr-section">ยี่ห้อ / รุ่นยอดนิยม</div>' +
+    '<button class="dr-all' + (brand === 'all' ? ' on' : '') + '" data-b="all">🚗 รถทั้งหมด <span class="dr-meta">' + ALL.length + '</span></button>';
   brands.forEach((b) => {
     const mc = {};
     ALL.filter((c) => (c.brand || '').trim() === b).forEach((c) => { const m = (c.model || '').trim(); if (m) mc[m] = (mc[m] || 0) + 1; });
@@ -492,6 +510,7 @@ function buildDrawer() {
   });
   const body = $('#drawerBody');
   body.innerHTML = h;
+  body.querySelectorAll('.dr-cat').forEach((btn) => btn.addEventListener('click', () => drawerCat(btn.dataset.cat)));
   body.querySelector('.dr-all').addEventListener('click', () => { brand = 'all'; model = 'all'; expanded = null; apply(); closeDrawer(); });
   body.querySelectorAll('.dr-brand').forEach((btn) => btn.addEventListener('click', () => {
     const b = btn.dataset.b;
@@ -507,6 +526,17 @@ function buildDrawer() {
 }
 function openDrawer() { expanded = (brand !== 'all' ? brand : null); buildDrawer(); $('#drawer').classList.add('show'); $('#drawerOv').classList.add('show'); document.body.style.overflow = 'hidden'; }
 function closeDrawer() { $('#drawer').classList.remove('show'); $('#drawerOv').classList.remove('show'); document.body.style.overflow = ''; }
+function drawerCat(cat) {
+  brand = 'all'; model = 'all'; query = ''; expanded = null; onlyHot = false; priceRange = 'all';
+  if (cat === 'new') sort = 'new';
+  else if (cat === 'hot') { onlyHot = true; sort = 'random'; }
+  else if (cat === 'budget') priceRange = '0-500000';
+  else sort = 'random';
+  const q = $('#q'); if (q) q.value = '';
+  const pr = $('#priceRange'); if (pr) pr.value = priceRange;
+  const so = $('#sort'); if (so) so.value = sort;
+  apply(); closeDrawer(); window.scrollTo({ top: 0, behavior: 'smooth' });
+}
 function updateActiveFilter() {
   const el = $('#activeFilter');
   if (brand === 'all') { el.hidden = true; el.innerHTML = ''; return; }
@@ -532,6 +562,7 @@ function apply() {
     const max = parts[1] ? Number(parts[1]) : Infinity;
     r = r.filter((c) => c.price != null && c.price >= min && c.price <= max);
   }
+  if (onlyHot) r = r.filter((c) => c.is_hot);
   if (query) {
     const q = query.toLowerCase();
     r = r.filter((c) => [c.brand, c.model, c.sub_model, c.year, c.price, c.engine, c.gear].filter(Boolean).join(' ').toLowerCase().includes(q));
@@ -572,7 +603,7 @@ function renderGrid() {
     const i = start + idx;
     const cover = c.cover_image_url || (c.images && c.images[0]) || '';
     const n = c.images ? c.images.length : 0;
-    return '<button class="card" data-i="' + i + '"><div class="card-img">' +
+    return '<div class="card" data-i="' + i + '"><div class="card-img">' +
       (cover ? '<img src="' + esc(cover) + '" alt="' + esc(carName(c)) + '" loading="lazy">' : '<div class="noimg">🚗</div>') +
       badgesHtml(c) +
       ((c.tiktok_url && /^https?:\/\//i.test(c.tiktok_url)) ? '<span class="tik-pip" title="มีวิดีโอ TikTok">🎵</span>' : '') +
@@ -581,9 +612,18 @@ function renderGrid() {
       (c.year ? '<span>📅 ' + esc(c.year) + '</span>' : '') +
       (c.mileage ? '<span>🛣️ ' + esc(c.mileage) + '</span>' : '') +
       '</div><div class="card-ft">' + priceHtml(c) +
-      '<span class="card-go">ดูรายละเอียด →</span></div></div></button>';
+      '<span class="card-go">ดูรายละเอียด →</span></div>' +
+      '<button class="card-cmp' + (inCompare(c.id) ? ' on' : '') + '" data-cmp="' + esc(c.id) + '">' + (inCompare(c.id) ? '✓ อยู่ในรายการเปรียบเทียบ' : '⚖️ + เปรียบเทียบ') + '</button>' +
+      '</div></div>';
   }).join('');
   $('#grid').querySelectorAll('.card').forEach((el) => el.addEventListener('click', () => openDetail(Number(el.dataset.i))));
+  $('#grid').querySelectorAll('[data-cmp]').forEach((b) => b.addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleCompare(b.dataset.cmp);
+    const on = inCompare(b.dataset.cmp);
+    b.classList.toggle('on', on);
+    b.textContent = on ? '✓ อยู่ในรายการเปรียบเทียบ' : '⚖️ + เปรียบเทียบ';
+  }));
   renderPager(pages);
 }
 function renderPager(pages) {
@@ -756,7 +796,7 @@ function toggleCompare(id) {
 function renderCompareBar() {
   const bar = $('#cmpBar'); if (!bar) return;
   $('#cmpCount').textContent = compareIds.length;
-  bar.classList.toggle('show', compareIds.length >= 2);
+  bar.classList.toggle('show', compareIds.length >= 1);
 }
 function clearCompare() { compareIds = []; renderCompareBar(); }
 function compareBtnHtml(c) {
