@@ -371,6 +371,272 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
 }
 @media(max-width:440px){.adv-grid,.form-grid{grid-template-columns:1fr}.detail-action-row{grid-template-columns:1fr}.form-field.full{grid-column:auto}}
 
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   UMHOME SHOWROOM — PREMIUM AUTOMOTIVE UI V2
+   เปลี่ยนเฉพาะหน้าตา/ประสบการณ์ใช้งาน โดยคงระบบข้อมูลเดิมทั้งหมด
+   ═══════════════════════════════════════════════════════════════════════════ */
+:root{
+  --bg:#F3F0EA;
+  --ink:#171715;
+  --muted:#746F66;
+  --line:#DED8CE;
+  --card:#FFFFFF;
+  --brand:#A52A20;
+  --brand-2:#C4A060;
+  --green:#06C755;
+  --shadow:0 1px 2px rgba(23,23,21,.035),0 12px 34px rgba(23,23,21,.07);
+  --shadow-lg:0 10px 30px rgba(23,23,21,.12),0 32px 80px rgba(23,23,21,.18);
+  --radius:16px;
+}
+body{
+  background:
+    radial-gradient(circle at 8% 0%,rgba(196,160,96,.09),transparent 28rem),
+    linear-gradient(180deg,#F7F5F1 0,#F3F0EA 25rem);
+  letter-spacing:.005em;
+}
+body::selection{background:rgba(165,42,32,.18)}
+
+/* Header */
+.hd{background:rgba(255,255,255,.92);border-bottom:1px solid rgba(23,23,21,.08);box-shadow:0 2px 18px rgba(23,23,21,.035)}
+.hd-in{max-width:1240px;padding:12px 22px;min-height:70px}
+.hd-logo{width:46px;height:46px;border-radius:12px;box-shadow:none;border:1px solid var(--line);padding:4px}
+.hd-name{font-size:1.2rem;color:var(--ink)}
+.hd-name small{color:var(--muted);margin-top:3px}
+.hd-menu{width:42px;height:42px;padding:0;display:grid;place-items:center;border:1px solid var(--line);border-radius:11px;font-size:1.25rem;background:#fff}
+.hd-menu:hover{background:#F4F1EC;border-color:#C8C0B5}
+.hd-actions{gap:9px}
+.hd-btn{min-height:40px;padding:9px 15px;border-radius:10px;font-family:'Kanit',sans-serif;font-weight:600;box-shadow:none}
+.hd-fav{background:#fff;border:1px solid var(--line);color:var(--ink)}
+.hd-fav-count{background:var(--brand);color:#fff;border-radius:99px;min-width:20px;height:20px;padding:0 6px;display:inline-grid;place-items:center;font-size:.72rem}
+.hd-line{border:1px solid var(--green)}
+.hd-call{background:#171715;border:1px solid #171715}
+
+/* Hero */
+.hero{max-width:1240px;min-height:350px;margin:22px auto 0;padding:62px 54px 54px;border-radius:26px;overflow:hidden;position:relative;background:linear-gradient(118deg,#151514 0%,#24221E 58%,#332D24 100%);color:#fff;box-shadow:0 24px 80px rgba(22,20,17,.18)}
+.hero::before{content:"";position:absolute;inset:auto -12% -55% auto;width:520px;height:520px;border-radius:50%;background:radial-gradient(circle,rgba(196,160,96,.24),transparent 67%);pointer-events:none}
+.hero::after{content:"UMHOME CAR";position:absolute;right:34px;bottom:-18px;font-family:'Kanit',sans-serif;font-weight:700;font-size:clamp(3.6rem,9vw,8rem);line-height:1;color:rgba(255,255,255,.025);letter-spacing:.04em;white-space:nowrap;pointer-events:none}
+.hero-cover{position:absolute;inset:0;width:auto;aspect-ratio:auto;border-radius:inherit;margin:0;opacity:.34;filter:saturate(.82) contrast(1.03);background-position:center;background-size:cover;box-shadow:none}
+.hero>h1,.hero>p,.hero>.hero-trust,.hero>.hero-cta{position:relative;z-index:2;max-width:760px}
+.hero h1{font-size:clamp(2.05rem,4.8vw,3.65rem);font-weight:700;line-height:1.08;letter-spacing:-.018em}
+.hero h1 .accent{background:linear-gradient(100deg,#F0D49D,#C4A060);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.hero-stats{color:rgba(255,255,255,.72);font-size:1.02rem;max-width:670px!important;margin-top:14px;line-height:1.65}
+.hero-trust{color:#F0D49D;margin-top:12px;font-size:.9rem}
+.hero-cta{gap:10px;margin-top:24px}
+.hero-action{min-height:46px;padding:11px 18px;border-radius:11px;background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.2);box-shadow:none;backdrop-filter:blur(8px)}
+.hero-action:hover{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.34)}
+.hero-action.primary{background:var(--brand);border:1px solid var(--brand);box-shadow:0 10px 24px rgba(165,42,32,.28)}
+.hero-action .count{background:rgba(255,255,255,.16)}
+.trust-strip{max-width:1180px;margin:-1px auto 6px;padding:17px 24px;background:#fff;border:1px solid var(--line);border-top:0;border-radius:0 0 18px 18px;display:grid;grid-template-columns:repeat(4,1fr);gap:12px;box-shadow:var(--shadow);position:relative;z-index:3}
+.trust-item{display:flex;align-items:center;gap:10px;min-width:0;color:#37342F;font-size:.88rem;font-weight:600}
+.trust-icon{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:#F4EFE6;color:var(--brand);font-family:'Kanit';font-size:.85rem;flex:none}
+
+/* Search and filters */
+.tools{max-width:1180px;margin:24px auto 0;top:78px;padding:0 18px}
+.tools-card{background:rgba(255,255,255,.95);border:1px solid var(--line);border-radius:20px;padding:15px;box-shadow:0 12px 42px rgba(23,23,21,.08);backdrop-filter:blur(14px)}
+.search input{min-height:52px;border:1px solid #D8D1C6;border-radius:13px;background:#F9F8F5;box-shadow:none;padding-left:48px;font-size:1rem}
+.search input:focus{background:#fff;border-color:var(--brand);box-shadow:0 0 0 4px rgba(165,42,32,.09)}
+.search .ic{opacity:.55}
+.row{margin-top:10px;gap:9px}
+.sort,.adv-toggle{min-height:40px;border:1px solid var(--line);border-radius:10px;background:#fff;padding:8px 13px;font-family:'Sarabun',sans-serif;font-weight:600}
+.sort:hover,.adv-toggle:hover{border-color:#B9AFA2}
+.adv-toggle.on{border-color:var(--brand);background:#FAF0EE;color:var(--brand)}
+.advanced{border-radius:14px;box-shadow:none;border-color:var(--line);background:#FBFAF8}
+.adv-field select,.adv-field input,.form-field input,.form-field select,.form-field textarea{border-radius:10px;background:#fff}
+.af-chip{border-radius:9px;background:#24231F;padding:8px 12px}
+.result-count{color:#4D4942}
+
+/* Sections and grid */
+.sec-head{max-width:1180px;margin-top:34px;padding:0 18px;font-size:1.45rem;letter-spacing:-.01em}
+.sec-head::before{width:4px;background:var(--brand)}
+.grid{max-width:1180px;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:18px;margin-top:15px}
+.featured .grid{margin-top:14px}
+
+/* Premium vehicle card */
+.card{border:1px solid rgba(23,23,21,.09);border-radius:17px;box-shadow:0 5px 22px rgba(23,23,21,.055);transition:transform .22s ease,box-shadow .22s ease,border-color .22s ease;background:#fff}
+.card:hover{transform:translateY(-5px);box-shadow:0 18px 42px rgba(23,23,21,.12);border-color:rgba(165,42,32,.22)}
+.card-img{aspect-ratio:16/10;background:#EAE6DF}
+.card-img img{transition:transform .55s cubic-bezier(.2,.8,.2,1)}
+.card:hover .card-img img{transform:scale(1.035)}
+.badges{left:12px;top:12px;flex-direction:row;gap:6px}
+.badges .hot,.badges .sale{font-size:.7rem;padding:5px 9px;border-radius:7px;box-shadow:none}
+.badges .hot{background:rgba(23,23,21,.88);backdrop-filter:blur(6px)}
+.badges .sale{background:#fff;color:var(--brand);border:0}
+.fav-btn{right:12px;top:12px;width:38px;height:38px;background:rgba(255,255,255,.92);border:1px solid rgba(23,23,21,.08);box-shadow:0 6px 18px rgba(23,23,21,.09);font-size:1rem}
+.fav-btn.on{color:var(--brand);background:#fff}
+.pics{right:12px!important;bottom:11px!important;background:rgba(23,23,21,.68)!important}
+.tik-pip{top:auto;right:auto;left:12px;bottom:11px;width:28px;height:28px;font-size:.76rem}
+.card-bd{padding:16px 16px 15px;gap:7px}
+.card-nm{font-size:1.05rem;min-height:2.55em;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.28}
+.card-meta{font-size:.82rem;color:#777168;border-bottom:1px solid #EEEAE4;padding-bottom:10px}
+.card-pricerow{padding-top:4px}
+.price{font-size:1.45rem;color:var(--brand);letter-spacing:-.01em}
+.price small{margin-top:3px}
+.price .old{font-size:.78rem}
+.card-inst{font-size:.81rem;margin-top:5px;color:#706A61}
+.card-inst b{color:#25231F}
+.card-detail{min-height:42px;margin-top:6px;background:#1D1C19;color:#fff;border:1px solid #1D1C19;border-radius:10px}
+.card-detail:hover{background:#302E29!important;border-color:#302E29!important;color:#fff!important}
+.card-contact{display:none!important}
+.card-cmp{width:auto;align-self:flex-start;margin-top:1px;padding:6px 0;border:0;background:transparent;color:#756F66;font-family:'Sarabun',sans-serif;font-size:.78rem;text-align:left}
+.card-cmp:hover,.card-cmp.on{background:transparent;border:0;color:var(--brand)}
+.owner-card-stats{border-radius:8px;background:#F7F3EC;border-color:#E5D8C5;color:#6A5640}
+
+/* Drawer */
+.drawer{background:#F7F5F1;width:330px}
+.drawer-hd{background:#fff;padding:19px 20px}
+.drawer-body{padding:14px}
+.dr-cats{gap:9px}
+.dr-cat,.dr-tiktok{border-radius:10px}
+.dr-section{margin-top:18px}
+.dr-all,.dr-brand,.dr-model{border-radius:9px;padding-left:12px;padding-right:12px}
+.dr-models{border:0;background:transparent;padding-left:8px}
+.dr-model.on{background:#F6EDEA}
+.drawer-foot{border-top-color:var(--line)}
+
+/* Detail modal */
+.ov{background:rgba(14,14,13,.72);backdrop-filter:blur(8px)}
+.sheet{background:#F7F5F1;box-shadow:0 40px 120px rgba(0,0,0,.34)}
+.sh-hero{background:#151515}
+.sh-hero img{object-fit:contain;background:#151515}
+.sh-x,.sh-share,.sh-nav{background:rgba(255,255,255,.94);box-shadow:0 6px 20px rgba(0,0,0,.14)}
+.sh-thumbs{background:#151515;padding:10px 14px}
+.sh-thumbs img{border-radius:7px;opacity:.55}
+.sh-thumbs img.on{border-color:#D6B674;opacity:1}
+.sh-bd{padding:25px 26px 28px}
+.sh-hot{border-radius:7px;background:#22211E;font-size:.74rem}
+.sh-nm{font-size:1.65rem;letter-spacing:-.012em}
+.sh-price{font-size:2.15rem;color:var(--brand);border-bottom:1px solid var(--line);padding-bottom:16px;margin-bottom:18px}
+.specs{gap:8px}
+.spec{border-radius:11px;background:#fff;border-color:var(--line);padding:11px 12px}
+.desc{border-radius:11px;background:#fff;line-height:1.7}
+.detail-action-row{grid-template-columns:1fr 1fr;gap:8px}
+.detail-action{border-radius:10px;background:#fff}
+.premium-cta-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:12px 0}
+.appointment-cta,.lead-cta{margin:0!important;min-height:48px;border-radius:11px;font-family:'Kanit',sans-serif;font-weight:700}
+.appointment-cta{background:#1D1C19;color:#fff;border:1px solid #1D1C19}
+.lead-cta{background:var(--brand);box-shadow:none}
+.cmp-add{border-radius:10px}
+.cta-row{position:sticky;bottom:-1px;z-index:3;background:linear-gradient(180deg,rgba(247,245,241,0),#F7F5F1 18%);padding-top:22px}
+.cta{border-radius:11px}
+
+/* Finance collapsible */
+.finance-accordion{margin:0 0 16px;border:1px solid var(--line);border-radius:13px;background:#fff;overflow:hidden}
+.finance-accordion>summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:15px 16px;cursor:pointer;font-family:'Kanit',sans-serif;font-weight:700;color:var(--ink)}
+.finance-accordion>summary::-webkit-details-marker{display:none}
+.finance-accordion>summary::after{content:"＋";width:28px;height:28px;border-radius:50%;background:#F2EEE7;display:grid;place-items:center;font-size:1rem;color:var(--brand);flex:none}
+.finance-accordion[open]>summary::after{content:"−"}
+.finance-accordion .finance{border:0;border-top:1px solid var(--line);border-radius:0;margin:0;padding:16px}
+.finance-accordion .fin-hd{display:none}
+.fin-input{border-radius:10px;background:#F8F6F2}
+.fin-pct,.fin-term{border-radius:9px}
+.fin-term.on{background:#F5E9E6;border-color:var(--brand)}
+.fin-result{background:#1D1C19;border-radius:11px}
+.fin-send{border-radius:10px}
+
+/* Similar, compare, forms */
+.sim-card,.rec-card,.cmp-col{border-radius:12px;box-shadow:none}
+.form-sheet{max-width:720px}
+.form-head{background:rgba(255,255,255,.96)}
+.form-submit{background:var(--brand);border-radius:10px}
+.form-choice .choice-btn{border-radius:10px}
+.cmp-bar{background:#1D1C19;border:1px solid rgba(255,255,255,.08)}
+.cmp-sheet{max-width:980px}
+.stats-sheet{background:#F7F5F1}
+
+/* Share menu */
+.share-menu-ov{position:fixed;inset:0;z-index:100;background:rgba(14,14,13,.62);backdrop-filter:blur(7px);display:grid;place-items:center;padding:18px}
+.share-panel{width:min(430px,100%);background:#fff;border-radius:18px;box-shadow:var(--shadow-lg);padding:20px;border:1px solid rgba(23,23,21,.08)}
+.share-panel-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px}
+.share-panel h3{font-family:'Kanit',sans-serif;font-size:1.2rem;margin:0}
+.share-panel p{color:var(--muted);font-size:.85rem;margin-bottom:15px}
+.share-close{width:36px;height:36px;border-radius:50%;background:#F3F0EA;font-size:1.05rem}
+.share-options{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.share-option{display:flex;align-items:center;justify-content:center;gap:8px;min-height:46px;border-radius:10px;text-decoration:none;border:1px solid var(--line);background:#fff;color:var(--ink);font-family:'Kanit',sans-serif;font-weight:600}
+.share-option.line{background:var(--green);color:#fff;border-color:var(--green)}
+.share-option.fb{background:#1877F2;color:#fff;border-color:#1877F2}
+.share-option.copy{grid-column:1/-1;background:#1D1C19;color:#fff;border-color:#1D1C19}
+
+/* Footer */
+.foot{padding:34px 18px 110px;color:#817B72}
+
+@media(min-width:900px){
+  .ov{align-items:center;padding:24px}
+  #ov .sheet{width:min(1180px,calc(100vw - 48px));height:min(88vh,860px);max-width:none;max-height:none;border-radius:22px;display:grid;grid-template-columns:minmax(0,1.22fr) minmax(390px,.78fr);grid-template-rows:minmax(0,1fr) auto;overflow:hidden}
+  #ov .sh-hero{grid-column:1;grid-row:1;aspect-ratio:auto;height:100%;min-height:0}
+  #ov .sh-thumbs{grid-column:1;grid-row:2;min-width:0}
+  #ov .sh-bd{grid-column:2;grid-row:1 / span 2;overflow-y:auto;min-height:0;background:#F7F5F1}
+}
+
+@media(max-width:899px){
+  .hero{margin-left:14px;margin-right:14px;padding:42px 30px;min-height:310px}
+  .trust-strip{margin-left:26px;margin-right:26px;grid-template-columns:1fr 1fr}
+}
+@media(max-width:680px){
+  body{background:#F5F2ED}
+  .hd-in{padding:9px 12px;min-height:62px;gap:9px}
+  .hd-logo{width:42px;height:42px}
+  .hd-name{font-size:1.02rem}
+  .hd-name small{display:none}
+  .hd-menu{width:38px;height:38px}
+  .hd-actions{display:flex;gap:6px}
+  .hd-fav{width:38px;padding:0;justify-content:center}
+  .hd-fav .fav-label{display:none}
+  .hd-line,.hd-call{display:none!important}
+  .hero{min-height:330px;margin-top:14px;padding:38px 22px 30px;border-radius:20px}
+  .hero::after{right:12px;font-size:4.4rem}
+  .hero h1{font-size:2.15rem}
+  .hero-stats{font-size:.9rem;line-height:1.55}
+  .hero-cta{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .hero-action{min-width:0!important;padding:10px 9px;font-size:.82rem}
+  .hero-action.primary{grid-column:1/-1}
+  .trust-strip{margin:0 20px 4px;padding:13px 14px;grid-template-columns:1fr 1fr;gap:9px;border-radius:0 0 14px 14px}
+  .trust-item{font-size:.74rem;gap:7px}
+  .trust-icon{width:25px;height:25px;border-radius:7px;font-size:.7rem}
+  .tools{top:63px;margin-top:18px;padding:0 12px}
+  .tools-card{padding:11px;border-radius:15px}
+  .search input{min-height:48px}
+  .row{display:grid;grid-template-columns:1fr 1fr}
+  .active-filter{grid-column:1/-1}
+  .sort{width:100%;min-width:0}
+  .filter-tools{display:grid;grid-template-columns:1fr auto auto}
+  .result-count{font-size:.76rem}
+  .adv-toggle{padding:8px 9px;font-size:.78rem}
+  .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:0 12px}
+  .sec-head{padding:0 13px;font-size:1.2rem;margin-top:28px}
+  .card{border-radius:13px}
+  .card-img{aspect-ratio:4/3}
+  .card-bd{padding:11px 11px 12px;gap:5px}
+  .card-nm{font-size:.87rem;min-height:2.45em}
+  .card-meta{font-size:.7rem;gap:4px;padding-bottom:7px}
+  .price{font-size:1.08rem}
+  .price .old{display:block;margin:3px 0 0;font-size:.68rem}
+  .card-inst{font-size:.68rem;line-height:1.35}
+  .card-detail{font-size:.76rem;min-height:37px;padding:7px 5px}
+  .card-cmp{font-size:.68rem;padding-bottom:0}
+  .fav-btn{width:32px;height:32px;right:8px;top:8px}
+  .badges{left:8px;top:8px}
+  .badges .hot,.badges .sale{padding:4px 6px;font-size:.61rem}
+  .pics{right:8px!important;bottom:7px!important;font-size:.62rem!important}
+  .tik-pip{left:8px;bottom:7px;width:24px;height:24px}
+  .owner-card-stats{font-size:.65rem;padding:5px 6px}
+  .sheet{border-radius:20px 20px 0 0}
+  .sh-bd{padding:20px 16px 22px}
+  .sh-nm{font-size:1.35rem}
+  .sh-price{font-size:1.8rem}
+  .premium-cta-grid{grid-template-columns:1fr}
+  .cta-row{bottom:0}
+  .share-options{grid-template-columns:1fr}
+  .share-option.copy{grid-column:auto}
+}
+@media(max-width:390px){
+  .grid{gap:8px;padding:0 9px}
+  .card-bd{padding:9px}
+  .card-nm{font-size:.82rem}
+  .hero h1{font-size:1.9rem}
+  .trust-strip{margin-left:14px;margin-right:14px}
+}
+
 </style>
 </head>
 <body>
@@ -393,10 +659,16 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
     <p class="hero-stats" id="heroStats"></p>
     <span class="hero-trust" id="heroTrust" hidden></span>
     <div class="hero-cta">
-      <button class="hero-action primary" id="guideBtn">🎯 ช่วยเลือกรถให้คุณ</button>
-      <button class="hero-action" id="heroFavBtn">❤️ รถที่บันทึกไว้ <span class="count" id="heroFavCount">0</span></button>
-      <button class="hero-action" id="globalLeadBtn">📞 ให้เซลส์ติดต่อกลับ</button>
+      <button class="hero-action primary" id="guideBtn">ช่วยเลือกรถให้คุณ</button>
+      <button class="hero-action" id="heroFavBtn">รถที่บันทึกไว้ <span class="count" id="heroFavCount">0</span></button>
+      <button class="hero-action" id="globalLeadBtn">ให้เซลส์ติดต่อกลับ</button>
     </div>
+  </section>
+  <section class="trust-strip" aria-label="บริการของอัมโฮมคาร์">
+    <div class="trust-item"><span class="trust-icon">01</span><span>คัดสภาพรถก่อนลงขาย</span></div>
+    <div class="trust-item"><span class="trust-icon">02</span><span>บริการจัดไฟแนนซ์</span></div>
+    <div class="trust-item"><span class="trust-icon">03</span><span>รับเทิร์นรถคันเดิม</span></div>
+    <div class="trust-item"><span class="trust-icon">04</span><span>พาช่างเข้าตรวจสอบได้</span></div>
   </section>
 
   <div class="tools" id="tools" hidden>
@@ -424,7 +696,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
       </div>
       <div class="filter-tools">
         <span class="result-count" id="resultCount"></span>
-        <button class="adv-toggle" id="advToggle">⚙️ ตัวกรองละเอียด <span id="advCount"></span></button>
+        <button class="adv-toggle" id="advToggle">ตัวกรองละเอียด <span id="advCount"></span></button>
         <button class="adv-toggle" id="resetAll">ล้างตัวกรอง</button>
       </div>
       <div class="advanced" id="advanced" hidden>
@@ -632,12 +904,17 @@ function startSettingsRealtime(){
 let toastT;
 function showToast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 2200); }
 function shareCar(c) {
-  const slug = slugify(carName(c) + '-' + (c.year || ''));
-  const direct = location.origin + location.pathname + '?car=' + encodeURIComponent(c.id) + (_branchKey ? '&b=' + encodeURIComponent(_branchKey) : '');
-  const url = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? direct : location.origin + '/api/car/' + slug + '?car=' + encodeURIComponent(c.id) + (_branchKey ? '&b=' + encodeURIComponent(_branchKey) : '');
-  if (navigator.share) { navigator.share({ title: carName(c), text: carName(c) + (c.price != null ? ' ราคา ' + baht(c.price) : ''), url }).catch(() => {}); }
-  else if (navigator.clipboard) { navigator.clipboard.writeText(url).then(() => showToast('คัดลอกลิงก์แล้ว ✓')).catch(() => showToast('ลิงก์: ' + url)); }
-  else showToast('ลิงก์: ' + url);
+  const old=document.querySelector('.share-menu-ov'); if(old)old.remove();
+  const url=location.origin+location.pathname+'?car='+encodeURIComponent(c.id)+(_branchKey?'&b='+encodeURIComponent(_branchKey):'');
+  const title=carName(c)+(c.year?' ปี '+c.year:'');
+  const ov=document.createElement('div');ov.className='share-menu-ov';
+  const lineUrl='https://line.me/R/msg/text/?'+encodeURIComponent(title+' '+(c.price!=null?'ราคา '+baht(c.price)+' ':'')+url);
+  const fbUrl='https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(url);
+  ov.innerHTML='<div class="share-panel"><div class="share-panel-head"><h3>แชร์รถคันนี้</h3><button class="share-close" aria-label="ปิด">✕</button></div><p>'+esc(title)+'</p><div class="share-options"><a class="share-option line" href="'+esc(lineUrl)+'" target="_blank" rel="noopener">LINE</a><a class="share-option fb" href="'+esc(fbUrl)+'" target="_blank" rel="noopener">Facebook</a>'+(navigator.share?'<button class="share-option" data-native>แชร์ผ่านแอป</button>':'')+'<button class="share-option copy" data-copy>คัดลอกลิงก์</button></div></div>';
+  document.body.appendChild(ov);
+  const close=()=>ov.remove();ov.addEventListener('click',e=>{if(e.target===ov)close();});ov.querySelector('.share-close').addEventListener('click',close);
+  const cp=ov.querySelector('[data-copy]');if(cp)cp.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(url);showToast('คัดลอกลิงก์แล้ว ✓');}catch(e){showToast('ไม่สามารถคัดลอกอัตโนมัติได้');}close();});
+  const nt=ov.querySelector('[data-native]');if(nt)nt.addEventListener('click',()=>navigator.share({title,text:title,url}).then(close).catch(()=>{}));
 }
 function openCarById(id) {
   const c = ALL.find((x) => String(x.id) === String(id));
@@ -984,7 +1261,7 @@ function renderFeatured() {
   if (!sec) return;
   if (!featuredCars.length) { sec.hidden = true; sec.innerHTML = ''; if (ah) ah.hidden = true; return; }
   sec.hidden = false;
-  sec.innerHTML = '<h2 class="sec-head">⭐ รถแนะนำประจำสัปดาห์</h2><div class="grid">' + featuredCars.map((c) => cardHtml(c)).join('') + '</div>';
+  sec.innerHTML = '<h2 class="sec-head">รถแนะนำประจำสัปดาห์</h2><div class="grid">' + featuredCars.map((c) => cardHtml(c)).join('') + '</div>';
   wireCards(sec);
   if (ah) { ah.hidden = false; ah.textContent = 'รถทั้งหมด'; }
 }
@@ -1107,15 +1384,15 @@ function calcMonthly(price, down, term) {
 function calcFinanceSummary(price,down,term){const financed=Math.max(0,(Number(price)||0)-(Number(down)||0)),monthly=calcMonthly(price,down,term);return{financed,monthly};}
 function financeHtml(c) {
   if(!c.price)return''; const F=CONFIG.FINANCE,terms=Object.keys(F.rates).map(Number).sort((a,b)=>a-b),sum=calcFinanceSummary(c.price,calcDown,calcTerm);
-  return '<div class="finance"><div class="fin-hd">💳 เครื่องคำนวณค่างวด <small>กรอกเงินดาวน์และงบผ่อนที่รับไหวได้เลย</small></div>'+ 
+  return '<details class="finance-accordion"><summary><span>คำนวณค่างวดรถคันนี้</span><small style="font-family:Sarabun;font-weight:500;color:var(--muted)">ดูยอดดาวน์และค่างวดโดยประมาณ</small></summary><div class="finance"><div class="fin-hd">เครื่องคำนวณค่างวด <small>กรอกเงินดาวน์และงบผ่อนที่รับไหวได้เลย</small></div>'+ 
     '<label class="fin-label">เงินดาวน์ (บาท)</label><input id="finDown" class="fin-input" inputmode="numeric" value="" placeholder="0">'+
-    '<div class="fin-pcts">'+(F.downPercents||[]).map(p=>'<button class="fin-pct" data-pct="'+p+'">'+p+'%</button>').join('')+'</div>'+
+    '<div class="fin-pcts">'+(F.downPercents||[]).map(p=>'<button class="fin-pct" data-pct="'+p+'">'+p+'%</button>').join('')+'</div>'+ 
     '<label class="fin-label">งบผ่อนที่รับไหวต่อเดือน (ไม่บังคับ)</label><input id="finBudget" class="fin-input" inputmode="numeric" value="" placeholder="เช่น 10,000">'+
-    '<label class="fin-label">จำนวนงวด</label><div class="fin-terms">'+terms.map(t=>'<button class="fin-term'+(t===calcTerm?' on':'')+'" data-term="'+t+'"><b>'+t+' งวด</b><span>'+F.rates[t]+'%</span></button>').join('')+'</div>'+
-    '<div class="fin-result"><span>ค่างวดประมาณการ</span><b id="finMonthly">'+baht(sum.monthly)+'</b><small id="finTermLbl">/ เดือน · ผ่อน '+calcTerm+' งวด</small></div>'+
-    '<div class="fin-breakdown"><div class="fin-mini"><span>ยอดจัดโดยประมาณ</span><b id="finFinanced">'+baht(sum.financed)+'</b></div></div>'+
-    '<div class="fin-budget-note" id="finBudgetNote"></div><button class="fin-send" id="finSend">ส่งผลคำนวณไป LINE</button>'+
-    '<div class="fin-note">* เป็นเพียงประมาณการเบื้องต้น ยอดจัด ดอกเบี้ย และค่างวดจริงขึ้นกับเงื่อนไขและผลอนุมัติของสถาบันการเงิน</div></div>';
+    '<label class="fin-label">จำนวนงวด</label><div class="fin-terms">'+terms.map(t=>'<button class="fin-term'+(t===calcTerm?' on':'')+'" data-term="'+t+'"><b>'+t+' งวด</b><span>'+F.rates[t]+'%</span></button>').join('')+'</div>'+ 
+    '<div class="fin-result"><span>ค่างวดประมาณการ</span><b id="finMonthly">'+baht(sum.monthly)+'</b><small id="finTermLbl">/ เดือน · ผ่อน '+calcTerm+' งวด</small></div>'+ 
+    '<div class="fin-breakdown"><div class="fin-mini"><span>ยอดจัดโดยประมาณ</span><b id="finFinanced">'+baht(sum.financed)+'</b></div></div>'+ 
+    '<div class="fin-budget-note" id="finBudgetNote"></div><button class="fin-send" id="finSend">ส่งผลคำนวณไป LINE</button>'+ 
+    '<div class="fin-note">* เป็นเพียงประมาณการเบื้องต้น ยอดจัด ดอกเบี้ย และค่างวดจริงขึ้นกับเงื่อนไขและผลอนุมัติของสถาบันการเงิน</div></div></details>';
 }
 function updateFinance(){const s=calcFinanceSummary(cur.price,calcDown,calcTerm);if($('#finMonthly'))$('#finMonthly').textContent=baht(s.monthly);if($('#finTermLbl'))$('#finTermLbl').textContent='/ เดือน · ผ่อน '+calcTerm+' งวด';if($('#finFinanced'))$('#finFinanced').textContent=baht(s.financed);const note=$('#finBudgetNote');if(note)note.textContent=calcBudget?(s.monthly<=calcBudget?'✅ อยู่ในงบผ่อนที่ระบุ':'⚠️ สูงกว่างบประมาณ '+baht(s.monthly-calcBudget)+' /เดือน'):'';$('#sheet').querySelectorAll('.fin-term').forEach(b=>b.classList.toggle('on',Number(b.dataset.term)===calcTerm));}
 function financeLineUrl(){const s=calcFinanceSummary(cur.price,calcDown,calcTerm),id=lineOaId(),msg='ขอประเมินไฟแนนซ์รถคันนี้ครับ/ค่ะ 🚗\n'+carName(cur)+(cur.year?' ปี '+cur.year:'')+'\nราคา '+baht(cur.price)+'\nดาวน์ '+baht(calcDown)+'\nผ่อน '+calcTerm+' งวด ประมาณ '+baht(s.monthly)+'/เดือน'+(calcBudget?'\nงบที่รับไหว '+baht(calcBudget)+'/เดือน':'')+'\n(คำนวณจากหน้าเว็บโชว์รูม)';return id&&id[0]==='@'?'https://line.me/R/oaMessage/'+id+'/?'+encodeURIComponent(msg):CONFIG.LINE_URL;}
@@ -1199,10 +1476,10 @@ function openCompare() {
 }
 function closeCompare() { $('#cmpOv').classList.remove('show'); if (!$('#ov').classList.contains('show')) document.body.style.overflow = ''; }
 
-function syncDetailFavorite(){const b=$('#detailFav');if(b&&cur){const on=isFavorite(cur.id);b.classList.toggle('on',on);b.textContent=on?'❤️ บันทึกไว้แล้ว':'🤍 บันทึกรถคันนี้';}}
+function syncDetailFavorite(){const b=$('#detailFav');if(b&&cur){const on=isFavorite(cur.id);b.classList.toggle('on',on);b.textContent=on?'♥ บันทึกไว้แล้ว':'♡ บันทึกรถคันนี้';}}
 function openGuide(pref={}) {
   const type=pref.type||'all',seats=Number(pref.seats||5);
-  $('#guideSheet').innerHTML='<div class="form-head"><h2>🎯 ช่วยเลือกรถให้คุณ</h2><button class="sh-x" id="guideX">✕</button></div><div class="form-body"><p class="form-intro">ตอบเพียง 4 ข้อ ระบบจะประเมินค่างวดสูงสุดจากรายได้ และคัดรถที่เหมาะสมโดยคำนวณที่ 84 งวด</p><div class="form-grid">'+
+  $('#guideSheet').innerHTML='<div class="form-head"><h2>ช่วยเลือกรถให้คุณ</h2><button class="sh-x" id="guideX">✕</button></div><div class="form-body"><p class="form-intro">ตอบเพียง 4 ข้อ ระบบจะประเมินค่างวดสูงสุดจากรายได้ และคัดรถที่เหมาะสมโดยคำนวณที่ 84 งวด</p><div class="form-grid">'+
   '<div class="form-field"><label>รายได้ต่อเดือน *</label><input id="gIncome" inputmode="numeric" placeholder="เช่น 15,000"></div><div class="form-field"><label>เงินดาวน์</label><input id="gDown" inputmode="numeric" placeholder="เช่น 50,000"></div>'+ 
   '<div class="form-field"><label>ประเภทรถที่ต้องการ</label><select id="gType"><option value="all">ยังไม่แน่ใจ</option><option value="sedan">รถเก๋ง</option><option value="hatchback">แฮตช์แบ็ก</option><option value="suv">SUV / ครอสโอเวอร์</option><option value="pickup">รถกระบะ</option><option value="mpv">MPV / รถตู้</option></select></div>'+ 
   '<div class="form-field"><label>ใช้งานกี่คน</label><select id="gPeople"><option value="2">1–2 คน</option><option value="5" '+(seats<=5?'selected':'')+'>3–5 คน</option><option value="7" '+(seats>=7?'selected':'')+'>6–7 คนขึ้นไป</option></select></div></div>'+ 
@@ -1238,9 +1515,23 @@ function runGuide(){
   }).join('')+'</div><div class="fin-note" style="margin-top:12px">ผลคำนวณเป็นการประเมินเบื้องต้น ยังไม่รวมเงื่อนไขด้านภาระหนี้ เครดิตบูโร อายุงาน และหลักเกณฑ์เฉพาะของบริษัทไฟแนนซ์ กรุณาให้เซลส์ตรวจสอบอีกครั้ง</div>';
   box.querySelectorAll('[data-rec]').forEach(b=>b.addEventListener('click',()=>{closeGuide();openCarById(b.dataset.rec);}));
 }
-function openLead(c=null){const title=c?carName(c)+(c.year?' ปี '+c.year:''):'ยังไม่ได้เลือกรถ';$('#leadSheet').innerHTML='<div class="form-head"><h2>📞 ให้เซลส์ติดต่อกลับ</h2><button class="sh-x" id="leadX">✕</button></div><div class="form-body"><p class="form-intro">รถที่สนใจ: <b>'+esc(title)+'</b><br>กรอกข้อมูลเพื่อให้ทีมงานช่วยประเมินยอดจัดและค่างวด</p><form id="leadForm"><div class="form-grid"><div class="form-field"><label>ชื่อ *</label><input id="leadName" maxlength="80" required></div><div class="form-field"><label>เบอร์โทร *</label><input id="leadPhone" inputmode="tel" maxlength="20" required></div><div class="form-field"><label>จังหวัด</label><input id="leadProvince" maxlength="80"></div><div class="form-field"><label>เงินดาวน์โดยประมาณ</label><input id="leadDown" inputmode="numeric"></div><div class="form-field"><label>งบผ่อนต่อเดือน</label><input id="leadBudget" inputmode="numeric"></div><div class="form-field"><label>มีรถเทิร์นหรือไม่</label><select id="leadTrade"><option value="no">ไม่มี</option><option value="yes">มีรถเทิร์น</option><option value="unsure">ยังไม่แน่ใจ</option></select></div><div class="form-field full"><label>รายละเอียดเพิ่มเติม</label><textarea id="leadNote" placeholder="เช่น สะดวกรับสายช่วงเวลาใด หรืออาชีพโดยคร่าว"></textarea></div></div><label class="consent"><input type="checkbox" id="leadConsent"> <span>ยินยอมให้ อัมโฮมคาร์ ใช้ข้อมูลนี้เพื่อติดต่อกลับ ให้ข้อมูลรถ และประเมินสินเชื่อเบื้องต้นเท่านั้น *</span></label><button class="form-submit" id="leadSubmit" type="submit">ส่งข้อมูลให้เซลส์</button></form></div>';$('#leadX').addEventListener('click',closeLead);$('#leadForm').addEventListener('submit',e=>submitLead(e,c));$('#leadOv').classList.add('show');document.body.style.overflow='hidden';}
+function openAppointment(c){
+  const today=new Date();today.setMinutes(today.getMinutes()-today.getTimezoneOffset());const minDate=today.toISOString().slice(0,10);
+  $('#leadSheet').innerHTML='<div class="form-head"><h2>นัดเข้ามาดูรถ</h2><button class="sh-x" id="leadX">✕</button></div><div class="form-body"><p class="form-intro">รถที่ต้องการนัดดู: <b>'+esc(carName(c)+(c.year?' ปี '+c.year:''))+'</b><br>เลือกวันและช่วงเวลาที่สะดวก ทีมงานจะโทรกลับเพื่อยืนยันนัดหมายอีกครั้ง</p><form id="appointmentForm"><div class="form-grid"><div class="form-field"><label>ชื่อ *</label><input id="apptName" maxlength="80" required></div><div class="form-field"><label>เบอร์โทร *</label><input id="apptPhone" inputmode="tel" maxlength="20" required></div><div class="form-field"><label>วันที่ต้องการเข้าดู *</label><input id="apptDate" type="date" min="'+minDate+'" required></div><div class="form-field"><label>ช่วงเวลาที่สะดวก *</label><select id="apptTime" required><option value="">เลือกช่วงเวลา</option><option>08:00 - 10:00 น.</option><option>10:00 - 12:00 น.</option><option>12:00 - 14:00 น.</option><option>14:00 - 16:00 น.</option><option>16:00 - 18:00 น.</option></select></div><div class="form-field full"><label>รายละเอียดเพิ่มเติม</label><textarea id="apptNote" placeholder="เช่น ต้องการทดลองขับ หรือเดินทางมาจากจังหวัดใด"></textarea></div></div><label class="consent"><input type="checkbox" id="apptConsent"> <span>ยินยอมให้ อัมโฮมคาร์ ใช้ข้อมูลนี้เพื่อติดต่อกลับและยืนยันนัดหมาย *</span></label><button class="form-submit" id="apptSubmit" type="submit">ส่งคำขอนัดดูรถ</button></form></div>';
+  $('#leadX').addEventListener('click',closeLead);$('#appointmentForm').addEventListener('submit',e=>submitAppointment(e,c));$('#leadOv').classList.add('show');document.body.style.overflow='hidden';
+}
+async function submitAppointment(e,c){
+  e.preventDefault();const name=$('#apptName').value.trim(),phone=$('#apptPhone').value.trim(),date=$('#apptDate').value,time=$('#apptTime').value,consent=$('#apptConsent').checked;
+  if(!name||phone.replace(/\D/g,'').length<9||!date||!time){showToast('กรุณากรอกข้อมูลนัดหมายให้ครบ');return;}if(!consent){showToast('กรุณายอมรับการให้ติดต่อกลับ');return;}
+  const extra=$('#apptNote').value.trim(),note='ขอนัดดูรถ\nวันที่ '+date+'\nเวลา '+time+(extra?'\nรายละเอียด: '+extra:'');
+  const payload={car_id:String(c.id),car_name:carName(c)+(c.year?' ปี '+c.year:''),customer_name:name,phone,province:null,down_payment:null,monthly_budget:null,has_trade_in:'unsure',note,consent:true,branch_key:_branchKey||null,source_url:location.href,status:'new'};
+  const btn=$('#apptSubmit');btn.disabled=true;btn.textContent='กำลังส่ง…';
+  try{const{error}=await db.from('showroom_leads').insert(payload);if(error)throw error;$('#leadSheet').innerHTML='<div class="form-head"><h2>รับคำขอนัดหมายแล้ว</h2><button class="sh-x" id="leadX">✕</button></div><div class="form-body"><div class="lead-success"><div class="em">✓</div><h3>ทีมงานจะโทรกลับเพื่อยืนยันนัด</h3><p>วันและเวลาจะถือว่ายืนยันเมื่อทีมงานติดต่อกลับเรียบร้อยแล้ว</p><button class="form-submit" id="leadLine">ทัก LINE เพิ่มเติม</button></div></div>';$('#leadX').addEventListener('click',closeLead);$('#leadLine').addEventListener('click',()=>window.open(leadLineUrl(payload),'_blank'));}
+  catch(err){showToast('ยังบันทึกไม่ได้ กำลังเปิด LINE ให้แทน');window.open(leadLineUrl(payload),'_blank');btn.disabled=false;btn.textContent='ส่งคำขอนัดดูรถ';}
+}
+function openLead(c=null){const title=c?carName(c)+(c.year?' ปี '+c.year:''):'ยังไม่ได้เลือกรถ';$('#leadSheet').innerHTML='<div class="form-head"><h2>ให้เซลส์ติดต่อกลับ</h2><button class="sh-x" id="leadX">✕</button></div><div class="form-body"><p class="form-intro">รถที่สนใจ: <b>'+esc(title)+'</b><br>กรอกข้อมูลเพื่อให้ทีมงานช่วยประเมินยอดจัดและค่างวด</p><form id="leadForm"><div class="form-grid"><div class="form-field"><label>ชื่อ *</label><input id="leadName" maxlength="80" required></div><div class="form-field"><label>เบอร์โทร *</label><input id="leadPhone" inputmode="tel" maxlength="20" required></div><div class="form-field"><label>จังหวัด</label><input id="leadProvince" maxlength="80"></div><div class="form-field"><label>เงินดาวน์โดยประมาณ</label><input id="leadDown" inputmode="numeric"></div><div class="form-field"><label>งบผ่อนต่อเดือน</label><input id="leadBudget" inputmode="numeric"></div><div class="form-field"><label>มีรถเทิร์นหรือไม่</label><select id="leadTrade"><option value="no">ไม่มี</option><option value="yes">มีรถเทิร์น</option><option value="unsure">ยังไม่แน่ใจ</option></select></div><div class="form-field full"><label>รายละเอียดเพิ่มเติม</label><textarea id="leadNote" placeholder="เช่น สะดวกรับสายช่วงเวลาใด หรืออาชีพโดยคร่าว"></textarea></div></div><label class="consent"><input type="checkbox" id="leadConsent"> <span>ยินยอมให้ อัมโฮมคาร์ ใช้ข้อมูลนี้เพื่อติดต่อกลับ ให้ข้อมูลรถ และประเมินสินเชื่อเบื้องต้นเท่านั้น *</span></label><button class="form-submit" id="leadSubmit" type="submit">ส่งข้อมูลให้เซลส์</button></form></div>';$('#leadX').addEventListener('click',closeLead);$('#leadForm').addEventListener('submit',e=>submitLead(e,c));$('#leadOv').classList.add('show');document.body.style.overflow='hidden';}
 function closeLead(){$('#leadOv').classList.remove('show');document.body.style.overflow=($('#ov').classList.contains('show')||$('#guideOv').classList.contains('show'))?'hidden':'';}
-function leadLineUrl(payload){const id=lineOaId(),msg='ขอให้เซลส์ติดต่อกลับครับ/ค่ะ 📞\nชื่อ '+payload.customer_name+'\nโทร '+payload.phone+(payload.province?'\nจังหวัด '+payload.province:'')+(payload.car_name?'\nสนใจ '+payload.car_name:'')+(payload.down_payment?'\nดาวน์ประมาณ '+baht(payload.down_payment):'')+(payload.monthly_budget?'\nงบผ่อน '+baht(payload.monthly_budget)+'/เดือน':'')+'\nรถเทิร์น: '+(payload.has_trade_in==='yes'?'มี':payload.has_trade_in==='unsure'?'ยังไม่แน่ใจ':'ไม่มี');return id&&id[0]==='@'?'https://line.me/R/oaMessage/'+id+'/?'+encodeURIComponent(msg):CONFIG.LINE_URL;}
+function leadLineUrl(payload){const id=lineOaId(),msg='ขอให้เซลส์ติดต่อกลับครับ/ค่ะ 📞\nชื่อ '+payload.customer_name+'\nโทร '+payload.phone+(payload.province?'\nจังหวัด '+payload.province:'')+(payload.car_name?'\nสนใจ '+payload.car_name:'')+(payload.down_payment?'\nดาวน์ประมาณ '+baht(payload.down_payment):'')+(payload.monthly_budget?'\nงบผ่อน '+baht(payload.monthly_budget)+'/เดือน':'')+'\nรถเทิร์น: '+(payload.has_trade_in==='yes'?'มี':payload.has_trade_in==='unsure'?'ยังไม่แน่ใจ':'ไม่มี')+(payload.note?'\n\n'+payload.note:'');return id&&id[0]==='@'?'https://line.me/R/oaMessage/'+id+'/?'+encodeURIComponent(msg):CONFIG.LINE_URL;}
 async function submitLead(e,c){e.preventDefault();const name=$('#leadName').value.trim(),phone=$('#leadPhone').value.trim(),consent=$('#leadConsent').checked;if(!name||phone.replace(/\D/g,'').length<9){showToast('กรุณากรอกชื่อและเบอร์โทรให้ครบ');return;}if(!consent){showToast('กรุณายอมรับการให้ติดต่อกลับ');return;}const payload={car_id:c?String(c.id):null,car_name:c?carName(c)+(c.year?' ปี '+c.year:''):null,customer_name:name,phone,province:$('#leadProvince').value.trim()||null,down_payment:approxNumber($('#leadDown').value)||null,monthly_budget:approxNumber($('#leadBudget').value)||null,has_trade_in:$('#leadTrade').value,note:$('#leadNote').value.trim()||null,consent:true,branch_key:_branchKey||null,source_url:location.href,status:'new'};const btn=$('#leadSubmit');btn.disabled=true;btn.textContent='กำลังส่ง…';try{const{error}=await db.from('showroom_leads').insert(payload);if(error)throw error;$('#leadSheet').innerHTML='<div class="form-head"><h2>ส่งข้อมูลสำเร็จ</h2><button class="sh-x" id="leadX">✕</button></div><div class="form-body"><div class="lead-success"><div class="em">✅</div><h3>ทีมงานได้รับข้อมูลแล้วครับ</h3><p>เซลส์จะติดต่อกลับตามเบอร์ที่แจ้งไว้</p><button class="form-submit" id="leadLine">ทัก LINE เพิ่มเติม</button></div></div>';$('#leadX').addEventListener('click',closeLead);$('#leadLine').addEventListener('click',()=>window.open(leadLineUrl(payload),'_blank'));}catch(err){showToast('ยังบันทึกเข้าระบบไม่ได้ กำลังเปิด LINE ให้แทน');window.open(leadLineUrl(payload),'_blank');btn.disabled=false;btn.textContent='ส่งข้อมูลให้เซลส์';}}
 function renderSheet() {
   const c = cur;
@@ -1259,8 +1550,8 @@ function renderSheet() {
     (specs.length ? '<div class="specs">' + specs.map((p) => '<div class="spec"><span>' + p[0] + '</span><b>' + esc(p[1]) + '</b></div>').join('') + '</div>' : '') +
     (cleanDesc(c.description) ? '<div class="desc">' + esc(cleanDesc(c.description)) + '</div>' : '') +
     financeHtml(c) +
-    '<div class="detail-action-row"><button class="detail-action' + (isFavorite(c.id)?' on':'') + '" id="detailFav">' + (isFavorite(c.id)?'❤️ บันทึกไว้แล้ว':'🤍 บันทึกรถคันนี้') + '</button><button class="detail-action" id="detailGuide">🎯 หารถแบบนี้เพิ่ม</button></div>' +
-    '<button class="cta lead-cta" id="leadBtn">📞 ให้เซลส์ประเมินยอดจัดให้</button>' +
+    '<div class="detail-action-row"><button class="detail-action' + (isFavorite(c.id)?' on':'') + '" id="detailFav">' + (isFavorite(c.id)?'♥ บันทึกไว้แล้ว':'♡ บันทึกรถคันนี้') + '</button><button class="detail-action" id="detailGuide">ดูรถใกล้เคียง</button></div>' +
+    '<div class="premium-cta-grid"><button class="appointment-cta" id="appointmentBtn">นัดเข้ามาดูรถ</button><button class="cta lead-cta" id="leadBtn">ให้เซลส์ประเมินยอดจัด</button></div>' +
     compareBtnHtml(c) +
     ((c.tiktok_url && /^https?:\/\//i.test(c.tiktok_url)) ? '<a class="cta cta-tiktok" href="' + esc(c.tiktok_url) + '" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 3c.32 2.1 1.62 3.55 3.5 3.8v2.35c-1.16.05-2.32-.2-3.36-.78l-.02 5.6c0 2.96-2.2 5.23-5.06 5.23-2.85 0-5.06-2.27-5.06-5.18 0-2.93 2.27-5.2 5.13-5.2.27 0 .54.02.8.06v2.53a2.6 2.6 0 0 0-.86-.15c-1.46 0-2.6 1.18-2.6 2.7 0 1.5 1.14 2.66 2.6 2.66 1.46 0 2.62-1.13 2.62-2.6V3h2.37z"/></svg>🎵 ดูวิดีโอรถคันนี้ใน TikTok</a>' : '') +
     similarHtml(c) +
@@ -1271,6 +1562,7 @@ function renderSheet() {
   wireFinance();
   const detailFav=$('#detailFav'); if(detailFav)detailFav.addEventListener('click',()=>toggleFavorite(cur.id));
   const detailGuide=$('#detailGuide'); if(detailGuide)detailGuide.addEventListener('click',()=>{closeDetail();openGuide({type:cur._type,seats:cur._seats});});
+  const appointmentBtn=$('#appointmentBtn'); if(appointmentBtn)appointmentBtn.addEventListener('click',()=>openAppointment(cur));
   const leadBtn=$('#leadBtn'); if(leadBtn)leadBtn.addEventListener('click',()=>openLead(cur));
   const cmpAdd = $('#cmpAdd');
   if (cmpAdd) cmpAdd.addEventListener('click', () => {

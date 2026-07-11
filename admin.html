@@ -20,6 +20,35 @@
 .lead-toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.lead-toolbar input,.lead-toolbar select{border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:10px 11px}.lead-toolbar input{flex:1;min-width:190px}.lead-list{display:grid;gap:10px}.lead{background:#fff;border:1px solid var(--line);border-radius:15px;padding:14px;box-shadow:0 4px 16px rgba(28,26,23,.05)}.lead-top{display:flex;gap:9px;align-items:flex-start}.lead-name{font-family:'Kanit';font-weight:700}.lead-time{color:var(--muted);font-size:.75rem}.lead-status{margin-left:auto;border:1px solid var(--line);border-radius:9px;padding:7px 8px;background:#fff;font-weight:600}.lead-info{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:10px}.lead-info div{background:var(--bg);border-radius:9px;padding:8px 9px}.lead-info span{display:block;color:var(--muted);font-size:.7rem}.lead-info b{font-size:.84rem}.lead-note{margin-top:9px;font-size:.84rem;color:#4b4740;white-space:pre-wrap}.lead-actions{display:flex;gap:7px;margin-top:10px}.lead-actions a,.lead-actions button{flex:1;text-align:center;border:0;border-radius:9px;padding:9px;text-decoration:none;font-family:'Kanit';font-weight:600;cursor:pointer}.call{background:var(--ink);color:#fff}.line{background:var(--green);color:#fff}.danger{background:#fff0ee;color:#b42318}.empty{text-align:center;color:var(--muted);padding:35px 10px}.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(15px);opacity:0;pointer-events:none;background:var(--ink);color:#fff;border-radius:999px;padding:11px 18px;font-family:'Kanit';font-weight:600;transition:.2s;z-index:50}.toast.show{opacity:1;transform:translateX(-50%)}
 .stats-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}.stats-summary>div{background:var(--bg);border:1px solid var(--line);border-radius:13px;padding:12px}.stats-summary span{display:block;color:var(--muted);font-size:.75rem}.stats-summary b{display:block;font-family:'Kanit';font-size:1.45rem;margin-top:2px}.stats-toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.stats-toolbar input,.stats-toolbar select{border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:10px 11px}.stats-toolbar input{flex:1;min-width:210px}.stats-table{display:grid;gap:8px}.stats-head,.stats-row{display:grid;grid-template-columns:minmax(250px,1fr) 100px 100px 100px 100px;gap:8px;align-items:center}.stats-head{color:var(--muted);font-size:.75rem;font-weight:700;padding:0 10px}.stats-row{background:#fff;border:1px solid var(--line);border-radius:13px;padding:9px 10px;text-decoration:none;color:var(--ink);transition:.15s}.stats-row:hover{border-color:var(--brand);transform:translateY(-1px)}.stats-car{display:flex;align-items:center;gap:10px;min-width:0}.stats-car img,.stats-noimg{width:68px;height:50px;object-fit:cover;border-radius:9px;background:var(--bg);flex:none}.stats-noimg{display:grid;place-items:center}.stats-car-name{font-family:'Kanit';font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.stats-car-id{font-size:.72rem;color:var(--muted)}.stats-num{text-align:center;font-family:'Kanit';font-weight:700}.stats-num small{display:block;color:var(--muted);font-family:'Sarabun';font-weight:400;font-size:.68rem}.stats-note{color:var(--muted);font-size:.78rem;margin-top:9px}
 @media(max-width:700px){.grid{grid-template-columns:1fr}.full{grid-column:auto}.header-title small{display:none}.header-actions .home-label{display:none}.wrap{padding:14px}.card{padding:15px}.lead-info{grid-template-columns:1fr 1fr}.savebar .primary{max-width:none}.savebar{flex-direction:column}.notice{text-align:center}.lead-top{flex-wrap:wrap}.lead-status{margin-left:0}.stats-summary{grid-template-columns:1fr 1fr}.stats-head{display:none}.stats-row{grid-template-columns:1fr 1fr;gap:7px}.stats-car{grid-column:1/-1}.stats-num{background:var(--bg);border-radius:9px;padding:7px 4px}.stats-toolbar input{min-width:100%;}}
+
+/* UMHOME ADMIN — PREMIUM UI V2 */
+:root{--bg:#F2EFE9;--card:#fff;--ink:#171715;--muted:#746F66;--line:#DDD6CB;--brand:#A52A20;--green:#06C755;--gold:#C4A060;--shadow:0 10px 35px rgba(23,23,21,.075)}
+body{background:radial-gradient(circle at 4% 0%,rgba(196,160,96,.1),transparent 28rem),var(--bg)}
+.login-card{border-radius:18px;padding:30px;border-color:rgba(23,23,21,.1);box-shadow:0 24px 80px rgba(23,23,21,.13)}
+.logo{border-radius:13px;border:1px solid var(--line);padding:5px}
+.login h1{font-size:1.55rem;letter-spacing:-.01em}
+.field input,.field textarea,.field select{background:#FAF9F6;border-radius:10px}
+.primary{border-radius:10px;background:var(--brand);min-height:44px}
+.header{background:rgba(23,23,21,.96);border-bottom:0;color:#fff;box-shadow:0 8px 28px rgba(0,0,0,.14)}
+.header-in{max-width:1180px;min-height:70px;padding:12px 22px}
+.header img{border-radius:10px;background:#fff;padding:3px}
+.header-title small{color:rgba(255,255,255,.6)}
+.header .ghost{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.15);color:#fff;border-radius:9px}
+.wrap{max-width:1180px;padding:24px 20px 50px}
+.tabs{background:#fff;border:1px solid var(--line);border-radius:13px;padding:5px;gap:4px;box-shadow:0 7px 24px rgba(23,23,21,.055)}
+.tab{border:0;border-radius:9px;background:transparent;padding:10px 15px;color:#625D55}
+.tab.on{background:#1D1C19;color:#fff}
+.card{border-radius:15px;border-color:rgba(23,23,21,.09);box-shadow:0 8px 28px rgba(23,23,21,.055);padding:21px}
+.card h2{font-size:1.25rem}
+.savebar{background:linear-gradient(180deg,rgba(242,239,233,0),rgba(242,239,233,.98) 30%);padding-top:24px}
+.lead,.stats-row{border-radius:12px;box-shadow:none}
+.lead:hover,.stats-row:hover{border-color:rgba(165,42,32,.35)}
+.stats-summary>div{background:#F8F6F2;border-radius:11px}
+.stats-summary b{color:var(--brand)}
+.stats-row{padding:10px 12px}
+.toast{background:#1D1C19;border-radius:10px}
+@media(max-width:700px){.header-in{padding:10px 13px}.wrap{padding:15px 12px 36px}.tabs{border-radius:11px}.tab{padding:9px 12px}.card{padding:15px}.stats-summary>div{padding:11px}}
+
 </style>
 </head>
 <body>
