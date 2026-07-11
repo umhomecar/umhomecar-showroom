@@ -357,7 +357,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
 .lead-success .em{font-size:3rem}
 .lead-success h3{font-family:'Kanit',sans-serif;font-size:1.25rem;margin:7px 0}
 .lead-success p{color:var(--muted)}
-.fin-breakdown{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.fin-breakdown{display:grid;grid-template-columns:1fr;gap:8px;margin-top:10px}
 .fin-mini{background:var(--bg);border-radius:10px;padding:9px 11px}
 .fin-mini span{display:block;color:var(--muted);font-size:.72rem}
 .fin-mini b{font-family:'Kanit',sans-serif;font-size:.92rem}
@@ -1104,7 +1104,7 @@ function calcMonthly(price, down, term) {
   const rate=(CONFIG.FINANCE.rates[term]||0)/100, interest=financed*rate*(term/12), interestVat=interest*(1+(CONFIG.FINANCE.vat||0)/100);
   return Math.round((financed+interestVat)/term);
 }
-function calcFinanceSummary(price,down,term){const financed=Math.max(0,(Number(price)||0)-(Number(down)||0)),monthly=calcMonthly(price,down,term),total=monthly*term+Number(down||0);return{financed,monthly,total};}
+function calcFinanceSummary(price,down,term){const financed=Math.max(0,(Number(price)||0)-(Number(down)||0)),monthly=calcMonthly(price,down,term);return{financed,monthly};}
 function financeHtml(c) {
   if(!c.price)return''; const F=CONFIG.FINANCE,terms=Object.keys(F.rates).map(Number).sort((a,b)=>a-b),sum=calcFinanceSummary(c.price,calcDown,calcTerm);
   return '<div class="finance"><div class="fin-hd">💳 เครื่องคำนวณค่างวด <small>กรอกเงินดาวน์และงบผ่อนที่รับไหวได้เลย</small></div>'+ 
@@ -1113,11 +1113,11 @@ function financeHtml(c) {
     '<label class="fin-label">งบผ่อนที่รับไหวต่อเดือน (ไม่บังคับ)</label><input id="finBudget" class="fin-input" inputmode="numeric" value="" placeholder="เช่น 10,000">'+
     '<label class="fin-label">จำนวนงวด</label><div class="fin-terms">'+terms.map(t=>'<button class="fin-term'+(t===calcTerm?' on':'')+'" data-term="'+t+'"><b>'+t+' งวด</b><span>'+F.rates[t]+'%</span></button>').join('')+'</div>'+
     '<div class="fin-result"><span>ค่างวดประมาณการ</span><b id="finMonthly">'+baht(sum.monthly)+'</b><small id="finTermLbl">/ เดือน · ผ่อน '+calcTerm+' งวด</small></div>'+
-    '<div class="fin-breakdown"><div class="fin-mini"><span>ยอดจัดโดยประมาณ</span><b id="finFinanced">'+baht(sum.financed)+'</b></div><div class="fin-mini"><span>ยอดชำระรวมโดยประมาณ</span><b id="finTotal">'+baht(sum.total)+'</b></div></div>'+
+    '<div class="fin-breakdown"><div class="fin-mini"><span>ยอดจัดโดยประมาณ</span><b id="finFinanced">'+baht(sum.financed)+'</b></div></div>'+
     '<div class="fin-budget-note" id="finBudgetNote"></div><button class="fin-send" id="finSend">ส่งผลคำนวณไป LINE</button>'+
     '<div class="fin-note">* เป็นเพียงประมาณการเบื้องต้น ยอดจัด ดอกเบี้ย และค่างวดจริงขึ้นกับเงื่อนไขและผลอนุมัติของสถาบันการเงิน</div></div>';
 }
-function updateFinance(){const s=calcFinanceSummary(cur.price,calcDown,calcTerm);if($('#finMonthly'))$('#finMonthly').textContent=baht(s.monthly);if($('#finTermLbl'))$('#finTermLbl').textContent='/ เดือน · ผ่อน '+calcTerm+' งวด';if($('#finFinanced'))$('#finFinanced').textContent=baht(s.financed);if($('#finTotal'))$('#finTotal').textContent=baht(s.total);const note=$('#finBudgetNote');if(note)note.textContent=calcBudget?(s.monthly<=calcBudget?'✅ อยู่ในงบผ่อนที่ระบุ':'⚠️ สูงกว่างบประมาณ '+baht(s.monthly-calcBudget)+' /เดือน'):'';$('#sheet').querySelectorAll('.fin-term').forEach(b=>b.classList.toggle('on',Number(b.dataset.term)===calcTerm));}
+function updateFinance(){const s=calcFinanceSummary(cur.price,calcDown,calcTerm);if($('#finMonthly'))$('#finMonthly').textContent=baht(s.monthly);if($('#finTermLbl'))$('#finTermLbl').textContent='/ เดือน · ผ่อน '+calcTerm+' งวด';if($('#finFinanced'))$('#finFinanced').textContent=baht(s.financed);const note=$('#finBudgetNote');if(note)note.textContent=calcBudget?(s.monthly<=calcBudget?'✅ อยู่ในงบผ่อนที่ระบุ':'⚠️ สูงกว่างบประมาณ '+baht(s.monthly-calcBudget)+' /เดือน'):'';$('#sheet').querySelectorAll('.fin-term').forEach(b=>b.classList.toggle('on',Number(b.dataset.term)===calcTerm));}
 function financeLineUrl(){const s=calcFinanceSummary(cur.price,calcDown,calcTerm),id=lineOaId(),msg='ขอประเมินไฟแนนซ์รถคันนี้ครับ/ค่ะ 🚗\n'+carName(cur)+(cur.year?' ปี '+cur.year:'')+'\nราคา '+baht(cur.price)+'\nดาวน์ '+baht(calcDown)+'\nผ่อน '+calcTerm+' งวด ประมาณ '+baht(s.monthly)+'/เดือน'+(calcBudget?'\nงบที่รับไหว '+baht(calcBudget)+'/เดือน':'')+'\n(คำนวณจากหน้าเว็บโชว์รูม)';return id&&id[0]==='@'?'https://line.me/R/oaMessage/'+id+'/?'+encodeURIComponent(msg):CONFIG.LINE_URL;}
 function wireFinance(){const dn=$('#finDown'),bg=$('#finBudget');if(!dn)return;dn.addEventListener('input',e=>{calcDown=Number(String(e.target.value).replace(/[^0-9]/g,''))||0;updateFinance();});if(bg)bg.addEventListener('input',e=>{calcBudget=Number(String(e.target.value).replace(/[^0-9]/g,''))||0;updateFinance();});$('#sheet').querySelectorAll('.fin-pct').forEach(b=>b.addEventListener('click',()=>{calcDown=Math.round((cur.price||0)*Number(b.dataset.pct)/100);dn.value=calcDown.toLocaleString('th-TH');updateFinance();}));$('#sheet').querySelectorAll('.fin-term').forEach(b=>b.addEventListener('click',()=>{calcTerm=Number(b.dataset.term);updateFinance();}));const send=$('#finSend');if(send)send.addEventListener('click',()=>window.open(financeLineUrl(),'_blank'));}
 // รถใกล้เคียง: รุ่นเดียวกัน > ยี่ห้อเดียวกัน > ราคาใกล้กัน (±35%)
