@@ -637,6 +637,146 @@ body::selection{background:rgba(165,42,32,.18)}
   .trust-strip{margin-left:14px;margin-right:14px}
 }
 
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SHOWROOM UI V3 — SOFT LIGHT PREMIUM
+   ปรับโทนให้สว่างขึ้น สดขึ้น และแก้ปุ่มรถโปรดด้านบน
+   ═══════════════════════════════════════════════════════════════════════════ */
+:root{
+  --bg:#F4F8FC;
+  --ink:#1F2937;
+  --muted:#64748B;
+  --line:#DCE7F3;
+  --card:#FFFFFF;
+  --brand:#2F80ED;
+  --brand-2:#22C7D6;
+  --green:#22C55E;
+  --price:#EF5B3F;
+  --shadow:0 8px 22px rgba(15,23,42,.06);
+  --shadow-lg:0 18px 50px rgba(15,23,42,.16);
+  --radius:16px;
+}
+body{
+  background:
+    radial-gradient(circle at 100% 0%, rgba(34,199,214,.10), transparent 20rem),
+    radial-gradient(circle at 0% 6%, rgba(47,128,237,.10), transparent 18rem),
+    linear-gradient(180deg,#F8FBFF 0,#F4F8FC 13rem,#EEF5FC 100%);
+  color:var(--ink);
+}
+.hd{
+  background:rgba(255,255,255,.92);
+  border-bottom:1px solid #E7EEF8;
+  backdrop-filter:blur(14px);
+}
+.hd-in{padding:11px 18px}
+.hd-logo{background:#fff;border:1px solid #E7EEF8;box-shadow:0 8px 22px rgba(47,128,237,.08)}
+.hd-name{color:var(--ink)}
+.hd-name small{color:var(--muted)}
+.hd-menu{width:42px;height:42px;display:grid;place-items:center;border:1px solid #E4ECF6;background:#fff;border-radius:12px;color:#334155}
+.hd-menu:hover{background:#F8FBFF}
+.hd-actions{gap:10px}
+.hd-btn{border-radius:14px;border:1px solid #E3ECF7;background:#fff;box-shadow:none}
+.hd-line{background:#22C55E;border-color:#22C55E;color:#fff}
+.hd-call{background:#0F172A;border-color:#0F172A;color:#fff}
+.hd-fav{position:relative;min-width:106px;padding:10px 14px 10px 38px;justify-content:flex-start;color:#334155}
+.hd-fav::before{content:"❤";position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:15px;line-height:1;color:#EC5A72}
+.hd-fav .fav-label{font-size:.86rem;font-family:'Kanit',sans-serif;font-weight:700}
+.hd-fav-count{position:absolute;top:-6px;right:-6px;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:#F04461;color:#fff;display:grid;place-items:center;font-size:.7rem;font-weight:700;border:2px solid #fff;box-shadow:0 4px 12px rgba(240,68,97,.22)}
+.hero{
+  position:relative;
+  overflow:hidden;
+  margin-top:18px;
+  padding:34px 36px 30px;
+  min-height:290px;
+  border-radius:24px;
+  background:linear-gradient(135deg,#FFFFFF 0%,#F3F9FF 58%,#EEF8FF 100%);
+  border:1px solid #E2ECF8;
+  box-shadow:0 20px 50px rgba(47,128,237,.10);
+}
+.hero::before{content:"";position:absolute;inset:auto -8% -36% auto;width:420px;height:420px;border-radius:50%;background:radial-gradient(circle,rgba(47,128,237,.12),transparent 60%);pointer-events:none}
+.hero::after{content:"UMHOME CAR";position:absolute;right:22px;bottom:-10px;font-family:'Kanit',sans-serif;font-weight:700;font-size:clamp(3.8rem,10vw,7.8rem);line-height:1;color:rgba(47,128,237,.045);letter-spacing:.03em;white-space:nowrap;pointer-events:none}
+.hero h1{color:var(--ink);max-width:780px}
+.hero h1 .accent{background:linear-gradient(90deg,#2F80ED,#22C7D6);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.hero-stats,.hero p,.hero-trust{color:#5D6B80}
+.hero .cnt{background:#fff;border-color:#E2ECF8;color:#344256;box-shadow:none}
+.hero-btn,.hero-action.primary{background:linear-gradient(90deg,#2F80ED,#22C7D6)!important;border-color:transparent!important;color:#fff!important;box-shadow:0 12px 26px rgba(47,128,237,.22)!important}
+.hero-action{background:#fff!important;border:1px solid #DEE9F6!important;color:#334155!important;box-shadow:none!important}
+.hero-action:hover{background:#F7FBFF!important;border-color:#BCD5F3!important}
+.hero-action .count{background:#EEF5FF;color:#2F80ED;padding:2px 8px}
+.trust-strip{max-width:1180px;margin:0 auto 6px;padding:14px 18px;background:#fff;border:1px solid #E2ECF8;border-top:0;border-radius:0 0 20px 20px;display:grid;grid-template-columns:repeat(4,1fr);gap:12px;box-shadow:var(--shadow)}
+.trust-item{background:#F8FBFF;border:1px solid #E7EFF8;border-radius:16px;padding:12px 14px;min-height:58px;color:#334155;font-size:.88rem;font-weight:700}
+.trust-icon{width:30px;height:30px;border-radius:10px;color:#fff;font-size:.78rem;box-shadow:0 6px 16px rgba(15,23,42,.08)}
+.trust-item:nth-child(1) .trust-icon{background:linear-gradient(135deg,#2F80ED,#60A5FA)}
+.trust-item:nth-child(2) .trust-icon{background:linear-gradient(135deg,#22C55E,#34D399)}
+.trust-item:nth-child(3) .trust-icon{background:linear-gradient(135deg,#F59E0B,#FBBF24)}
+.trust-item:nth-child(4) .trust-icon{background:linear-gradient(135deg,#8B5CF6,#A78BFA)}
+.tools-card{background:rgba(255,255,255,.9);border:1px solid #E2ECF8;border-radius:18px;padding:12px;box-shadow:var(--shadow)}
+.search input,.sort,.adv-toggle,.mini-btn,.adv-field select,.adv-field input,.form-field input,.form-field select,.form-field textarea,.choice-btn,.fin-input,.fin-pct,.fin-term,.detail-action,.cmp-add{border-color:#DCE7F3!important}
+.search input,.sort,.adv-toggle,.mini-btn,.adv-field select,.adv-field input,.form-field input,.form-field select,.form-field textarea,.fin-input{background:#fff}
+.search input:focus,.adv-field select:focus,.adv-field input:focus,.form-field input:focus,.form-field select:focus,.form-field textarea:focus,.fin-input:focus{border-color:#7DB4F9!important;box-shadow:0 0 0 4px rgba(47,128,237,.10)!important}
+.adv-toggle.on,.chips-sub .chip.on,.choice-btn.on,.detail-action.on,.cmp-add.on{background:#EFF6FF!important;border-color:#8BB7F0!important;color:#2F80ED!important}
+.result-count,.adv-field label,.form-field label,.form-intro,.fin-note,.stats-note,.card-meta,.sim-meta,.stat-name small{color:var(--muted)}
+.card,.rec-card,.sim-card,.cmp-col{background:#fff;border:1px solid #E4EDF8;box-shadow:0 10px 26px rgba(15,23,42,.06)}
+.card:hover{transform:translateY(-3px);box-shadow:0 18px 34px rgba(15,23,42,.10)}
+.card-img{background:#EAF3FD}
+.badges .hot{background:linear-gradient(135deg,#FF9F43,#FF6B6B)!important;color:#fff!important}
+.badges .sale{background:#fff!important;color:#EF5B3F!important;border:1px solid #FFE2DA!important}
+.fav-btn{background:#fff;border:1px solid #E7EEF8;box-shadow:0 8px 18px rgba(15,23,42,.08)}
+.fav-btn.on{background:#FFF5F7;color:#F04461;border-color:#FFD4DF}
+.pics{background:rgba(15,23,42,.68)!important}
+.card-meta{border-bottom:1px solid #EEF3F8}
+.price{color:var(--price)!important}
+.card-inst,.rec-reason{color:#64748B}
+.card-inst b,.rec-price{color:var(--ink)}
+.card-detail{background:linear-gradient(90deg,#2F80ED,#22C7D6)!important;border:0!important;color:#fff!important}
+.card-detail:hover{background:linear-gradient(90deg,#256DD0,#1EB6C6)!important}
+.card-cmp,.card-cmp:hover,.card-cmp.on{color:#2F80ED}
+.owner-card-stats,.owner-detail-stats{background:#F4F9FF;border-color:#D6E7FB;color:#27548A}
+.drawer{background:#F8FBFF}
+.drawer-hd,.drawer-foot{background:#fff;border-color:#E2ECF8}
+.dr-cat{background:#fff}
+.dr-model.on{background:#EFF6FF;color:#2F80ED}
+.ov{background:rgba(15,23,42,.58)}
+.sheet,.stats-sheet{background:#F8FBFF}
+.sh-hero{background:#EEF5FD}
+.sh-hero img{background:#EEF5FD}
+.sh-thumbs{background:#EEF5FD}
+.sh-thumbs img.on{border-color:#2F80ED}
+.sh-x,.sh-share,.sh-nav{background:#fff;border:1px solid #E2ECF8}
+.sh-price{color:var(--price);border-bottom-color:#E4EDF8}
+.spec,.desc,.finance-accordion,.share-panel{border-color:#E2ECF8;box-shadow:none}
+.finance-accordion>summary::after{background:#EDF5FF;color:#2F80ED}
+.fin-term.on{background:#EFF6FF;border-color:#8CB8F1}
+.fin-result{background:linear-gradient(90deg,#2F80ED,#22C7D6)!important}
+.fin-send,.lead-cta,.appointment-cta,.stats-admin-link{background:linear-gradient(90deg,#2F80ED,#22C7D6)!important;border:0!important;color:#fff!important}
+.appointment-cta{box-shadow:none}
+.cta-call,.cmp-bar,.share-option.copy{background:#0F172A!important;color:#fff!important;border-color:#0F172A!important}
+.bar{background:rgba(255,255,255,.94);border-top:1px solid #E2ECF8}
+#statsBtn{background:linear-gradient(90deg,#2F80ED,#22C7D6)}
+.foot{color:#7B8CA3}
+@media(max-width:899px){
+  .hero{margin-left:14px;margin-right:14px;padding:28px 22px 26px;min-height:auto}
+  .trust-strip{margin-left:14px;margin-right:14px;grid-template-columns:1fr 1fr}
+}
+@media(max-width:680px){
+  body{background:linear-gradient(180deg,#F8FBFF 0,#F4F8FC 100%)}
+  .hd-in{padding:9px 12px;min-height:62px}
+  .hd-menu{width:40px;height:40px}
+  .hd-fav{width:42px;min-width:42px;height:42px;padding:0;font-size:0;justify-content:center;overflow:visible}
+  .hd-fav::before{left:50%;transform:translate(-50%,-50%)}
+  .hd-fav .fav-label{display:none!important}
+  .hd-fav-count{top:-4px;right:-4px}
+  .hero{padding:28px 18px 22px;border-radius:20px}
+  .hero::after{right:10px;font-size:3.8rem}
+  .hero-cta{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .hero-action{padding:10px 8px;font-size:.8rem}
+  .trust-strip{padding:12px;gap:8px;border-radius:0 0 16px 16px}
+  .trust-item{padding:10px 10px;min-height:54px;font-size:.73rem;border-radius:12px}
+  .tools{top:63px;padding:0 12px}
+  .tools-card{padding:10px;border-radius:16px}
+  .grid{gap:10px}
+}
+
 </style>
 </head>
 <body>
@@ -646,7 +786,7 @@ body::selection{background:rgba(165,42,32,.18)}
     <img class="hd-logo" id="hdLogo" alt="โลโก้ร้าน">
     <div class="hd-name" id="hdName">—</div>
     <div class="hd-actions">
-      <button class="hd-btn hd-fav" id="headerFavBtn" aria-label="รถที่บันทึกไว้">❤️ <span class="fav-label">รถโปรด</span> <span class="hd-fav-count" id="headerFavCount">0</span></button>
+      <button class="hd-btn hd-fav" id="headerFavBtn" aria-label="รถที่บันทึกไว้"><span class="fav-label">รถโปรด</span><span class="hd-fav-count" id="headerFavCount">0</span></button>
       <button class="hd-btn hd-line" data-line><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 5.64 2 10.1c0 4 3.55 7.34 8.35 7.97.32.07.77.21.88.49.1.25.07.64.03.9l-.14.86c-.04.25-.2 1 .87.54s5.79-3.41 7.9-5.84C21.3 13.5 22 11.88 22 10.1 22 5.64 17.52 2 12 2z"/></svg>LINE</button>
       <button class="hd-btn hd-call" data-call><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.5 21 3 13.5 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.2.2 2.4.6 3.6.1.4 0 .8-.2 1l-2.3 2.2z"/></svg>โทร</button>
     </div>
