@@ -18,7 +18,8 @@
 .wrap{max-width:1120px;margin:auto;padding:18px}.tabs{display:flex;gap:8px;overflow:auto;margin-bottom:14px}.tab{white-space:nowrap;border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:9px 15px;font-family:'Kanit';font-weight:600;cursor:pointer}.tab.on{background:var(--ink);border-color:var(--ink);color:#fff}.badge{display:inline-grid;place-items:center;min-width:20px;height:20px;border-radius:99px;background:var(--brand);color:#fff;padding:0 6px;font-size:.72rem;margin-left:4px}
 .card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:var(--shadow);margin-bottom:14px}.card h2{font-family:'Kanit';font-size:1.15rem;margin:0 0 4px}.card-desc{color:var(--muted);font-size:.84rem;margin-bottom:14px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}.full{grid-column:1/-1}.section-title{font-family:'Kanit';font-weight:700;margin:18px 0 8px;border-top:1px solid var(--line);padding-top:14px}.inline{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.check{display:flex;align-items:center;gap:8px;font-size:.9rem;margin:8px 0 12px}.savebar{position:sticky;bottom:0;background:rgba(247,244,239,.94);backdrop-filter:blur(10px);padding:10px 0 calc(10px + env(safe-area-inset-bottom));display:flex;gap:8px}.savebar .primary{max-width:260px}.notice{font-size:.82rem;color:var(--muted);align-self:center}
 .lead-toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.lead-toolbar input,.lead-toolbar select{border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:10px 11px}.lead-toolbar input{flex:1;min-width:190px}.lead-list{display:grid;gap:10px}.lead{background:#fff;border:1px solid var(--line);border-radius:15px;padding:14px;box-shadow:0 4px 16px rgba(28,26,23,.05)}.lead-top{display:flex;gap:9px;align-items:flex-start}.lead-name{font-family:'Kanit';font-weight:700}.lead-time{color:var(--muted);font-size:.75rem}.lead-status{margin-left:auto;border:1px solid var(--line);border-radius:9px;padding:7px 8px;background:#fff;font-weight:600}.lead-info{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:10px}.lead-info div{background:var(--bg);border-radius:9px;padding:8px 9px}.lead-info span{display:block;color:var(--muted);font-size:.7rem}.lead-info b{font-size:.84rem}.lead-note{margin-top:9px;font-size:.84rem;color:#4b4740;white-space:pre-wrap}.lead-actions{display:flex;gap:7px;margin-top:10px}.lead-actions a,.lead-actions button{flex:1;text-align:center;border:0;border-radius:9px;padding:9px;text-decoration:none;font-family:'Kanit';font-weight:600;cursor:pointer}.call{background:var(--ink);color:#fff}.line{background:var(--green);color:#fff}.danger{background:#fff0ee;color:#b42318}.empty{text-align:center;color:var(--muted);padding:35px 10px}.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(15px);opacity:0;pointer-events:none;background:var(--ink);color:#fff;border-radius:999px;padding:11px 18px;font-family:'Kanit';font-weight:600;transition:.2s;z-index:50}.toast.show{opacity:1;transform:translateX(-50%)}
-@media(max-width:700px){.grid{grid-template-columns:1fr}.full{grid-column:auto}.header-title small{display:none}.header-actions .home-label{display:none}.wrap{padding:14px}.card{padding:15px}.lead-info{grid-template-columns:1fr 1fr}.savebar .primary{max-width:none}.savebar{flex-direction:column}.notice{text-align:center}.lead-top{flex-wrap:wrap}.lead-status{margin-left:0}}
+.stats-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}.stats-summary>div{background:var(--bg);border:1px solid var(--line);border-radius:13px;padding:12px}.stats-summary span{display:block;color:var(--muted);font-size:.75rem}.stats-summary b{display:block;font-family:'Kanit';font-size:1.45rem;margin-top:2px}.stats-toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.stats-toolbar input,.stats-toolbar select{border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:10px 11px}.stats-toolbar input{flex:1;min-width:210px}.stats-table{display:grid;gap:8px}.stats-head,.stats-row{display:grid;grid-template-columns:minmax(250px,1fr) 100px 100px 100px 100px;gap:8px;align-items:center}.stats-head{color:var(--muted);font-size:.75rem;font-weight:700;padding:0 10px}.stats-row{background:#fff;border:1px solid var(--line);border-radius:13px;padding:9px 10px;text-decoration:none;color:var(--ink);transition:.15s}.stats-row:hover{border-color:var(--brand);transform:translateY(-1px)}.stats-car{display:flex;align-items:center;gap:10px;min-width:0}.stats-car img,.stats-noimg{width:68px;height:50px;object-fit:cover;border-radius:9px;background:var(--bg);flex:none}.stats-noimg{display:grid;place-items:center}.stats-car-name{font-family:'Kanit';font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.stats-car-id{font-size:.72rem;color:var(--muted)}.stats-num{text-align:center;font-family:'Kanit';font-weight:700}.stats-num small{display:block;color:var(--muted);font-family:'Sarabun';font-weight:400;font-size:.68rem}.stats-note{color:var(--muted);font-size:.78rem;margin-top:9px}
+@media(max-width:700px){.grid{grid-template-columns:1fr}.full{grid-column:auto}.header-title small{display:none}.header-actions .home-label{display:none}.wrap{padding:14px}.card{padding:15px}.lead-info{grid-template-columns:1fr 1fr}.savebar .primary{max-width:none}.savebar{flex-direction:column}.notice{text-align:center}.lead-top{flex-wrap:wrap}.lead-status{margin-left:0}.stats-summary{grid-template-columns:1fr 1fr}.stats-head{display:none}.stats-row{grid-template-columns:1fr 1fr;gap:7px}.stats-car{grid-column:1/-1}.stats-num{background:var(--bg);border-radius:9px;padding:7px 4px}.stats-toolbar input{min-width:100%;}}
 </style>
 </head>
 <body>
@@ -31,7 +32,7 @@
 </section>
 <section id="adminView" class="hidden">
 <header class="header"><div class="header-in"><img src="https://raw.githubusercontent.com/umhomecar/logoimages/main/88.png" alt=""><div class="header-title">จัดการโชว์รูม<small id="adminName">แอดมิน</small></div><div class="header-actions"><a class="ghost" href="index.html" target="_blank">🚗 <span class="home-label">เปิดหน้าเว็บ</span></a><button class="ghost" id="logoutBtn">ออกจากระบบ</button></div></div></header>
-<main class="wrap"><div class="tabs"><button class="tab on" data-tab="settings">⚙️ โปรโมชันและข้อมูลร้าน</button><button class="tab" data-tab="leads">📞 ลูกค้ารอติดต่อ <span class="badge" id="newCount">0</span></button></div>
+<main class="wrap"><div class="tabs"><button class="tab on" data-tab="settings">⚙️ โปรโมชันและข้อมูลร้าน</button><button class="tab" data-tab="leads">📞 ลูกค้ารอติดต่อ <span class="badge" id="newCount">0</span></button><button class="tab" data-tab="stats">📊 สถิติรถ</button></div>
 <section id="settingsPanel">
 <form id="settingsForm">
 <div class="card"><h2>ข้อมูลร้าน</h2><div class="card-desc">ข้อมูลนี้จะแสดงหน้าเว็บหลังบันทึก โดยไม่ต้องแก้โค้ดหรือ Deploy ใหม่</div><div class="grid">
@@ -41,13 +42,14 @@
 <div class="savebar"><button class="primary" id="saveBtn" type="submit">บันทึกและอัปเดตหน้าเว็บ</button><span class="notice" id="saveNote"></span></div></form>
 </section>
 <section id="leadsPanel" class="hidden"><div class="card"><h2>ลูกค้าที่ขอให้ติดต่อกลับ</h2><div class="card-desc">รายการใหม่จะเข้าหน้านี้แบบ Realtime</div><div class="lead-toolbar"><input id="leadSearch" placeholder="ค้นหาชื่อ เบอร์ รุ่นรถ จังหวัด"><select id="leadFilter"><option value="all">ทุกสถานะ</option><option value="new">รอติดต่อ</option><option value="contacted">ติดต่อแล้ว</option><option value="closed">ปิดรายการ</option></select><button class="ghost" id="reloadLeads">รีเฟรช</button></div><div class="lead-list" id="leadList"><div class="empty">กำลังโหลด…</div></div></div></section>
+<section id="statsPanel" class="hidden"><div class="card"><h2>สถิติรถในหน้าโชว์รูม</h2><div class="card-desc">ดูจำนวนเปิดรายละเอียด จำนวนอุปกรณ์ที่บันทึกเป็นรถโปรด และจำนวนลูกค้าขอให้ติดต่อกลับของแต่ละคัน</div><div class="stats-summary"><div><span>รถในโชว์รูม</span><b id="sumCars">–</b></div><div><span>ยอดเข้าดูรวม</span><b id="sumViews">–</b></div><div><span>ยอดบันทึกโปรด</span><b id="sumFavorites">–</b></div><div><span>ลูกค้าขอติดต่อ</span><b id="sumLeads">–</b></div></div><div class="stats-toolbar"><input id="statsSearch" placeholder="ค้นหายี่ห้อ รุ่น ปี"><select id="statsSort"><option value="views">เข้าดูมากที่สุด</option><option value="favorites">ถูกใจมากที่สุด</option><option value="leads">ลูกค้าติดต่อมากที่สุด</option><option value="conversion">อัตราติดต่อสูงที่สุด</option><option value="name">เรียงตามชื่อรถ</option></select><button class="ghost" id="reloadStats">รีเฟรช</button></div><div id="carStatsList" class="stats-table"><div class="empty">กำลังโหลด…</div></div><div class="stats-note">❤️ “คน” ในหน้านี้หมายถึงจำนวนเบราว์เซอร์หรืออุปกรณ์ที่ไม่ซ้ำกัน ลูกค้าไม่ต้องสมัครสมาชิก และไม่มีการเก็บชื่อจากการกดหัวใจ</div></div></section>
 </main></section>
 <div class="toast" id="toast"></div>
 <script>
 const SUPABASE_URL='https://jvvjwblwdeggetnpfvgq.supabase.co';
 const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp2dmp3Ymx3ZGVnZ2V0bnBmdmdxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwNTgyNTUsImV4cCI6MjA5MzYzNDI1NX0.7fvwqyfCH_4m0WQyUeTwZypSxE17db9UBlxJ2H-ZdXo';
 const db=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{auth:{persistSession:true,autoRefreshToken:true}});
-const $=s=>document.querySelector(s); let user=null,leads=[],leadChannel=null,currentSettings={};
+const $=s=>document.querySelector(s); let user=null,leads=[],leadChannel=null,currentSettings={},carStats=[],statsRefreshTimer=null,statsDebounceTimer=null;
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money=n=>n==null||n===''?'-':'฿'+Number(n).toLocaleString('th-TH');
 let toastTimer;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2200)}
@@ -56,7 +58,7 @@ function normalizeUsername(v){v=String(v||'').trim().toLowerCase();return v.incl
 async function isAdmin(){const{data,error}=await db.rpc('is_showroom_admin');return !error&&data===true}
 async function enterAdmin(u){user=u;if(!(await isAdmin())){await db.auth.signOut();showError('บัญชีนี้ไม่มีสิทธิ์แอดมิน');return}$('#loginView').classList.add('hidden');$('#adminView').classList.remove('hidden');$('#adminName').textContent=u.email||'แอดมิน';await Promise.all([loadSettings(),loadLeads()]);startRealtime()}
 $('#loginForm').addEventListener('submit',async e=>{e.preventDefault();$('#loginError').classList.add('hidden');const b=$('#loginBtn');b.disabled=true;b.textContent='กำลังเข้าสู่ระบบ…';const{data,error}=await db.auth.signInWithPassword({email:normalizeUsername($('#username').value),password:$('#password').value});b.disabled=false;b.textContent='เข้าสู่ระบบ';if(error){showError('เข้าสู่ระบบไม่สำเร็จ กรุณาตรวจชื่อผู้ใช้และรหัสผ่าน');return}await enterAdmin(data.user)});
-$('#logoutBtn').addEventListener('click',async()=>{if(leadChannel)await db.removeChannel(leadChannel);await db.auth.signOut();location.reload()});
+$('#logoutBtn').addEventListener('click',async()=>{if(leadChannel)await db.removeChannel(leadChannel);if(statsRefreshTimer)clearInterval(statsRefreshTimer);await db.auth.signOut();location.reload()});
 const fields=['shop_name','logo_url','line_url','phone','address','map_url','hours','hero_cover','hero_headline','hero_highlight','hero_stats','hero_trust','promo_start','promo_end','finance_vat','default_term'];
 async function loadSettings(){const{data,error}=await db.from('showroom_settings').select('*').eq('id','default').maybeSingle();if(error){toast('โหลดการตั้งค่าไม่สำเร็จ: กรุณารัน SQL ก่อน');return}const d=data||{};currentSettings=d;fields.forEach(k=>{if($('#'+k))$('#'+k).value=d[k]??''});$('#promo_enabled').checked=d.promo_enabled!==false;const r=d.finance_rates||{};$('#rate48').value=r['48']??2.79;$('#rate60').value=r['60']??3.29;$('#rate72').value=r['72']??3.99;$('#rate84').value=r['84']??4.99;$('#down_percents').value=(d.down_percents||[10,15,20,25]).join(',');$('#saveNote').textContent=d.updated_at?'อัปเดตล่าสุด '+new Date(d.updated_at).toLocaleString('th-TH'):''}
 $('#settingsForm').addEventListener('submit',async e=>{e.preventDefault();const b=$('#saveBtn');b.disabled=true;b.textContent='กำลังบันทึก…';const obj={id:'default',updated_by:user.id,promo_enabled:$('#promo_enabled').checked,finance_rates:{'48':Number($('#rate48').value)||0,'60':Number($('#rate60').value)||0,'72':Number($('#rate72').value)||0,'84':Number($('#rate84').value)||0},down_percents:$('#down_percents').value.split(',').map(v=>Number(v.trim())).filter(v=>v>0)};fields.forEach(k=>{obj[k]=$('#'+k).value.trim?$('#'+k).value.trim():$('#'+k).value;if(['finance_vat','default_term'].includes(k))obj[k]=Number(obj[k])||0;if(['promo_start','promo_end'].includes(k)&&!obj[k])obj[k]=null});const{error}=await db.from('showroom_settings').upsert(obj,{onConflict:'id'});b.disabled=false;b.textContent='บันทึกและอัปเดตหน้าเว็บ';if(error){toast('บันทึกไม่สำเร็จ: '+error.message);return}currentSettings={...currentSettings,...obj};$('#saveNote').textContent='บันทึกล่าสุด '+new Date().toLocaleString('th-TH');toast('บันทึกเรียบร้อย หน้าเว็บอัปเดตแล้ว ✅')});
@@ -66,9 +68,57 @@ function renderLeads(){const q=$('#leadSearch').value.trim().toLowerCase(),st=$(
 async function loadLeads(){const{data,error}=await db.from('showroom_leads').select('*').order('created_at',{ascending:false}).limit(300);if(error){$('#leadList').innerHTML='<div class="empty">โหลดไม่ได้ กรุณารัน showroom-upgrade.sql ก่อน</div>';return}leads=data||[];renderLeads()}
 async function updateLeadStatus(id,status){const{error}=await db.from('showroom_leads').update({status}).eq('id',id);if(error){toast('เปลี่ยนสถานะไม่สำเร็จ');return}const l=leads.find(x=>x.id===id);if(l)l.status=status;renderLeads();toast('อัปเดตสถานะแล้ว')}
 async function deleteLead(id){if(!confirm('ลบรายการลูกค้านี้ใช่ไหม?'))return;const{error}=await db.from('showroom_leads').delete().eq('id',id);if(error){toast('ลบไม่สำเร็จ');return}leads=leads.filter(x=>x.id!==id);renderLeads();toast('ลบแล้ว')}
-function startRealtime(){if(leadChannel)return;leadChannel=db.channel('showroom-admin-leads').on('postgres_changes',{event:'*',schema:'public',table:'showroom_leads'},()=>loadLeads()).subscribe()}
+function carLabel(c){return [c.brand,c.model,c.sub_model].filter(Boolean).join(' ')+(c.year?' ปี '+c.year:'')}
+function statCover(c){return c.cover_image_url||(Array.isArray(c.images)&&c.images[0])||''}
+async function loadCarStats(){
+  const box=$('#carStatsList');if(box)box.innerHTML='<div class="empty">กำลังโหลดสถิติ…</div>';
+  const [carsRes,viewsRes,favsRes,leadsRes]=await Promise.all([
+    db.from('public_cars').select('id,brand,model,sub_model,year,cover_image_url,images,created_at').order('created_at',{ascending:false}),
+    db.from('car_view_ranking').select('car_id,views').limit(1000),
+    db.rpc('get_showroom_favorite_counts'),
+    db.from('showroom_leads').select('car_id')
+  ]);
+  if(carsRes.error||viewsRes.error||favsRes.error||leadsRes.error){if(box)box.innerHTML='<div class="empty">โหลดสถิติไม่สำเร็จ กรุณารัน showroom-analytics-upgrade.sql ใน Supabase ก่อน</div>';return}
+  const viewMap=new Map((viewsRes.data||[]).map(r=>[String(r.car_id),Number(r.views)||0]));
+  const favMap=new Map((favsRes.data||[]).map(r=>[String(r.car_id),Number(r.favorites)||0]));
+  const leadMap=new Map();(leadsRes.data||[]).forEach(r=>{if(r.car_id!=null){const k=String(r.car_id);leadMap.set(k,(leadMap.get(k)||0)+1)}});
+  carStats=(carsRes.data||[]).map(c=>{const id=String(c.id),views=viewMap.get(id)||0,favorites=favMap.get(id)||0,leadCount=leadMap.get(id)||0;return{...c,views,favorites,leadCount,conversion:views?leadCount/views*100:0}});
+  renderCarStats();
+}
+function renderCarStats(){
+  const q=($('#statsSearch')?.value||'').trim().toLowerCase(),sort=$('#statsSort')?.value||'views';
+  let rows=carStats.filter(c=>!q||carLabel(c).toLowerCase().includes(q));
+  if(sort==='favorites')rows.sort((a,b)=>b.favorites-a.favorites||b.views-a.views);
+  else if(sort==='leads')rows.sort((a,b)=>b.leadCount-a.leadCount||b.views-a.views);
+  else if(sort==='conversion')rows.sort((a,b)=>b.conversion-a.conversion||b.leadCount-a.leadCount);
+  else if(sort==='name')rows.sort((a,b)=>carLabel(a).localeCompare(carLabel(b),'th'));
+  else rows.sort((a,b)=>b.views-a.views||b.favorites-a.favorites);
+  $('#sumCars').textContent=carStats.length.toLocaleString('th-TH');
+  $('#sumViews').textContent=carStats.reduce((s,c)=>s+c.views,0).toLocaleString('th-TH');
+  $('#sumFavorites').textContent=carStats.reduce((s,c)=>s+c.favorites,0).toLocaleString('th-TH');
+  $('#sumLeads').textContent=carStats.reduce((s,c)=>s+c.leadCount,0).toLocaleString('th-TH');
+  const box=$('#carStatsList');if(!box)return;if(!rows.length){box.innerHTML='<div class="empty">ไม่พบรถที่ค้นหา</div>';return}
+  box.innerHTML='<div class="stats-head"><span>รถ</span><span>เข้าดู</span><span>รถโปรด</span><span>ขอติดต่อ</span><span>อัตราติดต่อ</span></div>'+rows.map(c=>{const cover=statCover(c),rate=c.views?c.conversion.toFixed(1)+'%':'0%';return'<a class="stats-row" href="index.html?car='+encodeURIComponent(c.id)+'" target="_blank"><div class="stats-car">'+(cover?'<img src="'+esc(cover)+'" alt="">':'<div class="stats-noimg">🚗</div>')+'<div style="min-width:0"><div class="stats-car-name">'+esc(carLabel(c))+'</div><div class="stats-car-id">เปิดดูรายละเอียดรถ ↗</div></div></div><div class="stats-num">👁 '+c.views.toLocaleString('th-TH')+'<small>ครั้ง</small></div><div class="stats-num">❤️ '+c.favorites.toLocaleString('th-TH')+'<small>อุปกรณ์</small></div><div class="stats-num">📞 '+c.leadCount.toLocaleString('th-TH')+'<small>รายการ</small></div><div class="stats-num">'+rate+'<small>Lead / View</small></div></a>'}).join('');
+}
+function queueStatsReload(){if($('#statsPanel').classList.contains('hidden'))return;clearTimeout(statsDebounceTimer);statsDebounceTimer=setTimeout(loadCarStats,500)}
+function startRealtime(){
+  if(leadChannel)return;
+  leadChannel=db.channel('showroom-admin-realtime')
+    .on('postgres_changes',{event:'*',schema:'public',table:'showroom_leads'},()=>{loadLeads();queueStatsReload()})
+    .on('postgres_changes',{event:'*',schema:'public',table:'showroom_favorites'},queueStatsReload)
+    .subscribe();
+  statsRefreshTimer=setInterval(()=>{if(!$('#statsPanel').classList.contains('hidden'))loadCarStats()},30000);
+}
 $('#leadSearch').addEventListener('input',renderLeads);$('#leadFilter').addEventListener('change',renderLeads);$('#reloadLeads').addEventListener('click',loadLeads);
-document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===b));const t=b.dataset.tab;$('#settingsPanel').classList.toggle('hidden',t!=='settings');$('#leadsPanel').classList.toggle('hidden',t!=='leads')}));
+$('#statsSearch').addEventListener('input',renderCarStats);$('#statsSort').addEventListener('change',renderCarStats);$('#reloadStats').addEventListener('click',loadCarStats);
+document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===b));
+  const t=b.dataset.tab;
+  $('#settingsPanel').classList.toggle('hidden',t!=='settings');
+  $('#leadsPanel').classList.toggle('hidden',t!=='leads');
+  $('#statsPanel').classList.toggle('hidden',t!=='stats');
+  if(t==='stats')loadCarStats();
+}));
 (async()=>{const{data}=await db.auth.getSession();if(data.session?.user)await enterAdmin(data.session.user)})();
 </script>
 </body>

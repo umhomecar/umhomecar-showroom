@@ -320,6 +320,10 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
 .result-count{font-size:.82rem;color:var(--muted);font-weight:600;margin-right:auto}
 .fav-btn{position:absolute;right:9px;top:9px;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.92);box-shadow:var(--shadow);font-size:1.05rem;z-index:3;border:1px solid rgba(0,0,0,.04)}
 .fav-btn.on{background:#fff0ed;color:var(--brand)}
+.owner-card-stats{display:flex;gap:7px;align-items:center;flex-wrap:wrap;background:#fff5f1;border:1px solid #f4d6ce;border-radius:10px;padding:7px 9px;color:#6c3b31;font-size:.78rem;font-weight:700}
+.owner-card-stats span{display:inline-flex;align-items:center;gap:3px}
+.owner-detail-stats{display:flex;gap:9px;flex-wrap:wrap;margin:-5px 0 14px;padding:10px 12px;border:1px solid #f4d6ce;background:#fff5f1;border-radius:12px;font-family:'Kanit',sans-serif;font-weight:600;font-size:.9rem;color:#6c3b31}
+.owner-detail-stats span{display:inline-flex;align-items:center;gap:4px}
 .detail-action-row{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:12px}
 .detail-action{padding:11px;border-radius:11px;background:#fff;border:1.5px solid var(--line);font-family:'Kanit',sans-serif;font-weight:600;color:var(--ink)}
 .detail-action.on{color:var(--brand);border-color:var(--brand);background:#fff4f1}
@@ -664,9 +668,11 @@ async function load() {
     const { data, error } = await db.from('public_cars').select('*').order('created_at', { ascending: false });
     if (error) throw error;
     ALL = (data || []).map((c) => enrichCar({ ...c, images: Array.isArray(c.images) ? c.images : [], _rnd: Math.random() }));
+    if (isOwner()) await loadOwnerCardStats();
     populateYearOptions();
     apply();
     updateFavoriteUI();
+    if (!isOwner()) syncStoredFavorites();
     $('#tools').hidden = false;
     renderHeroContent();
     const carParam = new URLSearchParams(location.search).get('car');
@@ -687,7 +693,51 @@ async function load() {
 }
 
 const FAVORITES_KEY = 'umhome_showroom_favorites_v1';
+const FAVORITE_VISITOR_KEY = 'umhome_showroom_visitor_v1';
 let favoriteIds = (() => { try { const v = JSON.parse(localStorage.getItem(FAVORITES_KEY) || '[]'); return Array.isArray(v) ? v.map(String) : []; } catch (e) { return []; } })();
+let ownerCarStats = new Map();
+let ownerStatsError = '';
+function getVisitorId() {
+  try {
+    let id = localStorage.getItem(FAVORITE_VISITOR_KEY);
+    if (!id) {
+      id = (window.crypto && window.crypto.randomUUID) ? window.crypto.randomUUID() : ('v_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2));
+      localStorage.setItem(FAVORITE_VISITOR_KEY, id);
+    }
+    return id;
+  } catch (e) { return 'v_' + Math.random().toString(36).slice(2) + Date.now().toString(36); }
+}
+function ownerStat(id) { return ownerCarStats.get(String(id)) || { views:0, favorites:0 }; }
+function ownerCardStatsHtml(c) {
+  if (!isOwner()) return '';
+  const st=ownerStat(c.id);
+  return '<div class="owner-card-stats"><span>👁 '+Number(st.views||0).toLocaleString('th-TH')+' ดู</span><span>❤️ '+Number(st.favorites||0).toLocaleString('th-TH')+' คน</span></div>';
+}
+function ownerDetailStatsHtml(c) {
+  if (!isOwner()) return '';
+  const st=ownerStat(c.id);
+  return '<div class="owner-detail-stats"><span>👁 เข้าดู '+Number(st.views||0).toLocaleString('th-TH')+' ครั้ง</span><span>❤️ บันทึก '+Number(st.favorites||0).toLocaleString('th-TH')+' คน</span></div>';
+}
+async function loadOwnerCardStats() {
+  if (!db) return false;
+  ownerStatsError='';
+  const [viewRes,favRes]=await Promise.all([
+    db.from('car_view_ranking').select('car_id,views').limit(1000),
+    db.rpc('get_showroom_favorite_counts')
+  ]);
+  if (viewRes.error) ownerStatsError='โหลดจำนวนเข้าดูไม่สำเร็จ';
+  if (favRes.error) ownerStatsError=(ownerStatsError?ownerStatsError+' · ':'')+'โหลดจำนวนรถโปรดไม่สำเร็จ';
+  const next=new Map();
+  (viewRes.data||[]).forEach(r=>next.set(String(r.car_id),{views:Number(r.views)||0,favorites:0}));
+  (favRes.data||[]).forEach(r=>{const k=String(r.car_id),x=next.get(k)||{views:0,favorites:0};x.favorites=Number(r.favorites)||0;next.set(k,x);});
+  ownerCarStats=next;
+  return !ownerStatsError;
+}
+async function syncStoredFavorites() {
+  if (!db || isOwner() || !favoriteIds.length) return;
+  const { error } = await db.rpc('sync_showroom_favorites', { p_car_ids: favoriteIds.slice(0,200), p_visitor_id: getVisitorId() });
+  if (error) console.warn('favorite sync:', error.message);
+}
 function slugify(v) { return String(v || '').trim().toLowerCase().replace(/[^a-z0-9ก-๙]+/g, '-').replace(/^-+|-+$/g, '') || 'car'; }
 function approxNumber(v) {
   const raw = String(v ?? '').trim(); if (!raw) return 0;
@@ -731,10 +781,16 @@ function carMonthlyEstimate(c, down=0, term=84) {
 }
 function isFavorite(id) { return favoriteIds.includes(String(id)); }
 function saveFavorites() { try { localStorage.setItem(FAVORITES_KEY, JSON.stringify(favoriteIds)); } catch (e) {} updateFavoriteUI(); }
-function toggleFavorite(id) {
-  id=String(id); favoriteIds = isFavorite(id) ? favoriteIds.filter(x=>x!==id) : favoriteIds.concat(id); saveFavorites();
+async function toggleFavorite(id) {
+  id=String(id);
+  const adding=!isFavorite(id);
+  favoriteIds = adding ? favoriteIds.concat(id) : favoriteIds.filter(x=>x!==id);
+  saveFavorites();
   renderGrid(); renderFeatured(); if (cur && String(cur.id)===id) syncDetailFavorite();
-  showToast(isFavorite(id) ? 'บันทึกรถไว้แล้ว ❤️' : 'นำออกจากรถโปรดแล้ว');
+  showToast(adding ? 'บันทึกรถไว้แล้ว ❤️' : 'นำออกจากรถโปรดแล้ว');
+  if (!db || isOwner()) return;
+  const { error } = await db.rpc('set_showroom_favorite', { p_car_id:id, p_visitor_id:getVisitorId(), p_active:adding });
+  if (error) { console.warn('favorite count:',error.message); showToast('บันทึกในเครื่องแล้ว แต่ยังส่งสถิติไม่สำเร็จ'); }
 }
 function updateFavoriteUI() {
   const n=favoriteIds.length; ['headerFavCount','heroFavCount'].forEach(id=>{ const e=document.getElementById(id); if(e)e.textContent=n; });
@@ -894,7 +950,7 @@ function cardHtml(c) {
     '</div><div class="card-bd"><div class="card-nm">' + esc(carName(c)) + '</div><div class="card-meta">' +
     (c.year ? '<span>📅 ' + esc(c.year) + '</span>' : '') +
     (c.mileage ? '<span>🛣️ ' + esc(c.mileage) + '</span>' : '') +
-    '</div>' +
+    '</div>' + ownerCardStatsHtml(c) +
     '<div class="card-pricerow">' + priceHtml(c) + (c.price ? '<div class="card-inst">ผ่อนเริ่มต้น <b>' + baht(carMonthlyEstimate(c, 0, 84)) + '</b> /เดือน</div>' : '') + '</div>' +
     '<button class="card-btn card-detail">ดูรายละเอียด →</button>' +
     '<div class="card-contact">' +
@@ -983,7 +1039,7 @@ function closeDetail() {
 // ── คนดูสด (Supabase Realtime Presence) — นับเฉพาะลูกค้า (ไม่นับเจ้าของ) ──
 function startPresence() {
   if (!db || presenceChannel) return;
-  const key = (self.crypto && crypto.randomUUID) ? crypto.randomUUID() : 'u' + Math.random().toString(36).slice(2);
+  const key = (self.crypto && crypto.randomUUID) ? window.crypto.randomUUID() : 'u' + Math.random().toString(36).slice(2);
   presenceChannel = db.channel('showroom-live', { config: { presence: { key } } });
   presenceChannel.on('presence', { event: 'sync' }, () => {
     const st = presenceChannel.presenceState();
@@ -1003,35 +1059,36 @@ function openStats() {
   $('#statsSheet').innerHTML =
     '<div class="stats-hd"><h2>📊 สถิติร้าน <small>(เฉพาะเจ้าของ)</small></h2><button class="sh-x" id="statsX" aria-label="ปิด">✕</button></div>' +
     '<div class="stats-live">🟢 ลูกค้ากำลังดูตอนนี้ <b id="statLive">' + liveCount + '</b> คน</div>' +
-    '<div class="stats-total">📈 ยอดดูรวมทั้งเว็บ <b id="statTotal">…</b> ครั้ง</div>' +
-    '<h3>👁 รถยอดนิยม</h3><div id="statList">กำลังโหลด…</div>' +
-    '<div class="stats-foot"><a class="stats-admin-link" href="admin.html" target="_blank">⚙️ จัดการโปรโมชันและลูกค้าติดต่อ</a><button id="ownerOff" class="stats-btn-off">ออกจากโหมดเจ้าของ</button>' +
-    '<span class="stats-note">เครื่องนี้ถูกตั้งเป็น “เจ้าของ” — การกดดูของคุณจะไม่ถูกนับในสถิติ</span></div>';
+    '<div class="stats-total">👁 ยอดดูรวม <b id="statTotal">…</b> ครั้ง</div>' +
+    '<div class="stats-total">❤️ ยอดบันทึกรถโปรด <b id="statFavTotal">…</b> คน</div>' +
+    '<h3>🚗 สถิติรายคัน</h3><div id="statList">กำลังโหลด…</div>' +
+    '<div class="stats-foot"><a class="stats-admin-link" href="admin.html" target="_blank">📊 เปิดหน้าสถิติรถฉบับเต็ม</a><button id="ownerOff" class="stats-btn-off">ออกจากโหมดเจ้าของ</button>' +
+    '<span class="stats-note">เครื่องนี้ถูกตั้งเป็น “เจ้าของ” — การกดดูและกดรถโปรดจากเครื่องนี้จะไม่ถูกนับ</span></div>';
   $('#statsX').addEventListener('click', closeStats);
-  $('#ownerOff').addEventListener('click', () => { setOwner(false); retrackPresence(); updateStatsBtn(); showToast('ออกจากโหมดเจ้าของแล้ว'); closeStats(); });
+  $('#ownerOff').addEventListener('click', () => { setOwner(false); ownerCarStats=new Map(); retrackPresence(); updateStatsBtn(); renderGrid(); renderFeatured(); showToast('ออกจากโหมดเจ้าของแล้ว'); closeStats(); });
   $('#statsOv').classList.add('show'); document.body.style.overflow = 'hidden';
   loadStats();
 }
 function closeStats() { $('#statsOv').classList.remove('show'); document.body.style.overflow = ''; }
 async function loadStats() {
   try {
-    const { data, error } = await db.from('car_view_ranking').select('*').limit(100);
-    if (error) throw error;
-    const rows = data || [];
-    const total = rows.reduce((s, r) => s + (Number(r.views) || 0), 0);
-    const tEl = $('#statTotal'); if (tEl) tEl.textContent = total.toLocaleString('th-TH');
-    const listEl = $('#statList'); if (!listEl) return;
-    if (!rows.length) { listEl.innerHTML = '<div class="stats-empty">ยังไม่มีข้อมูลการดู — รอลูกค้าเข้ามาชมก่อนนะครับ</div>'; return; }
-    listEl.innerHTML = rows.slice(0, 20).map((r, i) =>
-      '<button class="stat-row" data-car="' + esc(r.car_id) + '">' +
-      '<span class="stat-rank">' + (i + 1) + '</span>' +
-      '<img src="' + esc(r.cover_image_url || '') + '" alt="" onerror="this.style.visibility=\'hidden\'">' +
-      '<span class="stat-name">' + esc([r.brand, r.model, r.sub_model].filter(Boolean).join(' ')) + (r.year ? ' ' + esc(r.year) : '') + '</span>' +
-      '<span class="stat-views">👁 ' + Number(r.views).toLocaleString('th-TH') + '</span></button>'
-    ).join('');
-    listEl.querySelectorAll('.stat-row').forEach((b) => b.addEventListener('click', () => { closeStats(); openCarById(b.dataset.car); }));
+    await loadOwnerCardStats();
+    renderGrid(); renderFeatured();
+    const rows=ALL.map(c=>({c,...ownerStat(c.id)})).filter(x=>x.views>0||x.favorites>0).sort((a,b)=>(b.views-a.views)||(b.favorites-a.favorites));
+    const total=Array.from(ownerCarStats.values()).reduce((s,r)=>s+(Number(r.views)||0),0);
+    const favTotal=Array.from(ownerCarStats.values()).reduce((s,r)=>s+(Number(r.favorites)||0),0);
+    const tEl=$('#statTotal'); if(tEl)tEl.textContent=total.toLocaleString('th-TH');
+    const fEl=$('#statFavTotal'); if(fEl)fEl.textContent=favTotal.toLocaleString('th-TH');
+    const listEl=$('#statList'); if(!listEl)return;
+    if (ownerStatsError) { listEl.innerHTML='<div class="stats-empty">'+esc(ownerStatsError)+' — กรุณารัน showroom-analytics-upgrade.sql ใน Supabase</div>'; return; }
+    if (!rows.length) { listEl.innerHTML='<div class="stats-empty">ยังไม่มีข้อมูลการดูหรือการบันทึกรถโปรด</div>'; return; }
+    listEl.innerHTML=rows.slice(0,30).map((r,i)=>{
+      const c=r.c,cover=c.cover_image_url||(c.images&&c.images[0])||'';
+      return '<button class="stat-row" data-car="'+esc(c.id)+'"><span class="stat-rank">'+(i+1)+'</span><img src="'+esc(cover)+'" alt=""><span class="stat-name">'+esc(carName(c))+(c.year?' '+esc(c.year):'')+'</span><span class="stat-views">👁 '+Number(r.views).toLocaleString('th-TH')+' · ❤️ '+Number(r.favorites).toLocaleString('th-TH')+'</span></button>';
+    }).join('');
+    listEl.querySelectorAll('.stat-row').forEach(b=>b.addEventListener('click',()=>{closeStats();openCarById(b.dataset.car);}));
   } catch (e) {
-    const listEl = $('#statList'); if (listEl) listEl.innerHTML = '<div class="stats-empty">โหลดสถิติไม่สำเร็จ — รัน showroom_stats.sql ใน Supabase แล้วหรือยังครับ?</div>';
+    const listEl=$('#statList'); if(listEl)listEl.innerHTML='<div class="stats-empty">โหลดสถิติไม่สำเร็จ — กรุณารัน showroom-analytics-upgrade.sql</div>';
   }
 }
 function gallery(d) {
@@ -1172,7 +1229,7 @@ function renderSheet() {
     (imgs.length > 1 ? '<button class="sh-nav prev" id="shPrev" aria-label="รูปก่อนหน้า">‹</button><button class="sh-nav next" id="shNext" aria-label="รูปถัดไป">›</button><span class="sh-count" id="shCount">1/' + imgs.length + '</span>' : '') +
     '</div>' +
     (imgs.length > 1 ? '<div class="sh-thumbs">' + imgs.map((u, k) => '<img src="' + esc(u) + '" data-k="' + k + '" class="' + (k === 0 ? 'on' : '') + '" alt="">').join('') + '</div>' : '') +
-    '<div class="sh-bd">' + (c.is_hot ? '<span class="sh-hot">🔥 HOT</span>' : '') + '<div class="sh-nm">' + esc(carName(c)) + '</div><div class="sh-price">' + (baht(c.price) || 'สอบถามราคา') + (hasDiscount(c) ? '<s class="old">' + baht(c.original_price) + '</s>' : '') + '</div>' +
+    '<div class="sh-bd">' + (c.is_hot ? '<span class="sh-hot">🔥 HOT</span>' : '') + '<div class="sh-nm">' + esc(carName(c)) + '</div><div class="sh-price">' + (baht(c.price) || 'สอบถามราคา') + (hasDiscount(c) ? '<s class="old">' + baht(c.original_price) + '</s>' : '') + '</div>' + ownerDetailStatsHtml(c) +
     (specs.length ? '<div class="specs">' + specs.map((p) => '<div class="spec"><span>' + p[0] + '</span><b>' + esc(p[1]) + '</b></div>').join('') + '</div>' : '') +
     (cleanDesc(c.description) ? '<div class="desc">' + esc(cleanDesc(c.description)) + '</div>' : '') +
     financeHtml(c) +
