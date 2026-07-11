@@ -49,6 +49,184 @@ body{background:radial-gradient(circle at 4% 0%,rgba(196,160,96,.1),transparent 
 .toast{background:#1D1C19;border-radius:10px}
 @media(max-width:700px){.header-in{padding:10px 13px}.wrap{padding:15px 12px 36px}.tabs{border-radius:11px}.tab{padding:9px 12px}.card{padding:15px}.stats-summary>div{padding:11px}}
 
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   UMHOME ADMIN — SOFT LIGHT DASHBOARD V5
+   ธีมสว่าง สีแยกหน้าที่ชัดเจน และเข้าชุดกับหน้าโชว์รูม
+   ═══════════════════════════════════════════════════════════════════════════ */
+:root{
+  --bg:#F3F8FD;
+  --card:#FFFFFF;
+  --ink:#1F2937;
+  --muted:#64748B;
+  --line:#DCE7F3;
+  --brand:#2F80ED;
+  --brand-2:#22C7D6;
+  --green:#22C55E;
+  --orange:#F59E0B;
+  --purple:#8B5CF6;
+  --red:#EF4444;
+  --shadow:0 10px 28px rgba(15,23,42,.065);
+}
+body{
+  background:
+    radial-gradient(circle at 100% 0%,rgba(34,199,214,.10),transparent 22rem),
+    radial-gradient(circle at 0% 5%,rgba(47,128,237,.11),transparent 22rem),
+    linear-gradient(180deg,#F8FBFF 0,#F3F8FD 18rem,#EEF5FC 100%);
+  color:var(--ink);
+}
+.login{background:linear-gradient(145deg,#EFF7FF 0%,#F9FCFF 48%,#EEFDFB 100%)}
+.login-card{
+  border:1px solid #DFEAF6;
+  border-radius:22px;
+  padding:30px;
+  box-shadow:0 24px 70px rgba(47,128,237,.13);
+}
+.logo{border:1px solid #E2ECF8;border-radius:16px;padding:5px;box-shadow:0 10px 24px rgba(47,128,237,.10)}
+.login h1{color:#1F2937}
+.login p{color:#64748B}
+.field label{color:#475569}
+.field input,.field textarea,.field select,
+.lead-toolbar input,.lead-toolbar select,
+.stats-toolbar input,.stats-toolbar select{
+  background:#fff!important;
+  border-color:#DCE7F3!important;
+  border-radius:12px!important;
+}
+.field input:focus,.field textarea:focus,.field select:focus,
+.lead-toolbar input:focus,.lead-toolbar select:focus,
+.stats-toolbar input:focus,.stats-toolbar select:focus{
+  border-color:#7DB4F9!important;
+  box-shadow:0 0 0 4px rgba(47,128,237,.10)!important;
+  outline:none;
+}
+.primary{
+  background:linear-gradient(90deg,#2F80ED,#22C7D6)!important;
+  border-radius:12px!important;
+  box-shadow:0 12px 26px rgba(47,128,237,.22);
+  min-height:46px;
+}
+.header{
+  background:rgba(255,255,255,.93)!important;
+  border-bottom:1px solid #E2ECF8!important;
+  color:var(--ink)!important;
+  box-shadow:0 8px 26px rgba(15,23,42,.06)!important;
+}
+.header-in{max-width:1180px;min-height:70px;padding:11px 20px}
+.header img{background:#fff;border:1px solid #E3ECF7;padding:3px;box-shadow:0 8px 20px rgba(47,128,237,.08)}
+.header-title{color:#1F2937}
+.header-title small{color:#64748B!important}
+.header .ghost{
+  background:#fff!important;
+  border:1px solid #DCE7F3!important;
+  color:#334155!important;
+  border-radius:11px!important;
+}
+.header .ghost:hover{background:#F5FAFF!important;border-color:#9EC5F3!important;color:#2F80ED!important}
+.wrap{max-width:1180px;padding:22px 18px 54px}
+.tabs{
+  background:#fff!important;
+  border:1px solid #DFEAF6!important;
+  border-radius:16px!important;
+  padding:6px!important;
+  gap:6px!important;
+  box-shadow:var(--shadow)!important;
+}
+.tab{
+  border:1px solid transparent!important;
+  border-radius:11px!important;
+  background:transparent!important;
+  color:#53657A!important;
+  padding:10px 16px!important;
+}
+.tab[data-tab="settings"].on{background:linear-gradient(90deg,#2F80ED,#60A5FA)!important;color:#fff!important}
+.tab[data-tab="leads"].on{background:linear-gradient(90deg,#F59E0B,#F97316)!important;color:#fff!important}
+.tab[data-tab="stats"].on{background:linear-gradient(90deg,#8B5CF6,#6366F1)!important;color:#fff!important}
+.badge{background:#F04461;color:#fff;border:2px solid rgba(255,255,255,.72)}
+.card{
+  background:#fff!important;
+  border:1px solid #E0EAF5!important;
+  border-radius:18px!important;
+  box-shadow:var(--shadow)!important;
+  padding:21px!important;
+}
+.card h2{color:#1F2937;font-size:1.27rem}
+.card-desc,.notice,.stats-note{color:#64748B}
+.section-title{border-top-color:#E6EEF7;color:#334155}
+.savebar{
+  background:linear-gradient(180deg,rgba(243,248,253,0),rgba(243,248,253,.98) 33%)!important;
+  padding-top:25px!important;
+}
+.ghost{
+  border-color:#DCE7F3!important;
+  background:#fff!important;
+  color:#334155!important;
+  border-radius:11px!important;
+}
+#reloadLeads{color:#D97706!important;background:#FFF8E8!important;border-color:#F6D27A!important}
+#reloadStats{color:#6D4BC3!important;background:#F6F2FF!important;border-color:#D9CCFF!important}
+.lead{
+  border:1px solid #E2EBF5!important;
+  border-left:5px solid #F59E0B!important;
+  border-radius:15px!important;
+  box-shadow:none!important;
+}
+.lead:hover{border-color:#F3C45D!important;box-shadow:0 10px 24px rgba(245,158,11,.08)!important}
+.lead-name{color:#25364B}
+.lead-info div{background:#F7FAFD!important;border:1px solid #E8EFF7;border-radius:11px!important}
+.lead-note{background:#FFFBEF;border:1px solid #F5E6B6;border-radius:11px;padding:10px;color:#6B5321}
+.lead-status{font-family:'Kanit';font-weight:700;border-radius:10px!important}
+.lead-status.status-new{background:#FFF7E6!important;border-color:#F4CC69!important;color:#B86E00!important}
+.lead-status.status-contacted{background:#ECFDF3!important;border-color:#86E0A7!important;color:#178443!important}
+.lead-status.status-closed{background:#F1F5F9!important;border-color:#CBD5E1!important;color:#475569!important}
+.lead-actions{gap:9px}
+.lead-actions a,.lead-actions button{border-radius:11px!important;min-height:42px}
+.call{background:#0F172A!important;color:#fff!important}
+.line{background:#22C55E!important;color:#fff!important}
+.danger{background:#FFF1F2!important;color:#DC3A4E!important;border:1px solid #FFC9D2!important}
+.stats-summary{gap:12px}
+.stats-summary>div{
+  position:relative;
+  overflow:hidden;
+  border:0!important;
+  border-radius:15px!important;
+  padding:15px!important;
+  color:#fff;
+  box-shadow:0 12px 24px rgba(15,23,42,.09);
+}
+.stats-summary>div::after{content:"";position:absolute;width:86px;height:86px;border-radius:50%;right:-20px;bottom:-38px;background:rgba(255,255,255,.14)}
+.stats-summary>div:nth-child(1){background:linear-gradient(135deg,#2F80ED,#22C7D6)!important}
+.stats-summary>div:nth-child(2){background:linear-gradient(135deg,#22C55E,#34D399)!important}
+.stats-summary>div:nth-child(3){background:linear-gradient(135deg,#F59E0B,#F97316)!important}
+.stats-summary>div:nth-child(4){background:linear-gradient(135deg,#8B5CF6,#6366F1)!important}
+.stats-summary span{color:rgba(255,255,255,.88)!important;font-weight:600}
+.stats-summary b{color:#fff!important;font-size:1.62rem!important}
+.stats-row{
+  border:1px solid #E3ECF6!important;
+  border-radius:14px!important;
+  box-shadow:none!important;
+}
+.stats-row:hover{border-color:#9FC4F0!important;box-shadow:0 10px 24px rgba(47,128,237,.08)!important}
+.stats-car img,.stats-noimg{background:#EEF5FC!important;border-radius:11px!important}
+.stats-num{border-radius:10px;padding:7px 5px}
+.stats-row .stats-num:nth-child(2){background:#EFF7FF;color:#2F80ED}
+.stats-row .stats-num:nth-child(3){background:#FFF1F5;color:#E54870}
+.stats-row .stats-num:nth-child(4){background:#ECFDF3;color:#178443}
+.stats-row .stats-num:nth-child(5){background:#F6F2FF;color:#6D4BC3}
+.toast{background:#0F172A!important;border-radius:12px!important;box-shadow:0 12px 30px rgba(15,23,42,.2)}
+@media(max-width:700px){
+  .header-in{padding:9px 12px}
+  .wrap{padding:14px 11px 38px}
+  .tabs{border-radius:13px!important;padding:5px!important}
+  .tab{padding:9px 12px!important}
+  .card{padding:15px!important}
+  .stats-summary{gap:8px}
+  .stats-summary>div{padding:12px!important}
+  .stats-summary b{font-size:1.4rem!important}
+  .lead-info{gap:6px}
+  .stats-num{padding:8px 4px!important}
+}
+
 </style>
 </head>
 <body>
@@ -93,7 +271,7 @@ async function loadSettings(){const{data,error}=await db.from('showroom_settings
 $('#settingsForm').addEventListener('submit',async e=>{e.preventDefault();const b=$('#saveBtn');b.disabled=true;b.textContent='กำลังบันทึก…';const obj={id:'default',updated_by:user.id,promo_enabled:$('#promo_enabled').checked,finance_rates:{'48':Number($('#rate48').value)||0,'60':Number($('#rate60').value)||0,'72':Number($('#rate72').value)||0,'84':Number($('#rate84').value)||0},down_percents:$('#down_percents').value.split(',').map(v=>Number(v.trim())).filter(v=>v>0)};fields.forEach(k=>{obj[k]=$('#'+k).value.trim?$('#'+k).value.trim():$('#'+k).value;if(['finance_vat','default_term'].includes(k))obj[k]=Number(obj[k])||0;if(['promo_start','promo_end'].includes(k)&&!obj[k])obj[k]=null});const{error}=await db.from('showroom_settings').upsert(obj,{onConflict:'id'});b.disabled=false;b.textContent='บันทึกและอัปเดตหน้าเว็บ';if(error){toast('บันทึกไม่สำเร็จ: '+error.message);return}currentSettings={...currentSettings,...obj};$('#saveNote').textContent='บันทึกล่าสุด '+new Date().toLocaleString('th-TH');toast('บันทึกเรียบร้อย หน้าเว็บอัปเดตแล้ว ✅')});
 function fmtDate(v){return v?new Date(v).toLocaleString('th-TH',{dateStyle:'medium',timeStyle:'short'}):'-'}
 function lineUrl(l){const raw=String(currentSettings.line_url||'https://line.me/R/ti/p/@um44'),id=(raw.split('/').pop()||'@um44').trim(),msg='ติดต่อลูกค้าจากหน้าเว็บครับ\nชื่อ '+l.customer_name+'\nเบอร์ '+l.phone+(l.car_name?'\nสนใจ '+l.car_name:'');return id[0]==='@'?'https://line.me/R/oaMessage/'+id+'/?'+encodeURIComponent(msg):raw}
-function renderLeads(){const q=$('#leadSearch').value.trim().toLowerCase(),st=$('#leadFilter').value;const rows=leads.filter(l=>(st==='all'||l.status===st)&&(!q||[l.customer_name,l.phone,l.car_name,l.province,l.note].filter(Boolean).join(' ').toLowerCase().includes(q)));$('#newCount').textContent=leads.filter(l=>l.status==='new').length;const box=$('#leadList');if(!rows.length){box.innerHTML='<div class="empty">ไม่พบรายการลูกค้า</div>';return}box.innerHTML=rows.map(l=>'<article class="lead" data-id="'+esc(l.id)+'"><div class="lead-top"><div><div class="lead-name">'+esc(l.customer_name)+'</div><div class="lead-time">'+fmtDate(l.created_at)+'</div></div><select class="lead-status" data-status="'+esc(l.id)+'"><option value="new" '+(l.status==='new'?'selected':'')+'>รอติดต่อ</option><option value="contacted" '+(l.status==='contacted'?'selected':'')+'>ติดต่อแล้ว</option><option value="closed" '+(l.status==='closed'?'selected':'')+'>ปิดรายการ</option></select></div><div class="lead-info"><div><span>เบอร์โทร</span><b>'+esc(l.phone)+'</b></div><div><span>รถที่สนใจ</span><b>'+esc(l.car_name||'ยังไม่เลือกรถ')+'</b></div><div><span>จังหวัด</span><b>'+esc(l.province||'-')+'</b></div><div><span>เงินดาวน์</span><b>'+money(l.down_payment)+'</b></div><div><span>งบผ่อน</span><b>'+money(l.monthly_budget)+'</b></div><div><span>รถเทิร์น</span><b>'+(l.has_trade_in==='yes'?'มี':l.has_trade_in==='unsure'?'ยังไม่แน่ใจ':'ไม่มี')+'</b></div></div>'+(l.note?'<div class="lead-note">📝 '+esc(l.note)+'</div>':'')+'<div class="lead-actions"><a class="call" href="tel:'+esc(String(l.phone).replace(/[^0-9+]/g,''))+'">📞 โทร</a><a class="line" href="'+esc(lineUrl(l))+'" target="_blank">LINE</a><button class="danger" data-delete="'+esc(l.id)+'">ลบ</button></div></article>').join('');box.querySelectorAll('[data-status]').forEach(el=>el.addEventListener('change',()=>updateLeadStatus(el.dataset.status,el.value)));box.querySelectorAll('[data-delete]').forEach(el=>el.addEventListener('click',()=>deleteLead(el.dataset.delete)))}
+function renderLeads(){const q=$('#leadSearch').value.trim().toLowerCase(),st=$('#leadFilter').value;const rows=leads.filter(l=>(st==='all'||l.status===st)&&(!q||[l.customer_name,l.phone,l.car_name,l.province,l.note].filter(Boolean).join(' ').toLowerCase().includes(q)));$('#newCount').textContent=leads.filter(l=>l.status==='new').length;const box=$('#leadList');if(!rows.length){box.innerHTML='<div class="empty">ไม่พบรายการลูกค้า</div>';return}box.innerHTML=rows.map(l=>'<article class="lead" data-id="'+esc(l.id)+'"><div class="lead-top"><div><div class="lead-name">'+esc(l.customer_name)+'</div><div class="lead-time">'+fmtDate(l.created_at)+'</div></div><select class="lead-status status-'+esc(l.status||'new')+'" data-status="'+esc(l.id)+'"><option value="new" '+(l.status==='new'?'selected':'')+'>รอติดต่อ</option><option value="contacted" '+(l.status==='contacted'?'selected':'')+'>ติดต่อแล้ว</option><option value="closed" '+(l.status==='closed'?'selected':'')+'>ปิดรายการ</option></select></div><div class="lead-info"><div><span>เบอร์โทร</span><b>'+esc(l.phone)+'</b></div><div><span>รถที่สนใจ</span><b>'+esc(l.car_name||'ยังไม่เลือกรถ')+'</b></div><div><span>จังหวัด</span><b>'+esc(l.province||'-')+'</b></div><div><span>เงินดาวน์</span><b>'+money(l.down_payment)+'</b></div><div><span>งบผ่อน</span><b>'+money(l.monthly_budget)+'</b></div><div><span>รถเทิร์น</span><b>'+(l.has_trade_in==='yes'?'มี':l.has_trade_in==='unsure'?'ยังไม่แน่ใจ':'ไม่มี')+'</b></div></div>'+(l.note?'<div class="lead-note">📝 '+esc(l.note)+'</div>':'')+'<div class="lead-actions"><a class="call" href="tel:'+esc(String(l.phone).replace(/[^0-9+]/g,''))+'">📞 โทร</a><a class="line" href="'+esc(lineUrl(l))+'" target="_blank">LINE</a><button class="danger" data-delete="'+esc(l.id)+'">ลบ</button></div></article>').join('');box.querySelectorAll('[data-status]').forEach(el=>el.addEventListener('change',()=>updateLeadStatus(el.dataset.status,el.value)));box.querySelectorAll('[data-delete]').forEach(el=>el.addEventListener('click',()=>deleteLead(el.dataset.delete)))}
 async function loadLeads(){const{data,error}=await db.from('showroom_leads').select('*').order('created_at',{ascending:false}).limit(300);if(error){$('#leadList').innerHTML='<div class="empty">โหลดไม่ได้ กรุณารัน showroom-upgrade.sql ก่อน</div>';return}leads=data||[];renderLeads()}
 async function updateLeadStatus(id,status){const{error}=await db.from('showroom_leads').update({status}).eq('id',id);if(error){toast('เปลี่ยนสถานะไม่สำเร็จ');return}const l=leads.find(x=>x.id===id);if(l)l.status=status;renderLeads();toast('อัปเดตสถานะแล้ว')}
 async function deleteLead(id){if(!confirm('ลบรายการลูกค้านี้ใช่ไหม?'))return;const{error}=await db.from('showroom_leads').delete().eq('id',id);if(error){toast('ลบไม่สำเร็จ');return}leads=leads.filter(x=>x.id!==id);renderLeads();toast('ลบแล้ว')}
