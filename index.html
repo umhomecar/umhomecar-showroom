@@ -777,6 +777,68 @@ body{
   .grid{gap:10px}
 }
 
+
+/* ===== BUTTON COLOR TUNING V4 ===== */
+.finance-accordion{border-radius:15px;overflow:hidden;border:1px solid #DCEBFA!important;background:#fff!important}
+.finance-accordion>summary{background:linear-gradient(90deg,#F3F9FF,#EEF8FF)!important;color:#214E87!important;padding:16px 18px!important}
+.finance-accordion>summary small{color:#5D789A!important;font-size:.85rem!important;line-height:1.35}
+.finance-accordion>summary::after{background:linear-gradient(135deg,#2F80ED,#22C7D6)!important;color:#fff!important;box-shadow:0 8px 18px rgba(47,128,237,.18)}
+.detail-action-row{gap:10px}
+#detailFav{
+  background:linear-gradient(180deg,#FFF7FA 0%,#FFF1F5 100%)!important;
+  border:1.5px solid #FFD4DF!important;
+  color:#D94869!important;
+  font-weight:700!important;
+}
+#detailFav.on{
+  background:linear-gradient(90deg,#F04461,#FF6B8C)!important;
+  border-color:#F04461!important;
+  color:#fff!important;
+}
+#detailGuide{
+  background:linear-gradient(180deg,#FFFBEF 0%,#FFF6DC 100%)!important;
+  border:1.5px solid #F7D77D!important;
+  color:#B7791F!important;
+  font-weight:700!important;
+}
+.premium-cta-grid{gap:10px}
+.appointment-cta,
+.lead-cta,
+.cmp-add,
+.detail-action{min-height:52px!important}
+.appointment-cta{
+  background:linear-gradient(90deg,#2F80ED,#22C7D6)!important;
+  color:#fff!important;
+  font-size:1.13rem!important;
+  letter-spacing:.01em;
+  box-shadow:0 12px 26px rgba(47,128,237,.22)!important;
+}
+.lead-cta{
+  background:linear-gradient(90deg,#F59E0B,#F97316)!important;
+  color:#fff!important;
+  font-size:1.06rem!important;
+  box-shadow:0 12px 26px rgba(245,158,11,.22)!important;
+}
+.cmp-add{
+  background:linear-gradient(180deg,#F6F7FF 0%,#EEF2FF 100%)!important;
+  border:1.5px solid #C7D2FE!important;
+  color:#5B5BD6!important;
+  font-size:1.02rem!important;
+  font-weight:700!important;
+}
+.cmp-add.on{
+  background:linear-gradient(90deg,#8B5CF6,#6366F1)!important;
+  border-color:#8B5CF6!important;
+  color:#fff!important;
+}
+@media(max-width:680px){
+  .finance-accordion>summary{padding:14px 14px!important}
+  .finance-accordion>summary small{font-size:.8rem!important}
+  .detail-action,.cmp-add{font-size:.92rem!important}
+  .appointment-cta{font-size:1.18rem!important;min-height:54px!important}
+  .lead-cta{font-size:1rem!important;min-height:54px!important}
+}
+
 </style>
 </head>
 <body>
