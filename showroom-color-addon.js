@@ -1,6 +1,7 @@
-/* UMHOME Showroom Color Add-on v1
+/* UMHOME Showroom Smart Filter Add-on v5
+   กรองต่อเนื่อง: ยี่ห้อ -> รุ่นรถ -> สี
    วางไฟล์นี้ไว้ข้าง index.html และเพิ่มก่อน </body>:
-   <script src="showroom-color-addon.js?v=1"></script>
+   <script src="showroom-color-addon.js?v=5"></script>
 */
 (function () {
   'use strict';
@@ -18,11 +19,21 @@
     'อื่น ๆ':'#b8b2aa'
   };
 
+  let selectedBrand = 'all';
+  let selectedModel = 'all';
   let selectedColor = 'all';
   let installed = false;
 
+  function clean(value) {
+    return String(value || '').trim().replace(/\s+/g, ' ');
+  }
+
+  function keyOf(value) {
+    return clean(value).toLocaleLowerCase('th-TH');
+  }
+
   function inferColorGroup(value) {
-    const compact = String(value || '').trim().replace(/\s+/g, '').toLowerCase();
+    const compact = clean(value).replace(/\s+/g, '').toLowerCase();
     if (!compact) return '';
     if (/ทูโทน|สองสี|2tone|two[- ]?tone/.test(compact)) return 'ทูโทน';
     if (/บรอนซ์ทอง|แชมเปญ|champagne|gold|สีทอง|ทอง/.test(compact)) return 'ทอง';
@@ -42,12 +53,25 @@
     return 'อื่น ๆ';
   }
 
+  function brandName(car) {
+    return clean(car && car.brand);
+  }
+
+  function modelName(car) {
+    let value = clean(car && car.model);
+    const brand = brandName(car);
+    if (value && brand && keyOf(value).startsWith(keyOf(brand) + ' ')) {
+      value = clean(value.slice(brand.length));
+    }
+    return value;
+  }
+
   function colorGroup(car) {
-    return String(car && car.color_group || '').trim() || inferColorGroup(car && car.color_name);
+    return clean(car && car.color_group) || inferColorGroup(car && car.color_name);
   }
 
   function colorName(car) {
-    return String(car && (car.color_name || car.color_group) || '').trim();
+    return clean(car && (car.color_name || car.color_group));
   }
 
   function searchBlob(car) {
@@ -59,71 +83,157 @@
     ].filter(Boolean).join(' ').toLowerCase();
   }
 
+  function escapeText(value) {
+    return String(value || '').replace(/[&<>"']/g, (ch) => ({
+      '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'
+    }[ch]));
+  }
+
+  function groupedOptions(cars, getter) {
+    const map = new Map();
+    (Array.isArray(cars) ? cars : []).forEach((car) => {
+      const label = clean(getter(car));
+      const key = keyOf(label);
+      if (!key) return;
+      const current = map.get(key);
+      if (current) current.count += 1;
+      else map.set(key, { key, label, count: 1 });
+    });
+    return [...map.values()].sort((a, b) => a.label.localeCompare(b.label, 'th', { numeric: true }));
+  }
+
+  function filterByBrand(cars) {
+    if (selectedBrand === 'all') return cars;
+    return cars.filter((car) => keyOf(brandName(car)) === selectedBrand);
+  }
+
+  function filterByModel(cars) {
+    if (selectedModel === 'all') return cars;
+    return cars.filter((car) => keyOf(modelName(car)) === selectedModel);
+  }
+
   function injectStyles() {
-    if (document.getElementById('um-color-addon-style')) return;
+    if (document.getElementById('um-smart-filter-style')) return;
     const style = document.createElement('style');
-    style.id = 'um-color-addon-style';
+    style.id = 'um-smart-filter-style';
     style.textContent = `
       .showroom-color-tag{display:inline-flex!important;align-items:center;gap:5px}
       .showroom-color-dot{display:inline-block;width:11px;height:11px;border-radius:50%;border:1px solid rgba(30,25,20,.2);box-shadow:inset 0 0 0 1px rgba(255,255,255,.35);flex:none}
-      .showroom-color-select{min-width:112px}
       .showroom-color-spec .showroom-color-dot{width:13px;height:13px;margin-right:5px;vertical-align:-1px}
-      @media(max-width:680px){.showroom-color-select{flex:1;min-width:105px}}
+      .um-smart-filter{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:10px 0 12px;padding:11px;border:1px solid rgba(123,139,160,.18);border-radius:15px;background:rgba(255,255,255,.78);box-shadow:0 3px 12px rgba(30,50,80,.05)}
+      .um-smart-filter-field{display:flex;flex-direction:column;gap:5px;min-width:0}
+      .um-smart-filter-field>span{padding-left:2px;color:#718096;font-size:11px;font-weight:800}
+      .um-smart-filter-select{width:100%;min-width:0;height:42px;padding:0 34px 0 11px;border:1px solid rgba(123,139,160,.22);border-radius:12px;background:#fff;color:#253047;font:700 12.5px inherit;outline:none}
+      .um-smart-filter-select:focus{border-color:#38bdf8;box-shadow:0 0 0 3px rgba(56,189,248,.12)}
+      .um-smart-filter-select:disabled{opacity:.55}
+      .um-smart-filter-reset{grid-column:1/-1;display:none;justify-self:end;border:0;background:none;padding:0 2px;color:#1683d8;font:800 11.5px inherit;cursor:pointer}
+      .um-smart-filter.has-selection .um-smart-filter-reset{display:block}
+      @media(max-width:680px){.um-smart-filter{grid-template-columns:1fr 1fr}.um-smart-filter-field:last-of-type{grid-column:1/-1}.um-smart-filter-select{height:41px}}
+      @media(max-width:420px){.um-smart-filter{grid-template-columns:1fr}.um-smart-filter-field:last-of-type{grid-column:auto}}
     `;
     document.head.appendChild(style);
   }
 
-  function colorCounts() {
-    const counts = {};
-    try {
-      ALL.forEach((car) => {
-        const group = colorGroup(car);
-        if (group) counts[group] = (counts[group] || 0) + 1;
-      });
-    } catch (_) {}
-    return counts;
-  }
+  function ensureFilterUi() {
+    let box = document.getElementById('umSmartVehicleFilter');
+    if (box) return box;
 
-  function fillColorOptions(select) {
-    const counts = colorCounts();
-    const known = COLOR_ORDER.filter((key) => counts[key] || key === selectedColor);
-    const extras = Object.keys(counts).filter((key) => !COLOR_ORDER.includes(key)).sort((a,b) => a.localeCompare(b, 'th'));
-    select.innerHTML = '<option value="all">ทุกสี</option>' + known.concat(extras).map((key) =>
-      '<option value="' + escapeOption(key) + '">' + escapeText(key) + ' (' + (counts[key] || 0) + ')</option>'
-    ).join('');
-    select.value = known.concat(extras).includes(selectedColor) ? selectedColor : 'all';
-    if (select.value === 'all') selectedColor = 'all';
-  }
+    const price = document.getElementById('priceRange');
+    const row = price && price.closest('.row');
+    const anchor = row || price;
+    if (!anchor || !anchor.parentNode) return null;
 
-  function escapeText(value) {
-    return String(value || '').replace(/[&<>"']/g, (ch) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
-  }
+    box = document.createElement('div');
+    box.id = 'umSmartVehicleFilter';
+    box.className = 'um-smart-filter';
+    box.innerHTML = `
+      <label class="um-smart-filter-field"><span>ยี่ห้อ</span><select id="umBrandFilter" class="um-smart-filter-select" aria-label="กรองตามยี่ห้อรถ"></select></label>
+      <label class="um-smart-filter-field"><span>รุ่นรถ</span><select id="umModelFilter" class="um-smart-filter-select" aria-label="กรองตามรุ่นรถ"></select></label>
+      <label class="um-smart-filter-field"><span>สีรถ</span><select id="colorFilter" class="um-smart-filter-select" aria-label="กรองตามสีรถ"></select></label>
+      <button id="umSmartFilterReset" class="um-smart-filter-reset" type="button">ล้าง ยี่ห้อ / รุ่น / สี</button>
+    `;
+    anchor.insertAdjacentElement('afterend', box);
 
-  function escapeOption(value) {
-    return escapeText(value);
-  }
+    box.querySelector('#umBrandFilter').addEventListener('change', (event) => {
+      selectedBrand = event.target.value || 'all';
+      selectedModel = 'all';
+      selectedColor = 'all';
+      fillFilterOptions();
+      apply();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
 
-  function injectFilter() {
-    let select = document.getElementById('colorFilter');
-    if (!select) {
-      const price = document.getElementById('priceRange');
-      const row = price && price.closest('.row');
-      if (!row) return false;
-      select = document.createElement('select');
-      select.className = 'sort showroom-color-select';
-      select.id = 'colorFilter';
-      select.setAttribute('aria-label', 'กรองตามสีรถ');
-      price.insertAdjacentElement('afterend', select);
-      select.addEventListener('change', () => {
-        selectedColor = select.value || 'all';
-        apply();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      });
-    }
-    fillColorOptions(select);
+    box.querySelector('#umModelFilter').addEventListener('change', (event) => {
+      selectedModel = event.target.value || 'all';
+      selectedColor = 'all';
+      fillFilterOptions();
+      apply();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    box.querySelector('#colorFilter').addEventListener('change', (event) => {
+      selectedColor = event.target.value || 'all';
+      fillFilterOptions();
+      apply();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    box.querySelector('#umSmartFilterReset').addEventListener('click', () => {
+      selectedBrand = 'all'; selectedModel = 'all'; selectedColor = 'all';
+      fillFilterOptions();
+      apply();
+    });
+
     const input = document.getElementById('q');
     if (input) input.placeholder = 'ค้นหา ยี่ห้อ / รุ่น / ปี / สี / ราคา…';
-    return true;
+    return box;
+  }
+
+  function fillSelect(select, allLabel, total, options, selected) {
+    if (!select) return;
+    select.innerHTML = '<option value="all">' + escapeText(allLabel) + ' (' + total + ')</option>' + options.map((item) =>
+      '<option value="' + escapeText(item.key) + '">' + escapeText(item.label) + ' (' + item.count + ')</option>'
+    ).join('');
+    select.value = options.some((item) => item.key === selected) ? selected : 'all';
+  }
+
+  function fillFilterOptions() {
+    const box = ensureFilterUi();
+    if (!box || typeof ALL === 'undefined' || !Array.isArray(ALL)) return;
+
+    const source = ALL;
+    const brands = groupedOptions(source, brandName);
+    if (selectedBrand !== 'all' && !brands.some((item) => item.key === selectedBrand)) {
+      selectedBrand = 'all'; selectedModel = 'all'; selectedColor = 'all';
+    }
+
+    const brandCars = filterByBrand(source);
+    const models = groupedOptions(brandCars, modelName);
+    if (selectedModel !== 'all' && !models.some((item) => item.key === selectedModel)) {
+      selectedModel = 'all'; selectedColor = 'all';
+    }
+
+    const modelCars = filterByModel(brandCars);
+    const colorMap = new Map();
+    modelCars.forEach((car) => {
+      const label = colorGroup(car);
+      if (!label) return;
+      colorMap.set(label, (colorMap.get(label) || 0) + 1);
+    });
+    const colorKeys = COLOR_ORDER.filter((key) => colorMap.has(key));
+    const extraKeys = [...colorMap.keys()].filter((key) => !COLOR_ORDER.includes(key)).sort((a, b) => a.localeCompare(b, 'th'));
+    const colors = colorKeys.concat(extraKeys).map((label) => ({ key: label, label, count: colorMap.get(label) || 0 }));
+    if (selectedColor !== 'all' && !colorMap.has(selectedColor)) selectedColor = 'all';
+
+    fillSelect(document.getElementById('umBrandFilter'), 'ทุกยี่ห้อ', source.length, brands, selectedBrand);
+    fillSelect(document.getElementById('umModelFilter'), 'ทุกรุ่น', brandCars.length, models, selectedModel);
+    fillSelect(document.getElementById('colorFilter'), 'ทุกสี', modelCars.length, colors, selectedColor);
+
+    const modelSelect = document.getElementById('umModelFilter');
+    const colorSelect = document.getElementById('colorFilter');
+    if (modelSelect) modelSelect.disabled = models.length === 0;
+    if (colorSelect) colorSelect.disabled = colors.length === 0;
+    box.classList.toggle('has-selection', selectedBrand !== 'all' || selectedModel !== 'all' || selectedColor !== 'all');
   }
 
   function dotStyle(group) {
@@ -147,7 +257,7 @@
         meta.appendChild(tag);
       });
     } catch (error) {
-      console.warn('[showroom-color] annotate cards:', error);
+      console.warn('[showroom-smart-filter] annotate cards:', error);
     }
   }
 
@@ -162,8 +272,15 @@
       spec.innerHTML = '<span>สีรถ</span><b><i class="showroom-color-dot" style="' + dotStyle(colorGroup(cur)) + '"></i>' + escapeText(name) + '</b>';
       specs.appendChild(spec);
     } catch (error) {
-      console.warn('[showroom-color] annotate detail:', error);
+      console.warn('[showroom-smart-filter] annotate detail:', error);
     }
+  }
+
+  function carMatchesFilters(car) {
+    if (selectedBrand !== 'all' && keyOf(brandName(car)) !== selectedBrand) return false;
+    if (selectedModel !== 'all' && keyOf(modelName(car)) !== selectedModel) return false;
+    if (selectedColor !== 'all' && colorGroup(car) !== selectedColor) return false;
+    return true;
   }
 
   function install() {
@@ -194,7 +311,7 @@
         const normalizedQuery = String(sourceQuery || '').trim().toLowerCase();
         try {
           ALL = sourceCars.filter((car) => {
-            if (selectedColor !== 'all' && colorGroup(car) !== selectedColor) return false;
+            if (!carMatchesFilters(car)) return false;
             if (normalizedQuery && !searchBlob(car).includes(normalizedQuery)) return false;
             return true;
           });
@@ -203,27 +320,25 @@
         } finally {
           ALL = sourceCars;
           query = sourceQuery;
-          const select = document.getElementById('colorFilter');
-          if (select) fillColorOptions(select);
+          fillFilterOptions();
         }
       };
 
       document.addEventListener('click', (event) => {
         if (!event.target.closest('#resetAll')) return;
-        selectedColor = 'all';
-        const select = document.getElementById('colorFilter');
-        if (select) select.value = 'all';
+        selectedBrand = 'all'; selectedModel = 'all'; selectedColor = 'all';
+        fillFilterOptions();
       }, true);
 
       injectStyles();
-      injectFilter();
+      ensureFilterUi();
+      fillFilterOptions();
       installed = true;
 
-      // กรณีข้อมูลโหลดเสร็จก่อนติดตั้ง ให้แสดงผลใหม่หนึ่งรอบ
       if (Array.isArray(ALL) && ALL.length) apply();
       return true;
     } catch (error) {
-      console.error('[showroom-color] install failed:', error);
+      console.error('[showroom-smart-filter] install failed:', error);
       return false;
     }
   }
