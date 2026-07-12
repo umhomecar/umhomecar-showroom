@@ -1,7 +1,7 @@
-/* UMHOME Showroom Smart Filter Add-on v6
+/* UMHOME Showroom Smart Filter Add-on v7
    กรองต่อเนื่อง: ยี่ห้อ -> รุ่นรถ -> สี
    วางไฟล์นี้ไว้ข้าง index.html และเพิ่มก่อน </body>:
-   <script src="showroom-color-addon.js?v=6"></script>
+   <script src="showroom-color-addon.js?v=7"></script>
 */
 (function () {
   'use strict';
@@ -139,6 +139,22 @@
       .um-smart-filter.has-selection .um-smart-filter-reset{display:block}
       @media(max-width:680px){.um-smart-filter-body{grid-template-columns:1fr 1fr}.um-smart-filter-field:last-of-type{grid-column:1/-1}.um-smart-filter-select{height:41px}}
       @media(max-width:420px){.um-smart-filter-body{grid-template-columns:1fr}.um-smart-filter-field:last-of-type{grid-column:auto}}
+
+      /* v7: ซ่อนชุดค้นหาและตัวกรองทั้งหมดไว้ในแถบเดียว */
+      .um-all-filter-shell{margin:8px 0 10px}
+      .um-all-filter-toggle{width:100%;min-height:46px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 10px 8px 13px;border:1px solid rgba(123,139,160,.18);border-radius:15px;background:rgba(255,255,255,.94);box-shadow:0 3px 12px rgba(30,50,80,.06);color:#253047;cursor:pointer;text-align:left}
+      .um-all-filter-copy{display:flex;flex-direction:column;gap:2px;min-width:0}
+      .um-all-filter-title{font-size:12.5px;font-weight:900}
+      .um-all-filter-desc{font-size:10.8px;font-weight:700;color:#718096;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+      .um-all-filter-arrow{flex:none;width:32px;height:32px;border:1px solid rgba(123,139,160,.18);border-radius:999px;background:#fff;display:inline-flex;align-items:center;justify-content:center}
+      .um-all-filter-arrow svg{width:16px;height:16px;transition:transform .24s ease}
+      .um-all-filter-shell:not(.is-collapsed) .um-all-filter-arrow svg{transform:rotate(180deg)}
+      .um-all-filter-body{overflow:hidden;max-height:1800px;opacity:1;transform:translateY(0);transition:max-height .32s cubic-bezier(.22,1,.36,1),opacity .2s ease,transform .26s ease,margin-top .24s ease;margin-top:8px}
+      .um-all-filter-shell.is-collapsed .um-all-filter-body{max-height:0!important;opacity:0;transform:translateY(-8px);margin-top:0;pointer-events:none}
+      .um-all-filter-shell .um-smart-filter-head{display:none!important}
+      .um-all-filter-shell .um-smart-filter-body{max-height:none!important;opacity:1!important;transform:none!important;margin-top:0!important;pointer-events:auto!important}
+      .um-all-filter-shell .um-smart-filter{margin-top:8px}
+      @media(min-width:769px){.um-all-filter-toggle{display:none}.um-all-filter-body{max-height:none!important;opacity:1!important;transform:none!important;margin-top:0!important;overflow:visible!important}}
     `;
     document.head.appendChild(style);
   }
@@ -269,6 +285,129 @@
     updateFilterSummary();
   }
 
+  function allFilterSummaryText() {
+    const q = clean(document.getElementById('q')?.value);
+    const parts = [];
+    if (q) parts.push('ค้นหา: ' + q);
+    if (selectedBrand !== 'all') parts.push(document.getElementById('umBrandFilter')?.selectedOptions?.[0]?.textContent || 'เลือกยี่ห้อ');
+    if (selectedModel !== 'all') parts.push(document.getElementById('umModelFilter')?.selectedOptions?.[0]?.textContent || 'เลือกรุ่น');
+    if (selectedColor !== 'all') parts.push(document.getElementById('colorFilter')?.selectedOptions?.[0]?.textContent || 'เลือกสี');
+    return parts.length ? parts.join(' • ') : 'ค้นหา ราคา ยี่ห้อ รุ่น และสี';
+  }
+
+  function updateAllFilterSummary() {
+    const shell = document.getElementById('umAllFilterShell');
+    if (!shell) return;
+    const desc = shell.querySelector('#umAllFilterDesc');
+    const button = shell.querySelector('#umAllFilterToggle');
+    if (desc) desc.textContent = allFilterSummaryText();
+    if (button) button.setAttribute('aria-expanded', shell.classList.contains('is-collapsed') ? 'false' : 'true');
+  }
+
+  function setAllFiltersCollapsed(collapsed, persist) {
+    const shell = document.getElementById('umAllFilterShell');
+    if (!shell) return;
+    shell.classList.toggle('is-collapsed', !!collapsed);
+    if (persist) {
+      try { localStorage.setItem('um_showroom_all_filters_collapsed', collapsed ? '1' : '0'); } catch (_) {}
+    }
+    updateAllFilterSummary();
+  }
+
+  function initialAllFiltersCollapsed() {
+    try {
+      const saved = localStorage.getItem('um_showroom_all_filters_collapsed');
+      if (saved === '1') return true;
+      if (saved === '0') return false;
+    } catch (_) {}
+    return !!(window.matchMedia && window.matchMedia('(max-width: 768px)').matches);
+  }
+
+  function commonAncestor(nodes) {
+    const valid = nodes.filter(Boolean);
+    if (!valid.length) return null;
+    let current = valid[0];
+    while (current && current !== document.body) {
+      if (valid.every((node) => current.contains(node))) return current;
+      current = current.parentElement;
+    }
+    return document.body;
+  }
+
+  function childUnder(node, ancestor) {
+    let current = node;
+    while (current && current.parentElement !== ancestor) current = current.parentElement;
+    return current;
+  }
+
+  function ensureAllFiltersUi() {
+    let shell = document.getElementById('umAllFilterShell');
+    if (shell) return shell;
+
+    const q = document.getElementById('q');
+    const price = document.getElementById('priceRange');
+    const reset = document.getElementById('resetAll');
+    const smart = document.getElementById('umSmartVehicleFilter');
+    const grid = document.getElementById('grid');
+    const anchors = [q, price, reset, smart].filter(Boolean);
+    if (!q || !anchors.length) return null;
+
+    let content = null;
+    let candidate = q.parentElement;
+    while (candidate && candidate !== document.body) {
+      if (anchors.every((node) => candidate.contains(node)) && !(grid && candidate.contains(grid))) {
+        content = candidate;
+        break;
+      }
+      candidate = candidate.parentElement;
+    }
+
+    shell = document.createElement('section');
+    shell.id = 'umAllFilterShell';
+    shell.className = 'um-all-filter-shell';
+    shell.innerHTML = `
+      <button id="umAllFilterToggle" class="um-all-filter-toggle" type="button" aria-expanded="false" aria-controls="umAllFilterBody">
+        <span class="um-all-filter-copy"><span class="um-all-filter-title">ค้นหาและกรองรถ</span><span id="umAllFilterDesc" class="um-all-filter-desc">ค้นหา ราคา ยี่ห้อ รุ่น และสี</span></span>
+        <span class="um-all-filter-arrow"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      </button>
+    `;
+
+    if (content) {
+      content.parentNode.insertBefore(shell, content);
+      content.id = content.id || 'umAllFilterBody';
+      content.classList.add('um-all-filter-body');
+      content.setAttribute('aria-label', 'ตัวเลือกค้นหาและกรองรถ');
+      shell.appendChild(content);
+    } else {
+      const end = reset || smart || price || q;
+      const parent = commonAncestor([q, end]);
+      if (!parent || parent === document.body) return null;
+      const startChild = childUnder(q, parent);
+      const endChild = childUnder(end, parent);
+      if (!startChild || !endChild) return null;
+      const children = [...parent.children];
+      let startIndex = children.indexOf(startChild);
+      let endIndex = children.indexOf(endChild);
+      if (startIndex > endIndex) [startIndex, endIndex] = [endIndex, startIndex];
+      const body = document.createElement('div');
+      body.id = 'umAllFilterBody';
+      body.className = 'um-all-filter-body';
+      parent.insertBefore(shell, children[startIndex]);
+      shell.appendChild(body);
+      children.slice(startIndex, endIndex + 1).forEach((node) => body.appendChild(node));
+    }
+
+    const toggle = shell.querySelector('#umAllFilterToggle');
+    toggle?.addEventListener('click', () => {
+      setAllFiltersCollapsed(!shell.classList.contains('is-collapsed'), true);
+    });
+
+    const input = document.getElementById('q');
+    input?.addEventListener('input', updateAllFilterSummary, { passive: true });
+    setAllFiltersCollapsed(initialAllFiltersCollapsed(), false);
+    return shell;
+  }
+
   function fillSelect(select, allLabel, total, options, selected) {
     if (!select) return;
     select.innerHTML = '<option value="all">' + escapeText(allLabel) + ' (' + total + ')</option>' + options.map((item) =>
@@ -315,6 +454,7 @@
     if (colorSelect) colorSelect.disabled = colors.length === 0;
     box.classList.toggle('has-selection', selectedBrand !== 'all' || selectedModel !== 'all' || selectedColor !== 'all');
     updateFilterSummary();
+    updateAllFilterSummary();
   }
 
   function dotStyle(group) {
@@ -414,6 +554,8 @@
       injectStyles();
       ensureFilterUi();
       fillFilterOptions();
+      ensureAllFiltersUi();
+      updateAllFilterSummary();
       installed = true;
 
       if (Array.isArray(ALL) && ALL.length) apply();
