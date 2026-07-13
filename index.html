@@ -839,6 +839,29 @@ body{
   .lead-cta{font-size:1rem!important;min-height:54px!important}
 }
 
+
+
+/* ===== Desktop auto-collapse search/filter panel ===== */
+.tools-compact-toggle{display:none}
+@media(min-width:681px){
+  .tools-card{padding:0;overflow:hidden;transition:border-radius .2s ease,box-shadow .2s ease,background .2s ease}
+  .tools-compact-toggle{width:100%;min-height:54px;padding:10px 15px;display:flex;align-items:center;justify-content:space-between;gap:14px;text-align:left;color:var(--ink);background:rgba(255,255,255,.96);border:0;border-bottom:1px solid var(--line);font-family:inherit}
+  .tools-compact-main{display:flex;align-items:center;gap:11px;min-width:0}
+  .tools-compact-icon{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:#EFF6FF;flex:none}
+  .tools-compact-copy{display:flex;flex-direction:column;min-width:0;line-height:1.25}
+  .tools-compact-copy strong{font-family:'Kanit',sans-serif;font-size:.95rem;font-weight:700}
+  .tools-compact-copy small{font-size:.76rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .tools-compact-arrow{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:#F3F6FA;color:#38516E;font-size:1.15rem;font-weight:800;transition:transform .22s ease,background .22s ease;flex:none}
+  .tools-body{max-height:1000px;padding:0 15px 15px;opacity:1;transform:translateY(0);overflow:hidden;transition:max-height .28s cubic-bezier(.2,.8,.2,1),opacity .18s ease,transform .22s ease,padding .22s ease}
+  .tools-card.is-collapsed{border-radius:15px;box-shadow:0 10px 32px rgba(23,23,21,.1)}
+  .tools-card.is-collapsed .tools-compact-toggle{border-bottom-color:transparent}
+  .tools-card.is-collapsed .tools-compact-arrow{transform:rotate(180deg);background:#E9F2FC}
+  .tools-card.is-collapsed .tools-body{max-height:0;padding-top:0;padding-bottom:0;opacity:0;transform:translateY(-8px);pointer-events:none}
+}
+@media(max-width:680px){
+  .tools-body{display:contents}
+}
+
 </style>
 </head>
 <body>
@@ -874,7 +897,18 @@ body{
   </section>
 
   <div class="tools" id="tools" hidden>
-    <div class="tools-card">
+    <div class="tools-card" id="toolsCard">
+      <button class="tools-compact-toggle" id="toolsCompactToggle" type="button" aria-expanded="true" aria-controls="toolsBody">
+        <span class="tools-compact-main">
+          <span class="tools-compact-icon">🔎</span>
+          <span class="tools-compact-copy">
+            <strong>ค้นหาและตัวกรองรถ</strong>
+            <small id="toolsCompactCount">กำลังโหลดข้อมูลรถ…</small>
+          </span>
+        </span>
+        <span class="tools-compact-arrow" aria-hidden="true">⌃</span>
+      </button>
+      <div class="tools-body" id="toolsBody">
       <div class="search">
         <span class="ic">🔍</span>
         <input id="q" type="search" placeholder="ค้นหา ยี่ห้อ / รุ่น / ปี / ราคา…" autocomplete="off">
@@ -913,6 +947,7 @@ body{
           <div class="adv-field"><label>จำนวนที่นั่งขั้นต่ำ</label><select id="seatFilter"><option value="all">ไม่จำกัด</option><option value="5">5 ที่นั่ง</option><option value="7">7 ที่นั่งขึ้นไป</option></select></div>
         </div>
         <div class="fin-note" style="margin-top:10px">* ประเภทรถ เชื้อเพลิง และจำนวนที่นั่ง ใช้เฉพาะข้อมูลที่ระบุได้จากชื่อรุ่นหรือรายละเอียดของรถ ส่วนค่างวดเป็นค่าประมาณเบื้องต้น</div><div class="adv-actions"><button class="mini-btn" id="advReset">ล้างตัวกรองละเอียด</button><button class="mini-btn primary" id="advClose">ดูผลลัพธ์</button></div>
+      </div>
       </div>
     </div>
   </div>
@@ -1403,7 +1438,9 @@ function apply() {
   else if (sort === 'new') r.sort((a,b)=>new Date(b.created_at||0)-new Date(a.created_at||0));
   else r.sort((a,b)=>((b.is_hot?1:0)-(a.is_hot?1:0))||((a._rnd??0)-(b._rnd??0)));
   VIEW=r; page=1; computeFeatured(); updateActiveFilter(); updateFilterControls(); renderGrid(); renderFeatured();
-  const rc=$('#resultCount'); if(rc)rc.textContent='พบ '+VIEW.length.toLocaleString('th-TH')+' คัน';
+  const resultText='พบ '+VIEW.length.toLocaleString('th-TH')+' คัน';
+  const rc=$('#resultCount'); if(rc)rc.textContent=resultText;
+  const compactRc=$('#toolsCompactCount'); if(compactRc)compactRc.textContent=resultText;
 }
 function hasDiscount(c) { return c.original_price != null && c.price != null && Number(c.original_price) > Number(c.price); }
 function badgesHtml(c) {
@@ -1803,6 +1840,61 @@ document.addEventListener('keydown', (e) => {
     if (e.key === 'ArrowRight') { curIdx = (curIdx + 1) % D; gallery(D); }
   }
 });
+// Desktop: show full filters first, then collapse to a slim bar while browsing cars.
+const toolsEl = $('#tools');
+const toolsCardEl = $('#toolsCard');
+const toolsCompactToggle = $('#toolsCompactToggle');
+let toolsPinnedOpen = false;
+let toolsScrollFrame = 0;
+
+function desktopToolsMode() {
+  return window.matchMedia('(min-width:681px)').matches;
+}
+
+function setToolsCollapsed(collapsed, { manual = false } = {}) {
+  if (!toolsCardEl || !toolsCompactToggle) return;
+  const next = desktopToolsMode() ? Boolean(collapsed) : false;
+  toolsCardEl.classList.toggle('is-collapsed', next);
+  toolsCompactToggle.setAttribute('aria-expanded', String(!next));
+  const arrow = toolsCompactToggle.querySelector('.tools-compact-arrow');
+  if (arrow) arrow.textContent = next ? '⌄' : '⌃';
+  if (manual) toolsPinnedOpen = !next;
+}
+
+function updateToolsAutoCollapse() {
+  if (!toolsEl || !toolsCardEl) return;
+  if (!desktopToolsMode()) {
+    toolsPinnedOpen = false;
+    setToolsCollapsed(false);
+    return;
+  }
+  const advancedOpen = $('#advanced') && !$('#advanced').hidden;
+  const start = Math.max(0, toolsEl.offsetTop - 30);
+  const collapseAt = toolsEl.offsetTop + 95;
+  if (window.scrollY <= start) {
+    toolsPinnedOpen = false;
+    setToolsCollapsed(false);
+  } else if (!toolsPinnedOpen && !advancedOpen && window.scrollY >= collapseAt) {
+    setToolsCollapsed(true);
+  }
+}
+
+if (toolsCompactToggle) {
+  toolsCompactToggle.addEventListener('click', () => {
+    const collapsed = toolsCardEl.classList.contains('is-collapsed');
+    setToolsCollapsed(!collapsed, { manual: true });
+  });
+}
+
+window.addEventListener('scroll', () => {
+  if (toolsScrollFrame) return;
+  toolsScrollFrame = requestAnimationFrame(() => {
+    toolsScrollFrame = 0;
+    updateToolsAutoCollapse();
+  });
+}, { passive: true });
+window.addEventListener('resize', updateToolsAutoCollapse);
+
 $('#menuBtn').addEventListener('click', openDrawer);
 $('#drawerX').addEventListener('click', closeDrawer);
 $('#drawerOv').addEventListener('click', closeDrawer);
@@ -1816,8 +1908,19 @@ $('#headerFavBtn').addEventListener('click',showFavorites);
 $('#heroFavBtn').addEventListener('click',showFavorites);
 $('#guideBtn').addEventListener('click',()=>openGuide());
 $('#globalLeadBtn').addEventListener('click',()=>openLead(null));
-$('#advToggle').addEventListener('click',()=>{const p=$('#advanced');p.hidden=!p.hidden;});
-$('#advClose').addEventListener('click',()=>{$('#advanced').hidden=true;window.scrollTo({top:$('#tools').offsetTop,behavior:'smooth'});});
+$('#advToggle').addEventListener('click',()=>{
+  const p=$('#advanced');
+  const willOpen=p.hidden;
+  if(willOpen){setToolsCollapsed(false,{manual:true});}
+  p.hidden=!p.hidden;
+  if(!willOpen){toolsPinnedOpen=false;updateToolsAutoCollapse();}
+});
+$('#advClose').addEventListener('click',()=>{
+  $('#advanced').hidden=true;
+  toolsPinnedOpen=false;
+  updateToolsAutoCollapse();
+  window.scrollTo({top:$('#tools').offsetTop,behavior:'smooth'});
+});
 $('#advReset').addEventListener('click',resetAdvanced);
 $('#resetAll').addEventListener('click',resetAllFilters);
 const advMap={monthlyBudget:'monthlyBudget',vehicleType:'vehicleType',gearFilter:'gear',fuelFilter:'fuel',yearMin:'yearMin',yearMax:'yearMax',maxMileage:'maxMileage',seatFilter:'seats'};
@@ -1831,7 +1934,9 @@ document.addEventListener('touchend', (e) => { const n = Date.now(); if (n - _la
 renderStaticShopInfo();
 bindStaticContactButtons();
 updateFavoriteUI();
+setToolsCollapsed(false);
 load();
+setTimeout(updateToolsAutoCollapse, 700);
 </script>
 <script src="showroom-color-addon.js?v=7"></script>
 </body>
