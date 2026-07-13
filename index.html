@@ -856,7 +856,7 @@ body{
   .tools-card.is-collapsed{border-radius:15px;box-shadow:0 10px 32px rgba(23,23,21,.1)}
   .tools-card.is-collapsed .tools-compact-toggle{border-bottom-color:transparent}
   .tools-card.is-collapsed .tools-compact-arrow{transform:rotate(180deg);background:#E9F2FC}
-  .tools-card.is-collapsed .tools-body{max-height:0;padding-top:0;padding-bottom:0;opacity:0;transform:translateY(-8px);pointer-events:none}
+  .tools-card.is-collapsed .tools-body{display:none!important;max-height:0!important;padding:0!important;margin:0!important;opacity:0;transform:translateY(-8px);pointer-events:none}
 }
 @media(max-width:680px){
   .tools-body{display:contents}
@@ -1844,7 +1844,7 @@ document.addEventListener('keydown', (e) => {
 const toolsEl = $('#tools');
 const toolsCardEl = $('#toolsCard');
 const toolsCompactToggle = $('#toolsCompactToggle');
-let toolsPinnedOpen = false;
+let toolsManualState = null; // null = automatic, 'open' = user kept open, 'collapsed' = user kept collapsed
 let toolsScrollFrame = 0;
 
 function desktopToolsMode() {
@@ -1858,10 +1858,8 @@ function setToolsCollapsed(collapsed, { manual = false } = {}) {
   toolsCompactToggle.setAttribute('aria-expanded', String(!next));
   const arrow = toolsCompactToggle.querySelector('.tools-compact-arrow');
   if (arrow) arrow.textContent = next ? '⌄' : '⌃';
-  if (manual) toolsPinnedOpen = !next;
+  if (manual) toolsManualState = next ? 'collapsed' : 'open';
 }
-
-let lastToolsScrollY = window.scrollY || 0;
 
 function updateToolsAutoCollapse() {
   if (!toolsEl || !toolsCardEl) return;
@@ -1869,32 +1867,44 @@ function updateToolsAutoCollapse() {
   const currentY = window.scrollY || document.documentElement.scrollTop || 0;
 
   if (!desktopToolsMode()) {
-    toolsPinnedOpen = false;
+    toolsManualState = null;
     setToolsCollapsed(false);
-    lastToolsScrollY = currentY;
     return;
   }
 
   const advancedOpen = $('#advanced') && !$('#advanced').hidden;
   const stickyTop = Number.parseFloat(getComputedStyle(toolsEl).top) || 67;
-  const rect = toolsEl.getBoundingClientRect();
-  const reachedStickyPosition = rect.top <= stickyTop + 4;
-  const backNearFilterStart = currentY <= Math.max(12, toolsEl.offsetTop - stickyTop - 24);
+  const collapseAfterY = Math.max(20, toolsEl.offsetTop - stickyTop + 70);
+  const resetManualAtY = Math.max(0, toolsEl.offsetTop - stickyTop - 180);
 
-  // When the user returns to the beginning of the filter area, show the full panel again.
-  if (backNearFilterStart) {
-    toolsPinnedOpen = false;
+  // Returning well above the filter resets manual preference and opens the full panel again.
+  if (currentY <= resetManualAtY) {
+    toolsManualState = null;
     setToolsCollapsed(false);
-  // As soon as the filter becomes sticky while browsing the cars, shrink it to the compact bar.
-  } else if (!toolsPinnedOpen && !advancedOpen && reachedStickyPosition) {
-    setToolsCollapsed(true);
+    return;
   }
 
-  lastToolsScrollY = currentY;
+  // A manual click must always win over automatic scroll behavior.
+  if (toolsManualState === 'collapsed') {
+    setToolsCollapsed(true);
+    return;
+  }
+  if (toolsManualState === 'open') {
+    setToolsCollapsed(false);
+    return;
+  }
+
+  // Automatic mode: keep advanced filters open; otherwise collapse after browsing begins.
+  if (advancedOpen) {
+    setToolsCollapsed(false);
+  } else {
+    setToolsCollapsed(currentY >= collapseAfterY);
+  }
 }
 
 if (toolsCompactToggle) {
-  toolsCompactToggle.addEventListener('click', () => {
+  toolsCompactToggle.addEventListener('click', (event) => {
+    event.preventDefault();
     const collapsed = toolsCardEl.classList.contains('is-collapsed');
     setToolsCollapsed(!collapsed, { manual: true });
   });
