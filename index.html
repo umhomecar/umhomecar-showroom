@@ -1861,22 +1861,36 @@ function setToolsCollapsed(collapsed, { manual = false } = {}) {
   if (manual) toolsPinnedOpen = !next;
 }
 
+let lastToolsScrollY = window.scrollY || 0;
+
 function updateToolsAutoCollapse() {
   if (!toolsEl || !toolsCardEl) return;
+
+  const currentY = window.scrollY || document.documentElement.scrollTop || 0;
+
   if (!desktopToolsMode()) {
     toolsPinnedOpen = false;
     setToolsCollapsed(false);
+    lastToolsScrollY = currentY;
     return;
   }
+
   const advancedOpen = $('#advanced') && !$('#advanced').hidden;
-  const start = Math.max(0, toolsEl.offsetTop - 30);
-  const collapseAt = toolsEl.offsetTop + 95;
-  if (window.scrollY <= start) {
+  const stickyTop = Number.parseFloat(getComputedStyle(toolsEl).top) || 67;
+  const rect = toolsEl.getBoundingClientRect();
+  const reachedStickyPosition = rect.top <= stickyTop + 4;
+  const backNearFilterStart = currentY <= Math.max(12, toolsEl.offsetTop - stickyTop - 24);
+
+  // When the user returns to the beginning of the filter area, show the full panel again.
+  if (backNearFilterStart) {
     toolsPinnedOpen = false;
     setToolsCollapsed(false);
-  } else if (!toolsPinnedOpen && !advancedOpen && window.scrollY >= collapseAt) {
+  // As soon as the filter becomes sticky while browsing the cars, shrink it to the compact bar.
+  } else if (!toolsPinnedOpen && !advancedOpen && reachedStickyPosition) {
     setToolsCollapsed(true);
   }
+
+  lastToolsScrollY = currentY;
 }
 
 if (toolsCompactToggle) {
@@ -1894,6 +1908,8 @@ window.addEventListener('scroll', () => {
   });
 }, { passive: true });
 window.addEventListener('resize', updateToolsAutoCollapse);
+window.addEventListener('load', () => setTimeout(updateToolsAutoCollapse, 120));
+setTimeout(updateToolsAutoCollapse, 250);
 
 $('#menuBtn').addEventListener('click', openDrawer);
 $('#drawerX').addEventListener('click', closeDrawer);
