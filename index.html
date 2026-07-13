@@ -1840,86 +1840,107 @@ document.addEventListener('keydown', (e) => {
     if (e.key === 'ArrowRight') { curIdx = (curIdx + 1) % D; gallery(D); }
   }
 });
-// Desktop: show full filters first, then collapse to a slim bar while browsing cars.
+// Desktop: show full filters first, then collapse automatically when the panel becomes sticky.
 const toolsEl = $('#tools');
 const toolsCardEl = $('#toolsCard');
 const toolsCompactToggle = $('#toolsCompactToggle');
-let toolsManualState = null; // null = automatic, 'open' = user kept open, 'collapsed' = user kept collapsed
 let toolsScrollFrame = 0;
+let toolsManualOpenAtY = null;
+let toolsManualCollapsed = false;
 
 function desktopToolsMode() {
   return window.matchMedia('(min-width:681px)').matches;
 }
 
-function setToolsCollapsed(collapsed, { manual = false } = {}) {
+function setToolsCollapsed(collapsed) {
   if (!toolsCardEl || !toolsCompactToggle) return;
   const next = desktopToolsMode() ? Boolean(collapsed) : false;
   toolsCardEl.classList.toggle('is-collapsed', next);
   toolsCompactToggle.setAttribute('aria-expanded', String(!next));
   const arrow = toolsCompactToggle.querySelector('.tools-compact-arrow');
   if (arrow) arrow.textContent = next ? '⌄' : '⌃';
-  if (manual) toolsManualState = next ? 'collapsed' : 'open';
 }
 
 function updateToolsAutoCollapse() {
   if (!toolsEl || !toolsCardEl) return;
 
-  const currentY = window.scrollY || document.documentElement.scrollTop || 0;
-
   if (!desktopToolsMode()) {
-    toolsManualState = null;
+    toolsManualOpenAtY = null;
+    toolsManualCollapsed = false;
     setToolsCollapsed(false);
     return;
   }
 
+  const currentY = window.scrollY || document.documentElement.scrollTop || 0;
   const advancedOpen = $('#advanced') && !$('#advanced').hidden;
-  const stickyTop = Number.parseFloat(getComputedStyle(toolsEl).top) || 67;
-  const collapseAfterY = Math.max(20, toolsEl.offsetTop - stickyTop + 70);
-  const resetManualAtY = Math.max(0, toolsEl.offsetTop - stickyTop - 180);
+  const stickyTop = Number.parseFloat(getComputedStyle(toolsEl).top) || 78;
+  const rect = toolsEl.getBoundingClientRect();
+  const reachedStickyPoint = rect.top <= stickyTop + 4 && currentY > 20;
+  const returnedAbovePanel = rect.top > stickyTop + 42 || currentY < 40;
 
-  // Returning well above the filter resets manual preference and opens the full panel again.
-  if (currentY <= resetManualAtY) {
-    toolsManualState = null;
+  // Returning above the panel restores the full filter automatically.
+  if (returnedAbovePanel) {
+    toolsManualOpenAtY = null;
+    toolsManualCollapsed = false;
     setToolsCollapsed(false);
     return;
   }
 
-  // A manual click must always win over automatic scroll behavior.
-  if (toolsManualState === 'collapsed') {
+  // Keep detailed filters visible while they are being used.
+  if (advancedOpen) {
+    toolsManualOpenAtY = currentY;
+    toolsManualCollapsed = false;
+    setToolsCollapsed(false);
+    return;
+  }
+
+  // If the user opened it manually, let them use it until they scroll down farther.
+  if (toolsManualOpenAtY !== null) {
+    if (currentY <= toolsManualOpenAtY + 90) {
+      setToolsCollapsed(false);
+      return;
+    }
+    toolsManualOpenAtY = null;
+  }
+
+  if (toolsManualCollapsed) {
     setToolsCollapsed(true);
     return;
   }
-  if (toolsManualState === 'open') {
-    setToolsCollapsed(false);
-    return;
-  }
 
-  // Automatic mode: keep advanced filters open; otherwise collapse after browsing begins.
-  if (advancedOpen) {
-    setToolsCollapsed(false);
-  } else {
-    setToolsCollapsed(currentY >= collapseAfterY);
-  }
+  // The main automatic behavior: collapse as soon as the filter reaches its sticky position.
+  setToolsCollapsed(reachedStickyPoint);
 }
 
 if (toolsCompactToggle) {
   toolsCompactToggle.addEventListener('click', (event) => {
     event.preventDefault();
     const collapsed = toolsCardEl.classList.contains('is-collapsed');
-    setToolsCollapsed(!collapsed, { manual: true });
+    if (collapsed) {
+      toolsManualCollapsed = false;
+      toolsManualOpenAtY = window.scrollY || document.documentElement.scrollTop || 0;
+      setToolsCollapsed(false);
+    } else {
+      toolsManualOpenAtY = null;
+      toolsManualCollapsed = true;
+      setToolsCollapsed(true);
+    }
   });
 }
 
-window.addEventListener('scroll', () => {
+function scheduleToolsAutoCollapse() {
   if (toolsScrollFrame) return;
   toolsScrollFrame = requestAnimationFrame(() => {
     toolsScrollFrame = 0;
     updateToolsAutoCollapse();
   });
-}, { passive: true });
+}
+
+window.addEventListener('scroll', scheduleToolsAutoCollapse, { passive: true });
+window.addEventListener('wheel', scheduleToolsAutoCollapse, { passive: true });
 window.addEventListener('resize', updateToolsAutoCollapse);
-window.addEventListener('load', () => setTimeout(updateToolsAutoCollapse, 120));
-setTimeout(updateToolsAutoCollapse, 250);
+window.addEventListener('load', () => setTimeout(updateToolsAutoCollapse, 180));
+setTimeout(updateToolsAutoCollapse, 350);
 
 $('#menuBtn').addEventListener('click', openDrawer);
 $('#drawerX').addEventListener('click', closeDrawer);
