@@ -859,10 +859,24 @@ body{
   .tools-card.is-collapsed .tools-body{display:none!important;max-height:0!important;padding:0!important;margin:0!important;opacity:0;transform:translateY(-8px);pointer-events:none}
 }
 @media(max-width:680px){
-  .tools-body{display:contents}
+  /* Mobile: keep only a compact search bar visible until the user taps it. */
+  .tools{top:63px;margin-top:12px;padding:0 10px}
+  .tools-card{padding:0!important;overflow:hidden;border-radius:15px;box-shadow:0 8px 28px rgba(23,23,21,.09);transition:border-radius .2s ease,box-shadow .2s ease}
+  .tools-compact-toggle{width:100%;min-height:52px;padding:9px 12px;display:flex;align-items:center;justify-content:space-between;gap:10px;text-align:left;color:var(--ink);background:rgba(255,255,255,.97);border:0;border-bottom:1px solid var(--line);font-family:inherit}
+  .tools-compact-main{display:flex;align-items:center;gap:10px;min-width:0}
+  .tools-compact-icon{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:#EFF6FF;flex:none}
+  .tools-compact-copy{display:flex;flex-direction:column;min-width:0;line-height:1.22}
+  .tools-compact-copy strong{font-family:'Kanit',sans-serif;font-size:.9rem;font-weight:700}
+  .tools-compact-copy small{font-size:.72rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .tools-compact-arrow{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:#F3F6FA;color:#38516E;font-size:1.05rem;font-weight:800;transition:transform .2s ease,background .2s ease;flex:none}
+  .tools-body{display:block;padding:0 11px 11px;max-height:1200px;opacity:1;transform:translateY(0);overflow:hidden;transition:max-height .26s cubic-bezier(.2,.8,.2,1),opacity .16s ease,transform .2s ease,padding .2s ease}
+  .tools-card.is-collapsed .tools-compact-toggle{border-bottom-color:transparent}
+  .tools-card.is-collapsed .tools-compact-arrow{transform:rotate(180deg);background:#E9F2FC}
+  .tools-card.is-collapsed .tools-body{display:none!important;max-height:0!important;padding:0!important;margin:0!important;opacity:0;transform:translateY(-6px);pointer-events:none}
 }
 
 </style>
+<!-- UM Showroom mobile filter compact fix v5 -->
 </head>
 <body>
 <header class="hd">
@@ -1854,7 +1868,7 @@ function desktopToolsMode() {
 
 function setToolsCollapsed(collapsed) {
   if (!toolsCardEl || !toolsCompactToggle) return;
-  const next = desktopToolsMode() ? Boolean(collapsed) : false;
+  const next = Boolean(collapsed);
   toolsCardEl.classList.toggle('is-collapsed', next);
   toolsCompactToggle.setAttribute('aria-expanded', String(!next));
   const arrow = toolsCompactToggle.querySelector('.tools-compact-arrow');
@@ -1867,7 +1881,16 @@ function updateToolsAutoCollapse() {
   if (!desktopToolsMode()) {
     toolsManualOpenAtY = null;
     toolsManualCollapsed = false;
-    setToolsCollapsed(false);
+
+    // On mobile the panel starts compact. If the user opened it and then
+    // scrolls down to view the cars, collapse it again to avoid covering them.
+    const currentY = window.scrollY || document.documentElement.scrollTop || 0;
+    const isOpen = !toolsCardEl.classList.contains('is-collapsed');
+    const fieldActive = toolsCardEl.contains(document.activeElement);
+    const collapseAfterY = Math.max(80, (toolsEl.offsetTop || 0) + 70);
+    if (isOpen && !fieldActive && currentY > collapseAfterY) {
+      setToolsCollapsed(true);
+    }
     return;
   }
 
@@ -1916,6 +1939,20 @@ if (toolsCompactToggle) {
   toolsCompactToggle.addEventListener('click', (event) => {
     event.preventDefault();
     const collapsed = toolsCardEl.classList.contains('is-collapsed');
+
+    if (!desktopToolsMode()) {
+      setToolsCollapsed(!collapsed);
+      if (collapsed) {
+        setTimeout(() => {
+          const q = $('#q');
+          if (q) {
+            try { q.focus({ preventScroll: true }); } catch (_) { q.focus(); }
+          }
+        }, 180);
+      }
+      return;
+    }
+
     if (collapsed) {
       toolsManualCollapsed = false;
       toolsManualOpenAtY = window.scrollY || document.documentElement.scrollTop || 0;
@@ -1938,7 +1975,10 @@ function scheduleToolsAutoCollapse() {
 
 window.addEventListener('scroll', scheduleToolsAutoCollapse, { passive: true });
 window.addEventListener('wheel', scheduleToolsAutoCollapse, { passive: true });
-window.addEventListener('resize', updateToolsAutoCollapse);
+window.addEventListener('resize', () => {
+  if (!desktopToolsMode()) setToolsCollapsed(true);
+  else updateToolsAutoCollapse();
+});
 window.addEventListener('load', () => setTimeout(updateToolsAutoCollapse, 180));
 setTimeout(updateToolsAutoCollapse, 350);
 
@@ -1948,6 +1988,15 @@ $('#drawerOv').addEventListener('click', closeDrawer);
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && $('#drawer').classList.contains('show')) closeDrawer(); });
 let qt;
 $('#q').addEventListener('input', (e) => { clearTimeout(qt); const v = e.target.value; qt = setTimeout(() => { query = v.trim(); apply(); }, 200); });
+$('#q').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !desktopToolsMode()) {
+    e.preventDefault();
+    e.currentTarget.blur();
+    setToolsCollapsed(true);
+    const carsTop = document.querySelector('.sec-head')?.offsetTop;
+    if (carsTop) window.scrollTo({ top: Math.max(0, carsTop - 118), behavior: 'smooth' });
+  }
+});
 $('#sort').addEventListener('change', (e) => { sort = e.target.value; apply(); });
 $('#priceRange').addEventListener('change', (e) => { priceRange = e.target.value; apply(); });
 
@@ -1965,8 +2014,14 @@ $('#advToggle').addEventListener('click',()=>{
 $('#advClose').addEventListener('click',()=>{
   $('#advanced').hidden=true;
   toolsPinnedOpen=false;
-  updateToolsAutoCollapse();
-  window.scrollTo({top:$('#tools').offsetTop,behavior:'smooth'});
+  if (!desktopToolsMode()) {
+    setToolsCollapsed(true);
+    const carsTop = document.querySelector('.sec-head')?.offsetTop;
+    window.scrollTo({top:Math.max(0,(carsTop || $('#tools').offsetTop)-118),behavior:'smooth'});
+  } else {
+    updateToolsAutoCollapse();
+    window.scrollTo({top:$('#tools').offsetTop,behavior:'smooth'});
+  }
 });
 $('#advReset').addEventListener('click',resetAdvanced);
 $('#resetAll').addEventListener('click',resetAllFilters);
@@ -1981,7 +2036,8 @@ document.addEventListener('touchend', (e) => { const n = Date.now(); if (n - _la
 renderStaticShopInfo();
 bindStaticContactButtons();
 updateFavoriteUI();
-setToolsCollapsed(false);
+// Mobile opens in compact mode; desktop keeps the full filters visible first.
+setToolsCollapsed(!desktopToolsMode());
 load();
 setTimeout(updateToolsAutoCollapse, 700);
 </script>
