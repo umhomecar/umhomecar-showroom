@@ -1861,14 +1861,18 @@ const toolsCompactToggle = $('#toolsCompactToggle');
 let toolsScrollFrame = 0;
 let toolsManualOpenAtY = null;
 let toolsManualCollapsed = false;
+let toolsMobilePinnedOpen = false;
 
 function desktopToolsMode() {
   return window.matchMedia('(min-width:681px)').matches;
 }
 
-function setToolsCollapsed(collapsed) {
+function setToolsCollapsed(collapsed, options = {}) {
   if (!toolsCardEl || !toolsCompactToggle) return;
   const next = Boolean(collapsed);
+  if (!desktopToolsMode() && options.manual) {
+    toolsMobilePinnedOpen = !next;
+  }
   toolsCardEl.classList.toggle('is-collapsed', next);
   toolsCompactToggle.setAttribute('aria-expanded', String(!next));
   const arrow = toolsCompactToggle.querySelector('.tools-compact-arrow');
@@ -1881,6 +1885,17 @@ function updateToolsAutoCollapse() {
   if (!desktopToolsMode()) {
     toolsManualOpenAtY = null;
     toolsManualCollapsed = false;
+
+    // A filter panel opened by the user must stay visible. In particular,
+    // dismissing the iOS keyboard can emit a scroll event; that event must not
+    // immediately close the controls the user has just opened.
+    const allFilters = $('#umAllFilterShell');
+    const nestedFiltersOpen = allFilters && !allFilters.classList.contains('is-collapsed');
+    const advancedOpen = $('#advanced') && !$('#advanced').hidden;
+    if (toolsMobilePinnedOpen || nestedFiltersOpen || advancedOpen) {
+      setToolsCollapsed(false);
+      return;
+    }
 
     // On mobile the panel starts compact. If the user opened it and then
     // scrolls down to view the cars, collapse it again to avoid covering them.
@@ -1941,15 +1956,7 @@ if (toolsCompactToggle) {
     const collapsed = toolsCardEl.classList.contains('is-collapsed');
 
     if (!desktopToolsMode()) {
-      setToolsCollapsed(!collapsed);
-      if (collapsed) {
-        setTimeout(() => {
-          const q = $('#q');
-          if (q) {
-            try { q.focus({ preventScroll: true }); } catch (_) { q.focus(); }
-          }
-        }, 180);
-      }
+      setToolsCollapsed(!collapsed, { manual: true });
       return;
     }
 
@@ -1976,7 +1983,10 @@ function scheduleToolsAutoCollapse() {
 window.addEventListener('scroll', scheduleToolsAutoCollapse, { passive: true });
 window.addEventListener('wheel', scheduleToolsAutoCollapse, { passive: true });
 window.addEventListener('resize', () => {
-  if (!desktopToolsMode()) setToolsCollapsed(true);
+  if (!desktopToolsMode()) {
+    toolsMobilePinnedOpen = false;
+    setToolsCollapsed(true);
+  }
   else updateToolsAutoCollapse();
 });
 window.addEventListener('load', () => setTimeout(updateToolsAutoCollapse, 180));
@@ -1992,6 +2002,7 @@ $('#q').addEventListener('keydown', (e) => {
   if (e.key === 'Enter' && !desktopToolsMode()) {
     e.preventDefault();
     e.currentTarget.blur();
+    toolsMobilePinnedOpen = false;
     setToolsCollapsed(true);
     const carsTop = document.querySelector('.sec-head')?.offsetTop;
     if (carsTop) window.scrollTo({ top: Math.max(0, carsTop - 118), behavior: 'smooth' });
@@ -2009,11 +2020,11 @@ $('#advToggle').addEventListener('click',()=>{
   const willOpen=p.hidden;
   if(willOpen){setToolsCollapsed(false,{manual:true});}
   p.hidden=!p.hidden;
-  if(!willOpen){toolsPinnedOpen=false;updateToolsAutoCollapse();}
+  if(!willOpen && desktopToolsMode()){updateToolsAutoCollapse();}
 });
 $('#advClose').addEventListener('click',()=>{
   $('#advanced').hidden=true;
-  toolsPinnedOpen=false;
+  toolsMobilePinnedOpen=false;
   if (!desktopToolsMode()) {
     setToolsCollapsed(true);
     const carsTop = document.querySelector('.sec-head')?.offsetTop;
@@ -2031,8 +2042,15 @@ $('#guideOv').addEventListener('click',e=>{if(e.target.id==='guideOv')closeGuide
 $('#leadOv').addEventListener('click',e=>{if(e.target.id==='leadOv')closeLead();});
 // กันซูมบนมือถือ (iOS เพิกเฉย user-scalable=no จึงต้องกันด้วย JS)
 ['gesturestart', 'gesturechange', 'gestureend'].forEach((ev) => document.addEventListener(ev, (e) => e.preventDefault()));
-let _lastTouchEnd = 0;
-document.addEventListener('touchend', (e) => { const n = Date.now(); if (n - _lastTouchEnd <= 350) e.preventDefault(); _lastTouchEnd = n; }, false);
+// Do not cancel document-level touchend events. On iPhone that also cancels a
+// legitimate second button tap (for example: open filters, then open search).
+document.addEventListener('um:all-filters-toggle', (event) => {
+  if (desktopToolsMode()) return;
+  if (event.detail && event.detail.open) {
+    toolsMobilePinnedOpen = true;
+    setToolsCollapsed(false);
+  }
+});
 renderStaticShopInfo();
 bindStaticContactButtons();
 updateFavoriteUI();
