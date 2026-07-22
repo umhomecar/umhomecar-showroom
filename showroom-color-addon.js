@@ -398,8 +398,13 @@
     }
 
     const toggle = shell.querySelector('#umAllFilterToggle');
-    toggle?.addEventListener('click', () => {
-      setAllFiltersCollapsed(!shell.classList.contains('is-collapsed'), true);
+    toggle?.addEventListener('click', (event) => {
+      event.preventDefault();
+      const willOpen = shell.classList.contains('is-collapsed');
+      setAllFiltersCollapsed(!willOpen, true);
+      document.dispatchEvent(new CustomEvent('um:all-filters-toggle', {
+        detail: { open: willOpen }
+      }));
     });
 
     const input = document.getElementById('q');
