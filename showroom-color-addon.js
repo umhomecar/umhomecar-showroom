@@ -1,7 +1,7 @@
-/* UMHOME Showroom Smart Filter Add-on v7
+/* UMHOME Showroom Smart Filter Add-on v8
    กรองต่อเนื่อง: ยี่ห้อ -> รุ่นรถ -> สี
    วางไฟล์นี้ไว้ข้าง index.html และเพิ่มก่อน </body>:
-   <script src="showroom-color-addon.js?v=7"></script>
+   <script src="showroom-color-addon.js?v=8"></script>
 */
 (function () {
   'use strict';
@@ -140,7 +140,7 @@
       @media(max-width:680px){.um-smart-filter-body{grid-template-columns:1fr 1fr}.um-smart-filter-field:last-of-type{grid-column:1/-1}.um-smart-filter-select{height:41px}}
       @media(max-width:420px){.um-smart-filter-body{grid-template-columns:1fr}.um-smart-filter-field:last-of-type{grid-column:auto}}
 
-      /* v7: ซ่อนชุดค้นหาและตัวกรองทั้งหมดไว้ในแถบเดียว */
+      /* v8: ซ่อนชุดค้นหาและตัวกรองทั้งหมดไว้ในแถบเดียว */
       .um-all-filter-shell{margin:8px 0 10px}
       .um-all-filter-toggle{width:100%;min-height:46px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 10px 8px 13px;border:1px solid rgba(123,139,160,.18);border-radius:15px;background:rgba(255,255,255,.94);box-shadow:0 3px 12px rgba(30,50,80,.06);color:#253047;cursor:pointer;text-align:left}
       .um-all-filter-copy{display:flex;flex-direction:column;gap:2px;min-width:0}
