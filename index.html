@@ -252,9 +252,9 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
 .cta-tiktok{width:100%;margin-bottom:10px;background:#000;color:#fff;text-decoration:none}
 .tik-pip{position:absolute;top:52px;right:9px;background:#000;color:#fff;font-size:.85rem;width:27px;height:27px;border-radius:50%;display:grid;place-items:center;box-shadow:var(--shadow);z-index:2}
 .cta svg{width:20px;height:20px}
-.bar{position:fixed;left:0;right:0;bottom:0;z-index:50;display:none;gap:10px;padding:10px 14px calc(10px + env(safe-area-inset-bottom));background:rgba(247,244,239,.95);backdrop-filter:blur(12px);border-top:1px solid var(--line)}
-.bar .cta{font-size:1rem;padding:13px}
-@media(max-width:680px){.bar{display:flex}.grid{margin-bottom:84px}}
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:50;display:none;gap:8px;padding:7px 12px calc(7px + env(safe-area-inset-bottom));background:rgba(247,244,239,.95);backdrop-filter:blur(12px);border-top:1px solid var(--line)}
+.bar .cta{font-size:.94rem;padding:10px}
+@media(max-width:680px){.bar{display:flex}.grid{margin-bottom:70px}}
 .foot{text-align:center;color:var(--muted);font-size:.8rem;padding:24px 18px 30px}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 .setup{max-width:620px;margin:60px auto;padding:26px;background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow)}
@@ -938,8 +938,8 @@ body{
           <option value="1000000-">1 ล้านขึ้นไป</option>
         </select>
         <select class="sort" id="sort">
-          <option value="random">🎲 สุ่ม (แนะนำ)</option>
           <option value="new">ใหม่ล่าสุด</option>
+          <option value="random">🎲 สุ่ม</option>
           <option value="plow">ราคาต่ำ → สูง</option>
           <option value="phigh">ราคาสูง → ต่ำ</option>
         </select>
@@ -1067,9 +1067,16 @@ function lineCarUrl(c) {
   const msg = 'สนใจรถคันนี้ครับ/ค่ะ 🚗\n' + carName(c) + (c.year ? ' ปี ' + c.year : '') + (plate ? '\nทะเบียน ' + plate : '') + '\nราคา ' + (baht(c.price) || 'สอบถาม') + '\n(สอบถามจากหน้าเว็บโชว์รูม)';
   return 'https://line.me/R/oaMessage/' + id + '/?' + encodeURIComponent(msg);
 }
-let ALL = [], VIEW = [], brand = 'all', model = 'all', sort = 'random', query = '', page = 1, expanded = null, priceRange = 'all', onlyHot = false, onlyFavorites = false;
+let ALL = [], VIEW = [], brand = 'all', model = 'all', sort = 'new', query = '', page = 1, expanded = null, priceRange = 'all', onlyHot = false, onlyFavorites = false;
 let filters = { monthlyBudget:'all', vehicleType:'all', gear:'all', fuel:'all', yearMin:'all', yearMax:'all', maxMileage:'all', seats:'all' };
-const PAGE_SIZE = 40;
+const PAGE_SIZE = 24;
+const SUMMARY_BATCH_SIZE = 80;
+const CAR_SUMMARY_COLUMNS = [
+  'id','brand','model','sub_model','year','license_plate','mileage','engine','gear',
+  'price','original_price','installment_4_years','installment_5_years','installment_6_years','installment_7_years',
+  'description','status','cover_image_url','created_at','is_hot','tiktok_url',
+].join(',');
+let summariesComplete = false;
 let cur = null, curIdx = 0;
 let db = null, presenceChannel = null, settingsChannel = null, liveCount = 0;
 const viewedThisSession = new Set();
@@ -1167,13 +1174,52 @@ function shareCar(c) {
   const cp=ov.querySelector('[data-copy]');if(cp)cp.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(url);showToast('คัดลอกลิงก์แล้ว ✓');}catch(e){showToast('ไม่สามารถคัดลอกอัตโนมัติได้');}close();});
   const nt=ov.querySelector('[data-native]');if(nt)nt.addEventListener('click',()=>navigator.share({title,text:title,url}).then(close).catch(()=>{}));
 }
-function openCarById(id) {
-  const c = ALL.find((x) => String(x.id) === String(id));
+function replaceLoadedCar(car) {
+  const same = (item) => String(item.id) === String(car.id);
+  ALL = ALL.map((item) => same(item) ? car : item);
+  VIEW = VIEW.map((item) => same(item) ? car : item);
+  featuredCars = featuredCars.map((item) => same(item) ? car : item);
+}
+async function fetchCarDetails(id, fallback = null) {
+  if (fallback?._detailsLoaded) return fallback;
+  const { data, error } = await db.from('public_cars').select('*').eq('id', String(id)).maybeSingle();
+  if (error) throw error;
+  if (!data) return fallback;
+  const full = enrichCar({
+    ...(fallback || {}),
+    ...data,
+    images: Array.isArray(data.images) ? data.images : [],
+    _rnd: fallback?._rnd ?? Math.random(),
+    _detailsLoaded: true,
+  });
+  if (fallback) replaceLoadedCar(full);
+  else ALL.push(full);
+  return full;
+}
+async function openCarById(id) {
+  let c = ALL.find((x) => String(x.id) === String(id));
+  if (!c) {
+    try { c = await fetchCarDetails(id); } catch (error) { console.warn('[car detail]', error); }
+  }
   if (!c) return;
   cur = c; curIdx = 0; updateDocumentMeta(c); renderSheet();
   const sh = $('#sheet'); if (sh) sh.scrollTop = 0;
   $('#ov').classList.add('show'); document.body.style.overflow = 'hidden';
   countView(c);
+  if (!c._detailsLoaded) {
+    try {
+      const full = await fetchCarDetails(c.id, c);
+      if (full && $('#ov').classList.contains('show') && String(cur?.id) === String(full.id)) {
+        cur = full;
+        curIdx = 0;
+        updateDocumentMeta(full);
+        renderSheet();
+      }
+    } catch (error) {
+      console.warn('[car detail]', error);
+      showToast('แสดงข้อมูลหลักได้ แต่โหลดรูปเพิ่มเติมไม่สำเร็จ');
+    }
+  }
 }
 function bindStaticContactButtons() {
   document.querySelectorAll('[data-line]').forEach((b) => { if (b.dataset.bound) return; b.dataset.bound='1'; b.addEventListener('click', () => window.open(CONFIG.LINE_URL, '_blank')); });
@@ -1181,6 +1227,16 @@ function bindStaticContactButtons() {
 }
 function skeletons() {
   $('#grid').innerHTML = Array.from({ length: 8 }).map(() => '<div class="skel"><div class="b" style="aspect-ratio:4/3"></div><div style="padding:14px"><div class="b" style="height:18px;border-radius:6px;margin-bottom:9px"></div><div class="b" style="height:14px;width:60%;border-radius:6px;margin-bottom:14px"></div><div class="b" style="height:24px;width:45%;border-radius:6px"></div></div></div>').join('');
+}
+async function fetchCarSummaryBatch(from) {
+  const to = from + SUMMARY_BATCH_SIZE - 1;
+  let result = await db.from('public_cars').select(CAR_SUMMARY_COLUMNS).order('created_at', { ascending: false }).range(from, to);
+  // เผื่อฐานข้อมูลเก่ายังไม่มีบางคอลัมน์: ให้เว็บใช้งานต่อได้ก่อน แล้วค่อยปรับ schema ภายหลัง
+  if (result.error) {
+    console.warn('[car summaries] ใช้โหมดเข้ากันได้', result.error.message || result.error);
+    result = await db.from('public_cars').select('*').order('created_at', { ascending: false }).range(from, to);
+  }
+  return result;
 }
 async function load() {
   if (CONFIG.SUPABASE_ANON_KEY.includes('ใส่_') || CONFIG.SUPABASE_URL.includes('ใส่')) {
@@ -1193,9 +1249,10 @@ async function load() {
     await loadRemoteSettings();
     renderStaticShopInfo();
     bindStaticContactButtons();
-    const { data, error } = await db.from('public_cars').select('*').order('created_at', { ascending: false });
+    const { data, error } = await fetchCarSummaryBatch(0);
     if (error) throw error;
-    ALL = (data || []).map((c) => enrichCar({ ...c, images: Array.isArray(c.images) ? c.images : [], _rnd: Math.random() }));
+    ALL = (data || []).map((c) => enrichCar({ ...c, images: [], _rnd: Math.random(), _detailsLoaded: false }));
+    summariesComplete = (data || []).length < SUMMARY_BATCH_SIZE;
     if (isOwner()) await loadOwnerCardStats();
     populateYearOptions();
     apply();
@@ -1214,9 +1271,35 @@ async function load() {
       history.replaceState(null, '', location.pathname + (qs ? '?' + qs : ''));
     }
     if (_openStatsOnLoad) openStats();
+    if (!summariesComplete) loadRemainingCarSummaries();
   } catch (e) {
     console.error(e);
     $('#grid').innerHTML = '<div class="state" style="grid-column:1/-1"><div class="em">😕</div><h3>โหลดข้อมูลไม่สำเร็จ</h3><p>ลองรีเฟรชอีกครั้ง หรือทักร้านทาง LINE ได้เลย @um44</p></div>';
+  }
+}
+
+async function loadRemainingCarSummaries() {
+  let from = ALL.length;
+  try {
+    while (!summariesComplete) {
+      const { data, error } = await fetchCarSummaryBatch(from);
+      if (error) throw error;
+      const rows = data || [];
+      const existing = new Set(ALL.map((car) => String(car.id)));
+      rows.forEach((car) => {
+        if (!existing.has(String(car.id))) ALL.push(enrichCar({ ...car, images: [], _rnd: Math.random(), _detailsLoaded: false }));
+      });
+      from += rows.length;
+      summariesComplete = rows.length < SUMMARY_BATCH_SIZE;
+      populateYearOptions();
+      apply({ preservePage: true });
+      if (!rows.length) break;
+    }
+  } catch (error) {
+    summariesComplete = true;
+    console.warn('[car summaries]', error);
+  } finally {
+    apply({ preservePage: true });
   }
 }
 
@@ -1336,8 +1419,8 @@ function updateFilterControls() {
 }
 function resetAdvanced() { filters={monthlyBudget:'all',vehicleType:'all',gear:'all',fuel:'all',yearMin:'all',yearMax:'all',maxMileage:'all',seats:'all'}; updateFilterControls(); apply(); }
 function resetAllFilters() {
-  brand='all';model='all';query='';sort='random';priceRange='all';onlyHot=false;onlyFavorites=false;expanded=null;resetAdvanced();
-  $('#q').value=''; $('#sort').value='random'; $('#priceRange').value='all';
+  brand='all';model='all';query='';sort='new';priceRange='all';onlyHot=false;onlyFavorites=false;expanded=null;resetAdvanced();
+  $('#q').value=''; $('#sort').value='new'; $('#priceRange').value='all';
 }
 function updateDocumentMeta(c) {
   const title=c ? carName(c)+(c.year?' ปี '+c.year:'')+' · '+CONFIG.SHOP_NAME : CONFIG.SHOP_NAME+' · รถมือสองคุณภาพ';
@@ -1406,7 +1489,7 @@ function drawerCat(cat) {
   if (cat === 'new') sort = 'new';
   else if (cat === 'hot') { onlyHot = true; sort = 'random'; }
   else if (cat === 'budget') priceRange = '0-500000';
-  else sort = 'random';
+  else sort = 'new';
   const q = $('#q'); if (q) q.value = '';
   const pr = $('#priceRange'); if (pr) pr.value = priceRange;
   const so = $('#sort'); if (so) so.value = sort;
@@ -1428,7 +1511,7 @@ function cleanDesc(text) {
     return true;
   }).join('\n').replace(/\n{3,}/g, '\n\n').trim();
 }
-function apply() {
+function apply({ preservePage = false } = {}) {
   let r = ALL.slice();
   if (brand !== 'all') r = r.filter((c) => (c.brand || '').trim() === brand);
   if (model !== 'all') r = r.filter((c) => (c.model || '').trim() === model);
@@ -1451,8 +1534,8 @@ function apply() {
   else if (sort === 'phigh') r.sort((a,b)=>(b.price??-1)-(a.price??-1));
   else if (sort === 'new') r.sort((a,b)=>new Date(b.created_at||0)-new Date(a.created_at||0));
   else r.sort((a,b)=>((b.is_hot?1:0)-(a.is_hot?1:0))||((a._rnd??0)-(b._rnd??0)));
-  VIEW=r; page=1; computeFeatured(); updateActiveFilter(); updateFilterControls(); renderGrid(); renderFeatured();
-  const resultText='พบ '+VIEW.length.toLocaleString('th-TH')+' คัน';
+  VIEW=r; if (!preservePage) page=1; computeFeatured(); updateActiveFilter(); updateFilterControls(); renderGrid(); renderFeatured();
+  const resultText='พบ '+VIEW.length.toLocaleString('th-TH')+' คัน'+(summariesComplete?'':' · กำลังโหลดเพิ่ม…');
   const rc=$('#resultCount'); if(rc)rc.textContent=resultText;
   const compactRc=$('#toolsCompactCount'); if(compactRc)compactRc.textContent=resultText;
 }
@@ -1861,7 +1944,6 @@ const toolsCompactToggle = $('#toolsCompactToggle');
 let toolsScrollFrame = 0;
 let toolsManualOpenAtY = null;
 let toolsManualCollapsed = false;
-let toolsMobilePinnedOpen = false;
 
 function desktopToolsMode() {
   return window.matchMedia('(min-width:681px)').matches;
@@ -1870,9 +1952,6 @@ function desktopToolsMode() {
 function setToolsCollapsed(collapsed, options = {}) {
   if (!toolsCardEl || !toolsCompactToggle) return;
   const next = Boolean(collapsed);
-  if (!desktopToolsMode() && options.manual) {
-    toolsMobilePinnedOpen = !next;
-  }
   toolsCardEl.classList.toggle('is-collapsed', next);
   toolsCompactToggle.setAttribute('aria-expanded', String(!next));
   const arrow = toolsCompactToggle.querySelector('.tools-compact-arrow');
@@ -1885,27 +1964,8 @@ function updateToolsAutoCollapse() {
   if (!desktopToolsMode()) {
     toolsManualOpenAtY = null;
     toolsManualCollapsed = false;
-
-    // A filter panel opened by the user must stay visible. In particular,
-    // dismissing the iOS keyboard can emit a scroll event; that event must not
-    // immediately close the controls the user has just opened.
-    const allFilters = $('#umAllFilterShell');
-    const nestedFiltersOpen = allFilters && !allFilters.classList.contains('is-collapsed');
-    const advancedOpen = $('#advanced') && !$('#advanced').hidden;
-    if (toolsMobilePinnedOpen || nestedFiltersOpen || advancedOpen) {
-      setToolsCollapsed(false);
-      return;
-    }
-
-    // On mobile the panel starts compact. If the user opened it and then
-    // scrolls down to view the cars, collapse it again to avoid covering them.
-    const currentY = window.scrollY || document.documentElement.scrollTop || 0;
-    const isOpen = !toolsCardEl.classList.contains('is-collapsed');
-    const fieldActive = toolsCardEl.contains(document.activeElement);
-    const collapseAfterY = Math.max(80, (toolsEl.offsetTop || 0) + 70);
-    if (isOpen && !fieldActive && currentY > collapseAfterY) {
-      setToolsCollapsed(true);
-    }
+    // มือถือเปิด/ปิดตัวกรองตามปุ่มที่ผู้ใช้กดเท่านั้น เพื่อไม่ให้แผงหาย
+    // ตอนคีย์บอร์ด iOS ยุบหรือหน้าเว็บเกิด scroll เล็กน้อย
     return;
   }
 
@@ -1984,7 +2044,6 @@ window.addEventListener('scroll', scheduleToolsAutoCollapse, { passive: true });
 window.addEventListener('wheel', scheduleToolsAutoCollapse, { passive: true });
 window.addEventListener('resize', () => {
   if (!desktopToolsMode()) {
-    toolsMobilePinnedOpen = false;
     setToolsCollapsed(true);
   }
   else updateToolsAutoCollapse();
@@ -2002,10 +2061,6 @@ $('#q').addEventListener('keydown', (e) => {
   if (e.key === 'Enter' && !desktopToolsMode()) {
     e.preventDefault();
     e.currentTarget.blur();
-    toolsMobilePinnedOpen = false;
-    setToolsCollapsed(true);
-    const carsTop = document.querySelector('.sec-head')?.offsetTop;
-    if (carsTop) window.scrollTo({ top: Math.max(0, carsTop - 118), behavior: 'smooth' });
   }
 });
 $('#sort').addEventListener('change', (e) => { sort = e.target.value; apply(); });
@@ -2024,11 +2079,8 @@ $('#advToggle').addEventListener('click',()=>{
 });
 $('#advClose').addEventListener('click',()=>{
   $('#advanced').hidden=true;
-  toolsMobilePinnedOpen=false;
   if (!desktopToolsMode()) {
-    setToolsCollapsed(true);
-    const carsTop = document.querySelector('.sec-head')?.offsetTop;
-    window.scrollTo({top:Math.max(0,(carsTop || $('#tools').offsetTop)-118),behavior:'smooth'});
+    setToolsCollapsed(false);
   } else {
     updateToolsAutoCollapse();
     window.scrollTo({top:$('#tools').offsetTop,behavior:'smooth'});
@@ -2047,7 +2099,6 @@ $('#leadOv').addEventListener('click',e=>{if(e.target.id==='leadOv')closeLead();
 document.addEventListener('um:all-filters-toggle', (event) => {
   if (desktopToolsMode()) return;
   if (event.detail && event.detail.open) {
-    toolsMobilePinnedOpen = true;
     setToolsCollapsed(false);
   }
 });
