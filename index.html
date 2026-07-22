@@ -859,10 +859,11 @@ body{
   .tools-card.is-collapsed .tools-body{display:none!important;max-height:0!important;padding:0!important;margin:0!important;opacity:0;transform:translateY(-8px);pointer-events:none}
 }
 @media(max-width:680px){
-  /* Mobile: keep only a compact search bar visible until the user taps it. */
+  /* Mobile: remove the redundant outer filter header; the useful search/filter
+     controls inside tools-body remain available. */
   .tools{top:63px;margin-top:12px;padding:0 10px}
   .tools-card{padding:0!important;overflow:hidden;border-radius:15px;box-shadow:0 8px 28px rgba(23,23,21,.09);transition:border-radius .2s ease,box-shadow .2s ease}
-  .tools-compact-toggle{width:100%;min-height:52px;padding:9px 12px;display:flex;align-items:center;justify-content:space-between;gap:10px;text-align:left;color:var(--ink);background:rgba(255,255,255,.97);border:0;border-bottom:1px solid var(--line);font-family:inherit}
+  .tools-compact-toggle{display:none!important}
   .tools-compact-main{display:flex;align-items:center;gap:10px;min-width:0}
   .tools-compact-icon{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:#EFF6FF;flex:none}
   .tools-compact-copy{display:flex;flex-direction:column;min-width:0;line-height:1.22}
@@ -872,7 +873,7 @@ body{
   .tools-body{display:block;padding:0 11px 11px;max-height:1200px;opacity:1;transform:translateY(0);overflow:hidden;transition:max-height .26s cubic-bezier(.2,.8,.2,1),opacity .16s ease,transform .2s ease,padding .2s ease}
   .tools-card.is-collapsed .tools-compact-toggle{border-bottom-color:transparent}
   .tools-card.is-collapsed .tools-compact-arrow{transform:rotate(180deg);background:#E9F2FC}
-  .tools-card.is-collapsed .tools-body{display:none!important;max-height:0!important;padding:0!important;margin:0!important;opacity:0;transform:translateY(-6px);pointer-events:none}
+  .tools-card.is-collapsed .tools-body{display:block!important;max-height:1200px!important;padding:0 11px 11px!important;margin:0!important;opacity:1;transform:none;pointer-events:auto}
 }
 
 </style>
