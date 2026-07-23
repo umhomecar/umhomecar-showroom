@@ -409,6 +409,22 @@
 
     const input = document.getElementById('q');
     input?.addEventListener('input', updateAllFilterSummary, { passive: true });
+    // On mobile, submitting the search from the keyboard should reveal the
+    // results immediately instead of leaving the full filter panel in front
+    // of the car cards. The compact summary remains available to reopen it.
+    const collapseAfterMobileSearch = () => {
+      if (!window.matchMedia('(max-width: 768px)').matches) return;
+      window.setTimeout(() => {
+        input.blur();
+        setAllFiltersCollapsed(true, true);
+      }, 0);
+    };
+    input?.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') collapseAfterMobileSearch();
+    });
+    input?.addEventListener('search', () => {
+      if (input.value.trim()) collapseAfterMobileSearch();
+    });
     setAllFiltersCollapsed(initialAllFiltersCollapsed(), false);
     return shell;
   }
