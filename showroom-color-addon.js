@@ -415,7 +415,7 @@
     const collapseAfterMobileSearch = () => {
       if (!window.matchMedia('(max-width: 768px)').matches) return;
       window.setTimeout(() => {
-        input.blur();
+        if (document.activeElement === input) input.blur();
         setAllFiltersCollapsed(true, true);
       }, 0);
     };
@@ -423,6 +423,9 @@
       if (event.key === 'Enter') collapseAfterMobileSearch();
     });
     input?.addEventListener('search', () => {
+      if (input.value.trim()) collapseAfterMobileSearch();
+    });
+    input?.addEventListener('blur', () => {
       if (input.value.trim()) collapseAfterMobileSearch();
     });
     setAllFiltersCollapsed(initialAllFiltersCollapsed(), false);
