@@ -852,7 +852,7 @@ body{
   .tools-compact-copy strong{font-family:'Kanit',sans-serif;font-size:.95rem;font-weight:700}
   .tools-compact-copy small{font-size:.76rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .tools-compact-arrow{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:#F3F6FA;color:#38516E;font-size:1.15rem;font-weight:800;transition:transform .22s ease,background .22s ease;flex:none}
-  .tools-body{max-height:1000px;padding:0 15px 15px;opacity:1;transform:translateY(0);overflow:hidden;transition:max-height .28s cubic-bezier(.2,.8,.2,1),opacity .18s ease,transform .22s ease,padding .22s ease}
+  .tools-body{max-height:1000px;padding:0 15px 15px;opacity:1;transform:translateY(0);overflow:hidden;transition:opacity .18s ease,transform .22s ease}
   .tools-card.is-collapsed{border-radius:15px;box-shadow:0 10px 32px rgba(23,23,21,.1)}
   .tools-card.is-collapsed .tools-compact-toggle{border-bottom-color:transparent}
   .tools-card.is-collapsed .tools-compact-arrow{transform:rotate(180deg);background:#E9F2FC}
@@ -870,7 +870,7 @@ body{
   .tools-compact-copy strong{font-family:'Kanit',sans-serif;font-size:.9rem;font-weight:700}
   .tools-compact-copy small{font-size:.72rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .tools-compact-arrow{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:#F3F6FA;color:#38516E;font-size:1.05rem;font-weight:800;transition:transform .2s ease,background .2s ease;flex:none}
-  .tools-body{display:block;padding:0 11px 11px;max-height:1200px;opacity:1;transform:translateY(0);overflow:hidden;transition:max-height .26s cubic-bezier(.2,.8,.2,1),opacity .16s ease,transform .2s ease,padding .2s ease}
+  .tools-body{display:block;padding:0 11px 11px;max-height:1200px;opacity:1;transform:translateY(0);overflow:hidden;transition:opacity .16s ease,transform .2s ease}
   .tools-card.is-collapsed .tools-compact-toggle{border-bottom-color:transparent}
   .tools-card.is-collapsed .tools-compact-arrow{transform:rotate(180deg);background:#E9F2FC}
   .tools-card.is-collapsed .tools-body{display:block!important;max-height:1200px!important;padding:0 11px 11px!important;margin:0!important;opacity:1;transform:none;pointer-events:auto}
@@ -883,7 +883,7 @@ body{
 <header class="hd">
   <div class="hd-in">
     <button class="hd-menu" id="menuBtn" aria-label="เมนูยี่ห้อ/รุ่น">☰</button>
-    <img class="hd-logo" id="hdLogo" alt="โลโก้ร้าน">
+    <img class="hd-logo" id="hdLogo" src="https://raw.githubusercontent.com/umhomecar/logoimages/main/88.png" alt="โลโก้อัมโฮมคาร์" width="46" height="46">
     <div class="hd-name" id="hdName">—</div>
     <div class="hd-actions">
       <button class="hd-btn hd-fav" id="headerFavBtn" aria-label="รถที่บันทึกไว้"><span class="fav-label">รถโปรด</span><span class="hd-fav-count" id="headerFavCount">0</span></button>
@@ -926,11 +926,11 @@ body{
       <div class="tools-body" id="toolsBody">
       <div class="search">
         <span class="ic">🔍</span>
-        <input id="q" type="search" placeholder="ค้นหา ยี่ห้อ / รุ่น / ปี / ราคา…" autocomplete="off">
+        <input id="q" type="search" aria-label="ค้นหารถ" placeholder="ค้นหา ยี่ห้อ / รุ่น / ปี / ราคา…" autocomplete="off">
       </div>
       <div class="row">
         <div class="active-filter" id="activeFilter" hidden></div>
-        <select class="sort" id="priceRange">
+        <select class="sort" id="priceRange" aria-label="ช่วงราคา">
           <option value="all">ทุกราคา</option>
           <option value="0-300000">ต่ำกว่า 3 แสน</option>
           <option value="300000-500000">3 - 5 แสน</option>
@@ -938,7 +938,7 @@ body{
           <option value="700000-1000000">7 แสน - 1 ล้าน</option>
           <option value="1000000-">1 ล้านขึ้นไป</option>
         </select>
-        <select class="sort" id="sort">
+        <select class="sort" id="sort" aria-label="เรียงลำดับรถ">
           <option value="new">ใหม่ล่าสุด</option>
           <option value="random">🎲 สุ่ม</option>
           <option value="plow">ราคาต่ำ → สูง</option>
@@ -946,20 +946,20 @@ body{
         </select>
       </div>
       <div class="filter-tools">
-        <span class="result-count" id="resultCount"></span>
+        <span class="result-count" id="resultCount" aria-live="polite"></span>
         <button class="adv-toggle" id="advToggle">ตัวกรองละเอียด <span id="advCount"></span></button>
         <button class="adv-toggle" id="resetAll">ล้างตัวกรอง</button>
       </div>
       <div class="advanced" id="advanced" hidden>
         <div class="adv-grid">
-          <div class="adv-field"><label>งบผ่อนต่อเดือน (ประมาณ)</label><select id="monthlyBudget"><option value="all">ไม่จำกัด</option><option value="7000">ไม่เกิน 7,000</option><option value="10000">ไม่เกิน 10,000</option><option value="15000">ไม่เกิน 15,000</option><option value="20000">ไม่เกิน 20,000</option></select></div>
-          <div class="adv-field"><label>ประเภทรถ</label><select id="vehicleType"><option value="all">ทุกประเภท</option><option value="sedan">รถเก๋ง</option><option value="hatchback">แฮตช์แบ็ก</option><option value="suv">SUV / ครอสโอเวอร์</option><option value="pickup">รถกระบะ</option><option value="mpv">MPV / รถตู้</option></select></div>
-          <div class="adv-field"><label>เกียร์</label><select id="gearFilter"><option value="all">ทุกเกียร์</option><option value="auto">อัตโนมัติ</option><option value="manual">ธรรมดา</option></select></div>
-          <div class="adv-field"><label>เชื้อเพลิง</label><select id="fuelFilter"><option value="all">ทุกเชื้อเพลิง</option><option value="petrol">เบนซิน</option><option value="diesel">ดีเซล</option><option value="hybrid">ไฮบริด</option><option value="ev">ไฟฟ้า</option></select></div>
-          <div class="adv-field"><label>ปีรถตั้งแต่</label><select id="yearMin"><option value="all">ไม่จำกัด</option></select></div>
-          <div class="adv-field"><label>ปีรถไม่เกิน</label><select id="yearMax"><option value="all">ไม่จำกัด</option></select></div>
-          <div class="adv-field"><label>เลขไมล์สูงสุด</label><select id="maxMileage"><option value="all">ไม่จำกัด</option><option value="50000">50,000 กม.</option><option value="100000">100,000 กม.</option><option value="150000">150,000 กม.</option><option value="200000">200,000 กม.</option></select></div>
-          <div class="adv-field"><label>จำนวนที่นั่งขั้นต่ำ</label><select id="seatFilter"><option value="all">ไม่จำกัด</option><option value="5">5 ที่นั่ง</option><option value="7">7 ที่นั่งขึ้นไป</option></select></div>
+          <div class="adv-field"><label for="monthlyBudget">งบผ่อนต่อเดือน (ประมาณ)</label><select id="monthlyBudget" aria-label="งบผ่อนต่อเดือน"><option value="all">ไม่จำกัด</option><option value="7000">ไม่เกิน 7,000</option><option value="10000">ไม่เกิน 10,000</option><option value="15000">ไม่เกิน 15,000</option><option value="20000">ไม่เกิน 20,000</option></select></div>
+          <div class="adv-field"><label for="vehicleType">ประเภทรถ</label><select id="vehicleType" aria-label="ประเภทรถ"><option value="all">ทุกประเภท</option><option value="sedan">รถเก๋ง</option><option value="hatchback">แฮตช์แบ็ก</option><option value="suv">SUV / ครอสโอเวอร์</option><option value="pickup">รถกระบะ</option><option value="mpv">MPV / รถตู้</option></select></div>
+          <div class="adv-field"><label for="gearFilter">เกียร์</label><select id="gearFilter" aria-label="เกียร์"><option value="all">ทุกเกียร์</option><option value="auto">อัตโนมัติ</option><option value="manual">ธรรมดา</option></select></div>
+          <div class="adv-field"><label for="fuelFilter">เชื้อเพลิง</label><select id="fuelFilter" aria-label="เชื้อเพลิง"><option value="all">ทุกเชื้อเพลิง</option><option value="petrol">เบนซิน</option><option value="diesel">ดีเซล</option><option value="hybrid">ไฮบริด</option><option value="ev">ไฟฟ้า</option></select></div>
+          <div class="adv-field"><label for="yearMin">ปีรถตั้งแต่</label><select id="yearMin" aria-label="ปีรถตั้งแต่"><option value="all">ไม่จำกัด</option></select></div>
+          <div class="adv-field"><label for="yearMax">ปีรถไม่เกิน</label><select id="yearMax" aria-label="ปีรถไม่เกิน"><option value="all">ไม่จำกัด</option></select></div>
+          <div class="adv-field"><label for="maxMileage">เลขไมล์สูงสุด</label><select id="maxMileage" aria-label="เลขไมล์สูงสุด"><option value="all">ไม่จำกัด</option><option value="50000">50,000 กม.</option><option value="100000">100,000 กม.</option><option value="150000">150,000 กม.</option><option value="200000">200,000 กม.</option></select></div>
+          <div class="adv-field"><label for="seatFilter">จำนวนที่นั่งขั้นต่ำ</label><select id="seatFilter" aria-label="จำนวนที่นั่งขั้นต่ำ"><option value="all">ไม่จำกัด</option><option value="5">5 ที่นั่ง</option><option value="7">7 ที่นั่งขึ้นไป</option></select></div>
         </div>
         <div class="fin-note" style="margin-top:10px">* ประเภทรถ เชื้อเพลิง และจำนวนที่นั่ง ใช้เฉพาะข้อมูลที่ระบุได้จากชื่อรุ่นหรือรายละเอียดของรถ ส่วนค่างวดเป็นค่าประมาณเบื้องต้น</div><div class="adv-actions"><button class="mini-btn" id="advReset">ล้างตัวกรองละเอียด</button><button class="mini-btn primary" id="advClose">ดูผลลัพธ์</button></div>
       </div>
@@ -981,7 +981,7 @@ body{
   <div class="drawer-body" id="drawerBody"></div>
   <div class="drawer-foot" id="drawerFoot"></div>
 </aside>
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 <div class="cmp-bar" id="cmpBar"><button class="cmp-bar-open" id="cmpOpen">⚖️ เปรียบเทียบ <b id="cmpCount">0</b> คัน</button><button class="cmp-bar-clear" id="cmpClear">ล้าง</button></div>
 <div class="ov" id="cmpOv"><div class="sheet cmp-sheet" id="cmpSheet"></div></div>
 <button id="statsBtn" title="สถิติร้าน (เฉพาะเจ้าของ)" aria-label="สถิติร้าน">📊</button>
@@ -1074,7 +1074,7 @@ const PAGE_SIZE = 24;
 const SUMMARY_BATCH_SIZE = 80;
 const CAR_SUMMARY_COLUMNS = [
   'id','brand','model','sub_model','year','license_plate','mileage','engine','gear',
-  'price','original_price','installment_4_years','installment_5_years','installment_6_years','installment_7_years',
+  'price','original_price',
   'description','status','cover_image_url','created_at','is_hot','tiktok_url',
 ].join(',');
 let summariesComplete = false;
@@ -1281,6 +1281,7 @@ async function load() {
 
 async function loadRemainingCarSummaries() {
   let from = ALL.length;
+  let changed = false;
   try {
     while (!summariesComplete) {
       const { data, error } = await fetchCarSummaryBatch(from);
@@ -1288,18 +1289,20 @@ async function loadRemainingCarSummaries() {
       const rows = data || [];
       const existing = new Set(ALL.map((car) => String(car.id)));
       rows.forEach((car) => {
-        if (!existing.has(String(car.id))) ALL.push(enrichCar({ ...car, images: [], _rnd: Math.random(), _detailsLoaded: false }));
+        if (!existing.has(String(car.id))) {
+          ALL.push(enrichCar({ ...car, images: [], _rnd: Math.random(), _detailsLoaded: false }));
+          changed = true;
+        }
       });
       from += rows.length;
       summariesComplete = rows.length < SUMMARY_BATCH_SIZE;
-      populateYearOptions();
-      apply({ preservePage: true });
       if (!rows.length) break;
     }
   } catch (error) {
     summariesComplete = true;
     console.warn('[car summaries]', error);
   } finally {
+    if (changed) populateYearOptions();
     apply({ preservePage: true });
   }
 }
