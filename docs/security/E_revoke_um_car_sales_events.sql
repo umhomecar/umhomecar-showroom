@@ -1,0 +1,83 @@
+-- ============================================================================
+-- Migration E — close unauthenticated read access to um_car_sales_events(uuid)
+-- Project : jvvjwblwdeggetnpfvgq
+-- Status  : DRAFT — DO NOT EXECUTE WITHOUT APPROVAL
+-- Scope   : EXECUTE privileges on ONE function. Privilege-only.
+--           The function body is NOT modified.
+--           No data, no RLS policies, no other functions, no schema-wide
+--           DEFAULT PRIVILEGES, no R2, no image columns (cover_image_url /
+--           image_url / storage_path), no edge functions, no cron.
+-- ============================================================================
+-- CONFIRMED FINDING (audit 2026-07-31, see
+-- docs/security/2026-07-31-audit-um-car-sales-events.md):
+--   public.um_car_sales_events(p_car_id uuid)
+--     SECURITY DEFINER, owner postgres (rolbypassrls = true)
+--     STABLE, LANGUAGE sql, SET search_path TO 'public'
+--     ACL: =X/postgres | postgres=X/postgres | anon=X/postgres
+--          | authenticated=X/postgres | service_role=X/postgres
+--     No auth.uid(), no is_admin(), no um_is_admin(), no role guard of any kind.
+--   It reads public.transactions. anon reading that table directly returns 0
+--   rows (RLS policy "umhome auth full" is FOR ALL TO authenticated), but
+--   through this function anon receives a car's full booking / approval /
+--   delivery / cancellation history. Car ids are enumerable from the public
+--   public_cars view, so the path is directly exploitable with the publishable
+--   key embedded in index.html.
+--   Returned columns carry no PII (no customer, seller, bank, branch, plate) —
+--   this is internal business-data disclosure, not a PII leak.
+--
+-- PRE-EXECUTE VERIFICATION (read-only, captured 2026-07-31):
+--   Exactly ONE overload exists: um_car_sales_events(uuid). The REVOKE below is
+--   therefore unambiguous.
+--     body md5         333aaabf6a19b7d20f324b8ebab94e75
+--     functiondef md5  e38be4ff97e6dd1d588879ed5e66fb79
+--   Both must be unchanged after this migration — it touches privileges only.
+--
+-- CALLER / DEPENDENCY RE-CONFIRMATION:
+--   Scanning pg_proc.prosrc across the whole database, the only references are:
+--     public.um_sync_one_car_sales_status(uuid)    SECURITY DEFINER, owner postgres
+--     public.um_sync_all_car_sales_statuses()      SECURITY DEFINER, owner postgres
+--   The full runtime chain and its owners:
+--     trigger trg_um_sync_transaction_car_statuses  (on public.transactions)
+--       -> um_sync_transaction_car_statuses()   SECURITY DEFINER, owner postgres
+--       -> um_sync_one_car_sales_status(uuid)   SECURITY DEFINER, owner postgres
+--       -> um_car_sales_events(uuid)            SECURITY DEFINER, owner postgres
+--     um_admin_sync_all_car_sales_statuses()    SECURITY DEFINER, owner postgres
+--       -> um_sync_all_car_sales_statuses()     SECURITY DEFINER, owner postgres
+--       -> um_sync_one_car_sales_status(uuid)   -> um_car_sales_events(uuid)
+--   Every link is SECURITY DEFINER owned by postgres, so EXECUTE on
+--   um_car_sales_events is checked against postgres (the definer), never
+--   against the end user. Revoking anon / authenticated / service_role
+--   therefore cannot break the sync chain.
+--   No caller outside the database: grep across umhomecar-showroom
+--   (index.html, admin.html, showroom-color-addon.js) and umhome-summary-web
+--   (src/, api/, cloudflare/, supabase/) returns no match; cron.job holds only
+--   auto-delete-sold-cars-daily; none of the three edge functions reference it.
+--
+-- NOTE ON service_role:
+--   Revoked here per the approved desired ACL. service_role has no current
+--   caller, and it reaches the same data far more directly anyway — it holds
+--   rolbypassrls and can read public.transactions itself, so removing this
+--   grant takes away nothing it actually needs.
+--
+-- NOTE ON PUBLIC:
+--   The `=X/postgres` entry in the ACL above IS the PUBLIC grant. It comes from
+--   ALTER DEFAULT PRIVILEGES (grantor postgres, schema public, objtype 'f'),
+--   which also seeds anon / authenticated / service_role on every new function
+--   in this schema. REVOKE ... FROM PUBLIC removes it. Per instruction, the
+--   schema-wide DEFAULT PRIVILEGES themselves are NOT changed in this round.
+-- ============================================================================
+
+BEGIN;
+
+REVOKE ALL ON FUNCTION public.um_car_sales_events(uuid)
+  FROM PUBLIC, anon, authenticated, service_role;
+
+COMMIT;
+
+-- Resulting ACL, and the approved desired state:
+--   postgres=X/postgres
+--     PUBLIC         no EXECUTE
+--     anon           no EXECUTE
+--     authenticated  no EXECUTE
+--     service_role   no EXECUTE
+--     postgres       EXECUTE (owner)
