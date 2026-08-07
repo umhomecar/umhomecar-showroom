@@ -1713,12 +1713,20 @@ function gallery(d) {
   document.querySelectorAll('.sh-thumbs img').forEach((t, k) => t.classList.toggle('on', k === curIdx));
 }
 let calcDown = 0, calcTerm = 48, calcBudget = 0;
-function calcMonthly(price, down, term) {
+function calcFinanceBreakdown(price, down, term) {
   const financed=Math.max(0,(Number(price)||0)-(Number(down)||0));
-  const rate=(CONFIG.FINANCE.rates[term]||0)/100, interest=financed*rate*(term/12), interestVat=interest*(1+(CONFIG.FINANCE.vat||0)/100);
-  return Math.round((financed+interestVat)/term);
+  const months=Math.max(0,Number(term)||0);
+  const annualRate=(CONFIG.FINANCE.rates[term]||0)/100;
+  const annualInterest=financed*annualRate;
+  const totalInterest=annualInterest*(months/12);
+  const beforeVat=financed+totalInterest;
+  const vat=beforeVat*((CONFIG.FINANCE.vat||0)/100);
+  const total=beforeVat+vat;
+  const monthly=months?Math.round((total/months)*100)/100:0;
+  return {financed,annualInterest,totalInterest,beforeVat,vat,total,monthly};
 }
-function calcFinanceSummary(price,down,term){const financed=Math.max(0,(Number(price)||0)-(Number(down)||0)),monthly=calcMonthly(price,down,term);return{financed,monthly};}
+function calcMonthly(price, down, term) { return calcFinanceBreakdown(price,down,term).monthly; }
+function calcFinanceSummary(price,down,term){return calcFinanceBreakdown(price,down,term);}
 function financeHtml(c) {
   if(!c.price)return''; const F=CONFIG.FINANCE,terms=Object.keys(F.rates).map(Number).sort((a,b)=>a-b),sum=calcFinanceSummary(c.price,calcDown,calcTerm);
   return '<details class="finance-accordion"><summary><span>คำนวณค่างวดรถคันนี้</span><small style="font-family:Sarabun;font-weight:500;color:var(--muted)">ดูยอดดาวน์และค่างวดโดยประมาณ</small></summary><div class="finance"><div class="fin-hd">เครื่องคำนวณค่างวด <small>กรอกเงินดาวน์และงบผ่อนที่รับไหวได้เลย</small></div>'+ 
