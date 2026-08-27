@@ -596,3 +596,62 @@
     if (install() || attempts >= 100) clearInterval(timer);
   }, 200);
 })();
+
+/* Weekly featured cars belong to the landing page only.
+   Keep the section hidden on page 2+ without changing the normal car pager. */
+(function () {
+  'use strict';
+
+  let installed = false;
+
+  function isFirstPage() {
+    try { return (Number(page) || 1) === 1; } catch (_) { return true; }
+  }
+
+  function syncFeaturedVisibility() {
+    const section = document.getElementById('featured');
+    if (!section) return;
+    if (!isFirstPage()) section.hidden = true;
+    else if (section.innerHTML.trim()) section.hidden = false;
+  }
+
+  function installFirstPageFeaturedGuard() {
+    if (installed) return true;
+    try {
+      if (typeof renderGrid !== 'function' || typeof renderFeatured !== 'function') return false;
+
+      const baseRenderGrid = renderGrid;
+      const baseRenderFeatured = renderFeatured;
+
+      renderGrid = function () {
+        const result = baseRenderGrid.apply(this, arguments);
+        syncFeaturedVisibility();
+        return result;
+      };
+
+      renderFeatured = function () {
+        if (!isFirstPage()) {
+          const section = document.getElementById('featured');
+          if (section) section.hidden = true;
+          return;
+        }
+        const result = baseRenderFeatured.apply(this, arguments);
+        syncFeaturedVisibility();
+        return result;
+      };
+
+      installed = true;
+      syncFeaturedVisibility();
+      return true;
+    } catch (error) {
+      console.error('[showroom-featured-first-page] install failed:', error);
+      return false;
+    }
+  }
+
+  let attempts = 0;
+  const timer = setInterval(() => {
+    attempts += 1;
+    if (installFirstPageFeaturedGuard() || attempts >= 100) clearInterval(timer);
+  }, 200);
+})();
