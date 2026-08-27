@@ -655,3 +655,133 @@
     if (installFirstPageFeaturedGuard() || attempts >= 100) clearInterval(timer);
   }, 200);
 })();
+
+/* Current-main stability hardening.
+   Keep the newer mobile filter behavior intact while fixing the stale summary
+   query/re-render work and adding lightweight accessibility metadata. */
+(function () {
+  'use strict';
+
+  let installed = false;
+  const SAFE_SUMMARY_COLUMNS = [
+    'id','license_plate','brand','model','sub_model','year','price','original_price',
+    'is_hot','mileage','engine','gear','description','created_at','cover_image_url',
+    'color_group','color_name'
+  ].join(',');
+
+  function enhanceAccessibility() {
+    const labels = [
+      ['q', 'ค้นหารถ'],
+      ['priceRange', 'ช่วงราคา'],
+      ['sort', 'เรียงลำดับรถ'],
+      ['monthlyBudget', 'งบผ่อนต่อเดือน'],
+      ['vehicleType', 'ประเภทรถ'],
+      ['gearFilter', 'เกียร์'],
+      ['fuelFilter', 'เชื้อเพลิง'],
+      ['yearMin', 'ปีรถตั้งแต่'],
+      ['yearMax', 'ปีรถไม่เกิน'],
+      ['maxMileage', 'เลขไมล์สูงสุด'],
+      ['seatFilter', 'จำนวนที่นั่งขั้นต่ำ']
+    ];
+
+    labels.forEach(([id, label]) => {
+      const field = document.getElementById(id);
+      if (!field) return;
+      if (!field.getAttribute('aria-label')) field.setAttribute('aria-label', label);
+      const fieldLabel = field.closest('.adv-field')?.querySelector('label');
+      if (fieldLabel && !fieldLabel.getAttribute('for')) fieldLabel.setAttribute('for', id);
+    });
+
+    const resultCount = document.getElementById('resultCount');
+    if (resultCount) resultCount.setAttribute('aria-live', 'polite');
+
+    const compactCount = document.getElementById('toolsCompactCount');
+    if (compactCount) compactCount.setAttribute('aria-live', 'polite');
+
+    const toast = document.getElementById('toast');
+    if (toast) {
+      toast.setAttribute('role', 'status');
+      toast.setAttribute('aria-live', 'polite');
+    }
+
+    const logo = document.getElementById('hdLogo');
+    if (logo) {
+      if (!logo.getAttribute('src')) logo.src = 'https://raw.githubusercontent.com/umhomecar/logoimages/main/88.png';
+      logo.alt = 'โลโก้อัมโฮมคาร์';
+      logo.setAttribute('width', '42');
+      logo.setAttribute('height', '42');
+    }
+  }
+
+  function installStabilityHardening() {
+    if (installed) return true;
+    try {
+      if (typeof fetchCarSummaryBatch !== 'function' || typeof loadRemainingCarSummaries !== 'function') return false;
+      if (typeof populateYearOptions !== 'function' || typeof apply !== 'function') return false;
+
+      fetchCarSummaryBatch = async function (from) {
+        const to = from + SUMMARY_BATCH_SIZE - 1;
+        let result = await db.from('public_cars')
+          .select(SAFE_SUMMARY_COLUMNS)
+          .order('created_at', { ascending: false })
+          .range(from, to);
+
+        if (result.error) {
+          console.warn('[showroom-stability] summary query fallback', result.error.message || result.error);
+          result = await db.from('public_cars')
+            .select('*')
+            .order('created_at', { ascending: false })
+            .range(from, to);
+        }
+        return result;
+      };
+
+      loadRemainingCarSummaries = async function () {
+        let from = ALL.length;
+        let changed = false;
+        const existing = new Set(ALL.map((car) => String(car.id)));
+
+        try {
+          while (!summariesComplete) {
+            const { data, error } = await fetchCarSummaryBatch(from);
+            if (error) throw error;
+            const rows = data || [];
+
+            rows.forEach((car) => {
+              const id = String(car.id);
+              if (existing.has(id)) return;
+              existing.add(id);
+              ALL.push(enrichCar({ ...car, images: [], _rnd: Math.random(), _detailsLoaded: false }));
+              changed = true;
+            });
+
+            from += rows.length;
+            summariesComplete = rows.length < SUMMARY_BATCH_SIZE;
+            if (!rows.length) break;
+          }
+        } catch (error) {
+          summariesComplete = true;
+          console.warn('[car summaries]', error);
+        } finally {
+          if (changed) populateYearOptions();
+          apply({ preservePage: true });
+        }
+      };
+
+      enhanceAccessibility();
+      installed = true;
+      return true;
+    } catch (error) {
+      console.error('[showroom-stability] install failed:', error);
+      return false;
+    }
+  }
+
+  if (!installStabilityHardening()) {
+    let attempts = 0;
+    const timer = setInterval(() => {
+      attempts += 1;
+      if (installStabilityHardening() || attempts >= 50) clearInterval(timer);
+    }, 50);
+  }
+})();
