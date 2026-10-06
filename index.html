@@ -1589,9 +1589,7 @@ function wireCards(root) {
 }
 let featuredCars = [];
 function computeFeatured() {
-  const noFilter = brand === 'all' && model === 'all' && priceRange === 'all' && !query && !onlyHot && !onlyFavorites && advancedCount()===0;
-  const hot = ALL.filter((c) => c.is_hot);
-  featuredCars = (noFilter && hot.length >= 2) ? hot.slice().sort((a, b) => (a._rnd ?? 0) - (b._rnd ?? 0)).slice(0, 6) : [];
+  featuredCars = [];
 }
 function renderFeatured() {
   const sec = $('#featured'), ah = $('#allHead');
