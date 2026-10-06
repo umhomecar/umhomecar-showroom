@@ -1598,7 +1598,7 @@ function renderFeatured() {
   if (!sec) return;
   if (!featuredCars.length) { sec.hidden = true; sec.innerHTML = ''; if (ah) ah.hidden = true; return; }
   sec.hidden = false;
-  sec.innerHTML = '<h2 class="sec-head">รถแนะนำประจำสัปดาห์</h2><div class="grid">' + featuredCars.map((c) => cardHtml(c)).join('') + '</div>';
+  sec.innerHTML = '<div class="grid">' + featuredCars.map((c) => cardHtml(c)).join('') + '</div>';
   wireCards(sec);
   if (ah) { ah.hidden = false; ah.textContent = 'รถทั้งหมด'; }
 }
